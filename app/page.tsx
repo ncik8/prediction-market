@@ -21,7 +21,7 @@ export default function Home() {
         left: 0,
         right: 0,
         bottom: 0,
-        backgroundImage: 'url(https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=1920&q=80)',
+        backgroundImage: 'url(/public.png)',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         opacity: 0.5,
