@@ -217,7 +217,7 @@ export default function Home() {
 
         {/* Footer */}
         <footer style={{ padding: '40px', borderTop: '1px solid rgba(255,255,255,0.08)', textAlign: 'center', color: '#444', fontSize: '13px' }}>
-          <p>© 2026 PredictX. Paper trading platform.</p>
+          <p>© 2026 PredictX. Training Trading Platform.</p>
         </footer>
       </div>
     </div>
