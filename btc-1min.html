@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PredictX - BTC 1 Min</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { background: #0a0a0a; color: white; }
+    .btn-up { background: #22c55e; }
+    .btn-down { background: #ef4444; }
+  </style>
+</head>
+<body class="min-h-screen">
+  <div class="flex">
+    <!-- Sidebar -->
+    <aside class="w-48 bg-slate-900/80 border-r border-slate-800 min-h-screen fixed left-0 top-0 hidden md:block">
+      <div class="p-4">
+        <h1 class="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent mb-6">PredictX</h1>
+        <div class="text-xs text-slate-500 uppercase tracking-wider mb-2 pl-2">Markets</div>
+        <nav class="space-y-1">
+          <a href="preview.html" class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-slate-400">Crypto</a>
+          <a href="#" class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-slate-400">Sports <span class="text-xs bg-slate-700 px-1.5 py-0.5 rounded">soon</span></a>
+        </nav>
+        <div class="text-xs text-slate-500 uppercase tracking-wider mt-6 mb-2 pl-2">Timeframes</div>
+        <nav class="space-y-1">
+          <a href="5min.html" class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-slate-400">5min</a>
+          <a href="btc-5min.html" class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-slate-400 font-bold">1min</a>
+        </nav>
+      </div>
+    </aside>
+
+    <div class="flex-1 md:ml-48">
+      <!-- Header -->
+      <header class="border-b border-slate-800 bg-slate-900/90 sticky top-0 z-50">
+        <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
+          <input type="text" placeholder="Search..." class="bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-sm flex-1 max-w-xs">
+          <div class="flex items-center gap-3">
+            <span class="text-green-400 font-mono">$9,500</span>
+            <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full"></div>
+          </div>
+        </div>
+      </header>
+
+      <div class="max-w-4xl mx-auto p-4">
+        <!-- Title & Timer -->
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <div class="text-sm text-slate-400">Crypto • 1MIN</div>
+            <h1 class="text-xl font-bold">BTC Up or Down</h1>
+          </div>
+          <span class="text-3xl font-bold text-green-400" id="timer">00:55</span>
+        </div>
+
+        <!-- Chart - 1 min only -->
+        <div class="bg-slate-900 rounded-xl border border-slate-800 p-4">
+          <div class="h-32">
+            <canvas id="chart"></canvas>
+          </div>
+          
+          <!-- Time labels on right -->
+          <div class="flex justify-end mt-2 text-xs text-slate-500" id="timeLabels">
+          </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="flex items-center justify-between mt-4 text-sm">
+          <span class="text-slate-400">Price to beat: <span class="text-white font-bold" id="strike">$100,250</span></span>
+          <span class="text-slate-400">Volume: <span class="text-white font-bold">$65K</span></span>
+        </div>
+
+        <!-- Trade Panel -->
+        <div class="mt-4 grid grid-cols-2 gap-3">
+          <button class="py-3 rounded-lg font-bold bg-green-500">UP 50¢</button>
+          <button class="py-3 rounded-lg font-bold bg-red-500">DOWN 51¢</button>
+        </div>
+
+        <div class="mt-4 flex items-center justify-between text-sm">
+          <span class="text-slate-400">Prob: <span class="text-green-400 font-bold">49%</span></span>
+          <button class="px-4 py-2 bg-green-600 rounded-lg font-bold">Sign up</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const startPrice = 100250;
+    let price = startPrice;
+    let prevPrice = price;
+    
+    // 12 points = 1 minute (5 sec each)
+    const history = Array(12).fill(startPrice);
+    
+    const ctx = document.getElementById('chart').getContext('2d');
+    const chart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: Array(12).fill(''),
+        datasets: [{
+          data: history,
+          borderColor: '#22c55e',
+          backgroundColor: 'rgba(34,197,94,0.15)',
+          fill: true,
+          tension: 0.3,
+          borderWidth: 2,
+          pointRadius: 0
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { display: false },
+          y: { 
+            position: 'right',
+            min: startPrice - 50,
+            max: startPrice + 50,
+            grid: { color: 'rgba(255,255,255,0.05)' },
+            ticks: { color: '#64748b', callback: v => '$' + v.toLocaleString() }
+          }
+        }
+      }
+    });
+
+    // Update time labels - 00:06 to 00:00 on right
+    function updateTimeLabels(remaining) {
+      const el = document.getElementById('timeLabels');
+      let html = '';
+      for (let i = 6; i >= 0; i--) {
+        let t = remaining - i;
+        if (t < 0) t += 60;
+        let label = '00:' + t.toString().padStart(2,'0');
+        html += `<span class="${i === 0 ? 'text-green-400 font-bold' : 'ml-2'}">${label}</span>`;
+      }
+      el.innerHTML = html;
+    }
+
+    async function update() {
+      // Fetch price
+      try {
+        const res = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT');
+        price = parseFloat((await res.json()).price);
+      } catch {}
+      price += (Math.random() - 0.5) * 20;
+      
+      const isUp = price > prevPrice;
+      prevPrice = price;
+      
+      // Update chart
+      history.shift();
+      history.push(price);
+      chart.data.datasets[0].data = history;
+      chart.data.datasets[0].borderColor = isUp ? '#22c55e' : '#ef4444';
+      chart.update();
+      
+      // Timer
+      const totalSecs = Math.floor(Date.now() / 1000);
+      const remaining = 60 - (totalSecs % 60);
+      document.getElementById('timer').textContent = '00:' + remaining.toString().padStart(2,'0');
+      
+      // Time labels
+      updateTimeLabels(remaining);
+    }
+
+    update();
+    setInterval(update, 1000);
+  </script>
+</body>
+</html>

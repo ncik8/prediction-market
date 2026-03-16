@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PredictX - BTC Up or Down</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { background: #0a0a0a; color: white; }
+    .btn-up { background: #22c55e; }
+    .btn-down { background: #ef4444; }
+    
+    /* Scrolling time ticker */
+    .time-ticker {
+      display: flex;
+      animation: tickerScroll 60s linear infinite;
+    }
+    @keyframes tickerScroll {
+      0% { transform: translateX(50%); }
+      100% { transform: translateX(-50%); }
+    }
+  </style>
+</head>
+<body class="min-h-screen">
+  <div class="flex">
+    <aside class="w-48 bg-slate-900/80 border-r border-slate-800 min-h-screen fixed left-0 top-0 hidden md:block">
+      <div class="p-4">
+        <h1 class="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent mb-6">PredictX</h1>
+        <div class="text-xs text-slate-500 uppercase tracking-wider mb-2 pl-2">Markets</div>
+        <nav class="space-y-1">
+          <a href="preview.html" class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-slate-400">Crypto</a>
+          <a href="#" class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-slate-400">Sports <span class="text-xs bg-slate-700 px-1.5 py-0.5 rounded">soon</span></a>
+        </nav>
+        <div class="text-xs text-slate-500 uppercase tracking-wider mt-6 mb-2 pl-2">Timeframes</div>
+        <nav class="space-y-1">
+          <a href="5min.html" class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-slate-400">5min</a>
+        </nav>
+      </div>
+    </aside>
+
+    <div class="flex-1 md:ml-48">
+      <header class="border-b border-slate-800 bg-slate-900/90 sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
+          <div class="flex-1 max-w-md">
+            <input type="text" placeholder="Search markets..." class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-sm">
+          </div>
+          <div class="flex items-center gap-4">
+            <div class="flex flex-col items-end">
+              <div class="text-xs text-slate-400">Cash <span class="text-[10px] bg-yellow-500/20 text-yellow-400 px-1 rounded">DEMO</span></div>
+              <div class="text-green-400 font-mono font-bold">$9,500</div>
+            </div>
+            <div class="w-px h-8 bg-slate-700"></div>
+            <div class="flex flex-col items-end">
+              <div class="text-xs text-slate-400">In Play</div>
+              <div class="text-yellow-400 font-mono font-bold">$500</div>
+            </div>
+            <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full"></div>
+          </div>
+        </div>
+      </header>
+
+      <div class="flex flex-col lg:flex-row">
+        <div class="flex-1 p-4 lg:p-6">
+          <div class="mb-2">
+            <div class="flex items-center gap-2 text-sm text-slate-400 mb-1"><span>Crypto</span> <span>•</span> <span>5MIN</span></div>
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3"><span class="text-3xl">₿</span><h1 class="text-xl font-bold">BTC Up or Down</h1></div>
+              <div class="flex items-center gap-2">
+                <span class="text-3xl font-bold text-green-400" id="timer">00:55</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-slate-900 rounded-xl border border-slate-800 p-4">
+            <div class="h-32">
+              <canvas id="main-chart"></canvas>
+            </div>
+            <!-- Scrolling time -->
+            <div class="mt-2 overflow-hidden h-5">
+              <div class="time-ticker text-xs text-slate-500" id="ticker"></div>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between mt-4 pt-4 border-t border-slate-800">
+            <div><span class="text-slate-400">Price to beat: </span><span class="font-bold text-white" id="strike-price">$100,250</span></div>
+            <div class="flex items-center gap-4"><span class="text-slate-400">Volume</span><span class="font-bold">$65,741</span></div>
+          </div>
+        </div>
+
+        <div class="w-full lg:w-80 bg-slate-900 border-l border-slate-800 p-4">
+          <div class="mb-6">
+            <div class="flex items-center gap-2 mb-4">
+              <span class="text-2xl">₿</span>
+              <div><div class="font-bold">Buy Yes</div><div class="text-xs text-slate-400">Price to beat: <span class="text-white">$100,250</span></div></div>
+            </div>
+            <div class="flex gap-2 mb-4">
+              <button class="flex-1 py-2 rounded-lg bg-green-600 text-sm font-medium">Buy</button>
+              <button class="flex-1 py-2 rounded-lg bg-slate-800 text-slate-400 text-sm font-medium">Sell</button>
+            </div>
+            <div class="space-y-2 mb-4">
+              <button class="w-full py-4 rounded-xl font-bold text-lg bg-green-500 flex items-center justify-between px-4"><span>UP</span><span class="bg-white/20 px-3 py-1 rounded">50¢</span></button>
+              <button class="w-full py-4 rounded-xl font-bold text-lg bg-red-500 flex items-center justify-between px-4"><span>DOWN</span><span class="bg-white/20 px-3 py-1 rounded">51¢</span></button>
+            </div>
+            <div class="mb-4">
+              <label class="text-xs text-slate-400 block mb-1">Amount ($)</label>
+              <input type="number" value="100" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-3 text-xl font-mono">
+            </div>
+            <div class="bg-slate-800 rounded-lg p-3 mb-4">
+              <div class="flex justify-between text-sm mb-1"><span class="text-slate-400">Payout</span><span class="font-bold">$100.00</span></div>
+              <div class="flex justify-between text-sm"><span class="text-slate-400">Fee</span><span class="text-red-400">-$0.50</span></div>
+            </div>
+            <button class="w-full py-4 rounded-xl font-bold text-lg bg-green-500">Sign up to trade</button>
+          </div>
+          <div class="text-center pt-4 border-t border-slate-800">
+            <div class="text-slate-400 text-sm mb-1">Market Probability</div>
+            <div class="text-3xl font-bold text-green-400">49%</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let btcPrice = 100250;
+    const startPrice = 100250;
+    const history = [];
+    for (let i = 0; i < 12; i++) history.push(startPrice);
+    let priceMin = 100200, priceMax = 100300;
+    let prevPrice = 100250;
+
+    async function fetchBTC() {
+      try {
+        const res = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT');
+        return parseFloat((await res.json()).price);
+      } catch { return null; }
+    }
+
+    const chart = new Chart(document.getElementById('main-chart').getContext('2d'), {
+      type: 'line',
+      data: {
+        labels: Array(12).fill(''),
+        datasets: [
+          { data: history, borderColor: '#f97316', backgroundColor: 'rgba(249,115,22,0.15)', fill: true, tension: 0.3, pointRadius: 0, borderWidth: 2 },
+          { data: Array(12).fill(startPrice), borderColor: '#ffffff', borderDash: [4,4], borderWidth: 1, pointRadius: 0, fill: false }
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: { enabled: false } },
+        scales: {
+          x: { display: false },
+          y: { position: 'right', min: priceMin, max: priceMax, grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#64748b', callback: v => '$' + v.toLocaleString() } }
+        }
+      }
+    });
+
+    // Generate times for ticker - starting from current countdown
+    function generateTickerTimes() {
+      let totalSecs = Math.floor(Date.now() / 1000);
+      let remaining = 60 - (totalSecs % 60);
+      
+      let times = [];
+      // Start from current remaining time
+      for (let i = 0; i < 30; i++) {
+        let t = remaining - (i * 5);
+        if (t < 0) t += 60;
+        let m = Math.floor(t / 60), s = t % 60;
+        times.push(`${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`);
+      }
+      // Duplicate for seamless loop
+      return [...times, ...times];
+    }
+
+    const ticker = document.getElementById('ticker');
+    ticker.innerHTML = generateTickerTimes().map(t => `<span class="mx-3 whitespace-nowrap">${t}</span>`).join('');
+
+    // Sync animation with countdown
+    function syncTicker() {
+      let totalSecs = Math.floor(Date.now() / 1000);
+      let remaining = 60 - (totalSecs % 60);
+      // Each 5 seconds = one position in the ticker
+      // 60 seconds total / 5 = 12 positions
+      // Animation duration is 60s, so delay = -remaining seconds
+      ticker.style.animationDelay = '-' + remaining + 's';
+    }
+    syncTicker();
+
+    function update() {
+      fetchBTC().then(newP => {
+        if (newP) btcPrice = newP;
+        btcPrice += (Math.random() - 0.5) * 20;
+        
+        let isGoingUp = btcPrice > prevPrice;
+        prevPrice = btcPrice;
+        
+        priceMin = Math.floor(btcPrice - 50);
+        priceMax = Math.ceil(btcPrice + 50);
+        chart.options.scales.y.min = priceMin;
+        chart.options.scales.y.max = priceMax;
+        
+        history.shift();
+        history.push(btcPrice);
+        chart.data.datasets[0].data = history;
+        chart.data.datasets[0].borderColor = isGoingUp ? '#22c55e' : '#ef4444';
+        chart.data.datasets[1].data = Array(12).fill(startPrice);
+        chart.update();
+      });
+
+      // Timer - 1 minute countdown
+      let totalSecs = Math.floor(Date.now() / 1000);
+      let remaining = 60 - (totalSecs % 60);
+      let secs = remaining % 60;
+      document.getElementById('timer').textContent = '00:' + secs.toString().padStart(2,'0');
+    }
+
+    update();
+    setInterval(update, 1000);
+  </script>
+</body>
+</html>
