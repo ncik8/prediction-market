@@ -35,7 +35,7 @@ export async function POST(request: Request) {
     market.noPrice = 1 - market.yesPrice
   } else {
     market.noPrice = Math.min(0.95, market.noPrice + priceShift)
-    market.yasPrice = 1 - market.noPrice
+    market.yesPrice = 1 - market.noPrice
   }
   market.volume = newVolume
   
