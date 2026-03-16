@@ -102,7 +102,7 @@ export default function Home() {
             margin: '0 auto 48px',
             lineHeight: '1.7'
           }}>
-            Master the markets with $10,000 in demo funds. Predict crypto, sports, and world events. Zero risk. Infinite learning.
+            Run your strategies through realistic simulations, thousands of runs, and live-like conditions—without risking a cent. Here is where winning bots get built, broken, and rebuilt for predictive market traders.
           </p>
           
           <div style={{ display: 'flex', gap: '16px', justifyContent: 'center' }}>
