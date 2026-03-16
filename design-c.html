@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Design C - Futuristic</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #050508; color: #fff; font-family: 'Inter', -apple-system, sans-serif; min-height: 100vh; overflow: hidden; }
+    
+    .container { display: flex; height: 100vh; }
+    
+    .left-panel { width: 280px; background: linear-gradient(180deg, #0d0d12 0%, #0808100 100%); border-right: 1px solid #1a1a25; padding: 24px; display: flex; flex-direction: column; gap: 24px; }
+    
+    .logo { font-size: 24px; font-weight: 900; letter-spacing: -1px; background: linear-gradient(135deg, #a855f7, #6366f1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    
+    .balance-box { background: linear-gradient(135deg, #1a1a25, #12121a); border-radius: 16px; padding: 20px; border: 1px solid #2a2a3a; }
+    .balance-label { font-size: 11px; color: #6b7280; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+    .balance-value { font-size: 32px; font-weight: 800; }
+    .balance-pnl { font-size: 14px; color: #22c55e; margin-top: 4px; }
+    
+    .asset-selector { background: #12121a; border-radius: 12px; padding: 16px; border: 1px solid #2a2a3a; }
+    .asset-name { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+    .asset-price { font-size: 28px; font-weight: 800; color: #22c55e; }
+    
+    .chart-panel { flex: 1; position: relative; }
+    .chart-bg { position: absolute; inset: 0; background: radial-gradient(ellipse at center, #0f0f18 0%, #050508 100%); }
+    
+    .top-bar { position: absolute; top: 20px; left: 20px; right: 20px; display: flex; justify-content: space-between; align-items: center; z-index: 10; }
+    .beat-box { background: rgba(20, 20, 30, 0.9); backdrop-filter: blur(10px); border: 1px solid #2a2a3a; border-radius: 12px; padding: 12px 20px; display: flex; align-items: center; gap: 16px; }
+    .beat-label { font-size: 11px; color: #6b7280; text-transform: uppercase; }
+    .beat-value { font-size: 20px; font-weight: 700; }
+    .timer-box { background: rgba(20, 20, 30, 0.9); backdrop-filter: blur(10px); border: 1px solid #2a2a3a; border-radius: 12px; padding: 12px 24px; }
+    .timer-value { font-size: 24px; font-weight: 700; font-family: monospace; }
+    
+    .right-panel { width: 360px; background: #0d0d12; border-left: 1px solid #1a1a25; padding: 24px; display: flex; flex-direction: column; gap: 20px; }
+    
+    .trade-section { background: linear-gradient(135deg, #1a1a25, #12121a); border-radius: 16px; padding: 24px; border: 1px solid #2a2a3a; }
+    .section-title { font-size: 13px; color: #6b7280; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; }
+    
+    .amount-display { text-align: center; margin-bottom: 20px; }
+    .amount-value { font-size: 48px; font-weight: 800; }
+    .amount-label { font-size: 12px; color: #6b7280; }
+    
+    .slider-container { margin-bottom: 20px; }
+    .slider { width: 100%; height: 8px; -webkit-appearance: none; background: #2a2a3a; border-radius: 4px; outline: none; }
+    .slider::-webkit-slider-thumb { -webkit-appearance: none; width: 24px; height: 24px; background: linear-gradient(135deg, #a855f7, #6366f1); border-radius: 50%; cursor: pointer; }
+    .slider-labels { display: flex; justify-content: space-between; margin-top: 8px; font-size: 12px; color: #6b7280; }
+    
+    .action-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .btn-up { background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); border: none; color: #fff; padding: 20px; border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer; transition: transform 0.1s; }
+    .btn-up:active { transform: scale(0.98); }
+    .btn-down { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); border: none; color: #fff; padding: 20px; border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer; transition: transform 0.1s; }
+    .btn-down:active { transform: scale(0.98); }
+    
+    .position-box { background: linear-gradient(135deg, #1a1a25, #12121a); border-radius: 16px; padding: 20px; border: 1px solid #2a2a3a; }
+    .position-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .position-type { font-size: 18px; font-weight: 700; }
+    .position-type.up { color: #22c55e; }
+    .position-type.down { color: #ef4444; }
+    .position-amount { color: #6b7280; }
+    .position-payout { font-size: 32px; font-weight: 800; text-align: right; }
+    .position-payout.positive { color: #22c55e; }
+    
+    .payout-rate { text-align: center; color: #6b7280; font-size: 13px; margin-top: 12px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="left-panel">
+      <div class="logo">PREDICTX</div>
+      
+      <div class="balance-box">
+        <div class="balance-label">Demo Balance</div>
+        <div class="balance-value">$10,000</div>
+        <div class="balance-pnl">+$1,250 today</div>
+      </div>
+      
+      <div class="asset-selector">
+        <div class="asset-name">BTC / USDT</div>
+        <div class="asset-price">$73,245</div>
+      </div>
+    </div>
+    
+    <div class="chart-panel">
+      <div class="chart-bg"></div>
+      <div class="top-bar">
+        <div class="beat-box">
+          <div>
+            <div class="beat-label">Beat Price</div>
+            <div class="beat-value">$73,200</div>
+          </div>
+        </div>
+        <div class="timer-box">
+          <div class="timer-value">04:32</div>
+        </div>
+      </div>
+      <!-- Chart line -->
+      <svg style="position:absolute;bottom:60px;left:40px;right:40px;height:300px;" viewBox="0 0 800 300" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="chartGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" style="stop-color:#a855f7;stop-opacity:0.4" />
+            <stop offset="100%" style="stop-color:#a855f7;stop-opacity:0" />
+          </linearGradient>
+        </defs>
+        <path d="M0,250 Q100,200 200,220 T400,150 T600,100 T800,50 L800,300 L0,300 Z" fill="url(#chartGrad)"/>
+        <polyline fill="none" stroke="#a855f7" stroke-width="3" points="0,250 100,200 200,220 300,180 400,150 500,120 600,100 700,70 800,50"/>
+      </svg>
+    </div>
+    
+    <div class="right-panel">
+      <div class="trade-section">
+        <div class="section-title">Trade Amount</div>
+        <div class="amount-display">
+          <div class="amount-value">$500</div>
+          <div class="amount-label">Potential payout: $975</div>
+        </div>
+        <div class="slider-container">
+          <input type="range" class="slider" min="10" max="1000" value="500">
+          <div class="slider-labels">
+            <span>$10</span>
+            <span>$1,000</span>
+          </div>
+        </div>
+        <div class="action-buttons">
+          <button class="btn-up">▲ UP</button>
+          <button class="btn-down">▼ DOWN</button>
+        </div>
+        <div class="payout-rate">95% payout • 5 min rounds</div>
+      </div>
+      
+      <div class="position-box">
+        <div class="section-title">Active Position</div>
+        <div class="position-header">
+          <span class="position-type up">▲ UP</span>
+          <span class="position-amount">$300</span>
+        </div>
+        <div class="position-payout positive">+$285</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

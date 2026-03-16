@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Design A - TradingView Style</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #131722; color: #d1d4dc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; }
+    
+    .header { background: #1e222d; padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #2a2e39; }
+    .logo { color: #fff; font-size: 18px; font-weight: 700; }
+    .asset { display: flex; align-items: center; gap: 12px; }
+    .asset-name { color: #fff; font-size: 20px; font-weight: 700; }
+    .asset-price { color: #089981; font-size: 24px; font-weight: 700; }
+    .timeframe { display: flex; gap: 8px; }
+    .tf-btn { background: #2a2e39; border: none; color: #787b86; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 13px; }
+    .tf-btn.active { background: #2962ff; color: #fff; }
+    
+    .main { display: flex; height: calc(100vh - 60px); }
+    .chart-area { flex: 1; display: flex; flex-direction: column; }
+    .chart { flex: 1; background: #131722; position: relative; }
+    .y-axis { position: absolute; right: 0; top: 0; bottom: 20px; width: 60px; background: #131722; border-left: 1px solid #2a2e39; padding: 10px 8px; font-size: 11px; color: #787b86; }
+    .y-axis div { height: 40px; border-bottom: 1px solid #2a2e39; display: flex; align-items: center; justify-content: flex-end; }
+    
+    .sidebar { width: 320px; background: #1e222d; border-left: 1px solid #2a2e39; padding: 20px; display: flex; flex-direction: column; gap: 20px; }
+    .balance-card { background: #2a2e39; border-radius: 8px; padding: 20px; }
+    .balance-label { font-size: 12px; color: #787b86; margin-bottom: 8px; }
+    .balance-amount { font-size: 28px; font-weight: 700; color: #fff; }
+    .balance-change { font-size: 14px; color: #089981; margin-top: 4px; }
+    
+    .trade-panel { background: #2a2e39; border-radius: 8px; padding: 20px; }
+    .trade-title { font-size: 14px; color: #fff; margin-bottom: 16px; font-weight: 600; }
+    .amount-input { width: 100%; background: #1e222d; border: 1px solid #363a45; border-radius: 4px; padding: 12px; color: #fff; font-size: 16px; margin-bottom: 12px; }
+    .buttons { display: flex; gap: 10px; }
+    .btn-up { flex: 1; background: #089981; border: none; color: #fff; padding: 16px; border-radius: 4px; font-size: 16px; font-weight: 700; cursor: pointer; }
+    .btn-down { flex: 1; background: #f23645; border: none; color: #fff; padding: 16px; border-radius: 4px; font-size: 16px; font-weight: 700; cursor: pointer; }
+    
+    .position-card { background: #2a2e39; border-radius: 8px; padding: 16px; }
+    .position-header { display: flex; justify-content: space-between; margin-bottom: 12px; }
+    .position-type { font-weight: 700; font-size: 16px; }
+    .position-type.up { color: #089981; }
+    .position-type.down { color: #f23645; }
+    .position-amount { color: #787b86; font-size: 14px; }
+    .position-pnl { text-align: right; }
+    .pnl-amount { font-size: 20px; font-weight: 700; color: #089981; }
+    .pnl-percent { font-size: 12px; color: #787b86; }
+    
+    .payout-info { font-size: 12px; color: #787b86; text-align: center; margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">PREDICTX</div>
+    <div class="asset">
+      <span class="asset-name">BTC/USDT</span>
+      <span class="asset-price">$73,245</span>
+    </div>
+    <div class="timeframe">
+      <button class="tf-btn">1m</button>
+      <button class="tf-btn">5m</button>
+      <button class="tf-btn active">15m</button>
+      <button class="tf-btn">30m</button>
+      <button class="tf-btn">1h</button>
+    </div>
+  </div>
+  
+  <div class="main">
+    <div class="chart-area">
+      <div class="chart">
+        <div class="y-axis">
+          <div>73,300</div>
+          <div>73,250</div>
+          <div>73,200</div>
+          <div>73,150</div>
+          <div>73,100</div>
+        </div>
+        <!-- Simulated chart line -->
+        <svg style="position:absolute;top:50px;left:10px;right:70px;bottom:20px;" viewBox="0 0 800 400" preserveAspectRatio="none">
+          <polyline fill="none" stroke="#2962ff" stroke-width="2" points="0,300 50,280 100,290 150,250 200,260 250,220 300,230 350,190 400,200 450,170 500,180 550,150 600,160 650,130 700,140 750,120 800,110"/>
+        </svg>
+      </div>
+    </div>
+    
+    <div class="sidebar">
+      <div class="balance-card">
+        <div class="balance-label">DEMO BALANCE</div>
+        <div class="balance-amount">$10,000</div>
+        <div class="balance-change">+$1,250 today</div>
+      </div>
+      
+      <div class="trade-panel">
+        <div class="trade-title">PLACE TRADE</div>
+        <input type="text" class="amount-input" placeholder="Amount ($)" value="100">
+        <div class="buttons">
+          <button class="btn-up">▲ UP</button>
+          <button class="btn-down">▼ DOWN</button>
+        </div>
+        <div class="payout-info">95% payout • 5:00 remaining</div>
+      </div>
+      
+      <div class="position-card">
+        <div class="position-header">
+          <div>
+            <div class="position-type up">▲ UP</div>
+            <div class="position-amount">$500</div>
+          </div>
+          <div class="position-pnl">
+            <div class="pnl-amount">+$475</div>
+            <div class="pnl-percent">+95%</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
