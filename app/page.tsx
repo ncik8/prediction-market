@@ -24,7 +24,7 @@ export default function Home() {
         backgroundImage: 'url(/public.png)',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
-        opacity: 0.5,
+        opacity: 0.85,
         zIndex: 0
       }} />
       
@@ -35,7 +35,7 @@ export default function Home() {
         left: 0,
         right: 0,
         bottom: 0,
-        background: 'linear-gradient(135deg, rgba(0,0,0,0.85) 0%, rgba(10,5,20,0.9) 100%)',
+        background: 'linear-gradient(135deg, rgba(0,0,0,0.5) 0%, rgba(10,5,20,0.6) 100%)',
         zIndex: 1
       }} />
 
