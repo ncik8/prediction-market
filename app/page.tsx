@@ -92,7 +92,7 @@ export default function Home() {
             letterSpacing: '-2px',
             lineHeight: '1.05'
           }}>
-            Train Hard <span style={{ color: '#6366f1', WebkitTextStroke: '1px white', textShadow: '0 0 30px rgba(99,102,241,0.8)' }}>/ Trade Easy</span>
+            Train Hard <span style={{ color: '#6366f1' }}>/ Trade Easy</span>
           </h2>
           
           <p style={{ 
