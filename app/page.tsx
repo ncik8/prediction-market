@@ -21,10 +21,10 @@ export default function Home() {
         left: 0,
         right: 0,
         bottom: 0,
-        backgroundImage: 'url(https://images.unsplash.com/photo-1614728263952-84ea256f9679?w=1920&q=80)',
+        backgroundImage: 'url(https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=1920&q=80)',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
-        opacity: 0.4,
+        opacity: 0.5,
         zIndex: 0
       }} />
       
@@ -35,133 +35,159 @@ export default function Home() {
         left: 0,
         right: 0,
         bottom: 0,
-        background: 'linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, rgba(5,5,5,0.95) 100%)',
+        background: 'linear-gradient(135deg, rgba(0,0,0,0.85) 0%, rgba(10,5,20,0.9) 100%)',
         zIndex: 1
       }} />
 
       {/* Content */}
       <div style={{ position: 'relative', zIndex: 2 }}>
-      
         {/* Header */}
         <header style={{ 
-          padding: '0 40px', 
-          height: '64px', 
+          padding: '0 48px', 
+          height: '72px', 
           display: 'flex', 
           alignItems: 'center', 
           justifyContent: 'space-between',
-          borderBottom: '1px solid rgba(255,255,255,0.1)',
+          borderBottom: '1px solid rgba(255,255,255,0.08)',
           position: 'fixed',
           top: 0,
           left: 0,
           right: 0,
-          background: 'rgba(0,0,0,0.5)',
-          backdropFilter: 'blur(10px)',
+          background: 'rgba(0,0,0,0.4)',
+          backdropFilter: 'blur(20px)',
           zIndex: 100
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '48px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '56px' }}>
             <h1 style={{ 
-              fontSize: '20px', 
-              fontWeight: '700', 
+              fontSize: '22px', 
+              fontWeight: '800', 
               color: '#fff',
               letterSpacing: '-0.5px'
             }}>
               PREDICTX
             </h1>
-            <nav style={{ display: 'flex', gap: '28px' }}>
+            <nav style={{ display: 'flex', gap: '32px' }}>
               <a href="#" style={{ color: '#888', textDecoration: 'none', fontSize: '14px', fontWeight: '500' }}>Markets</a>
               <a href="#" style={{ color: '#888', textDecoration: 'none', fontSize: '14px', fontWeight: '500' }}>Products</a>
               <a href="#" style={{ color: '#888', textDecoration: 'none', fontSize: '14px', fontWeight: '500' }}>Community</a>
             </nav>
           </div>
           <div style={{ display: 'flex', gap: '12px' }}>
-            <button style={{ background: 'transparent', border: 'none', color: '#888', padding: '10px 20px', fontSize: '14px', fontWeight: '500', cursor: 'pointer' }}>
+            <button style={{ background: 'transparent', border: 'none', color: '#888', padding: '12px 24px', fontSize: '14px', fontWeight: '500', cursor: 'pointer' }}>
               Sign In
             </button>
-            <Link href="/btc-live.html" style={{ background: '#2962ff', border: 'none', color: '#fff', padding: '10px 20px', borderRadius: '4px', fontSize: '14px', fontWeight: '600', textDecoration: 'none' }}>
+            <Link href="/btc-live.html" style={{ background: '#2962ff', border: 'none', color: '#fff', padding: '12px 24px', borderRadius: '4px', fontSize: '14px', fontWeight: '600', textDecoration: 'none' }}>
               Get Started
             </Link>
           </div>
         </header>
 
         {/* Hero */}
-        <section style={{ padding: '180px 40px 120px', maxWidth: '1200px', margin: '0 auto', textAlign: 'center' }}>
+        <section style={{ padding: '200px 48px 140px', maxWidth: '1400px', margin: '0 auto', textAlign: 'center' }}>
           <h2 style={{ 
-            fontSize: 'clamp(40px, 7vw, 64px)', 
-            fontWeight: '800', 
-            marginBottom: '24px', 
+            fontSize: 'clamp(48px, 8vw, 80px)', 
+            fontWeight: '900', 
+            marginBottom: '32px', 
             color: '#fff',
-            letterSpacing: '-1.5px',
-            lineHeight: '1.1'
+            letterSpacing: '-2px',
+            lineHeight: '1.05'
           }}>
-            Look first.<br/>Then leap.
+            Train hard.<br/><span style={{ color: '#6366f1' }}>Trade easy.</span>
           </h2>
           
           <p style={{ 
-            fontSize: '18px', 
-            color: '#aaa', 
-            maxWidth: '500px', 
-            margin: '0 auto 40px',
-            lineHeight: '1.6'
+            fontSize: '20px', 
+            color: '#999', 
+            maxWidth: '540px', 
+            margin: '0 auto 48px',
+            lineHeight: '1.7'
           }}>
-            The prediction market for everyone. Trade on crypto, sports, and world events with $10,000 in demo funds.
+            Master the markets with $10,000 in demo funds. Predict crypto, sports, and world events. Zero risk. Infinite learning.
           </p>
           
           <div style={{ display: 'flex', gap: '16px', justifyContent: 'center' }}>
             <Link href="/btc-live.html" style={{ 
               background: '#fff', 
-              padding: '14px 32px', 
-              borderRadius: '4px', 
+              padding: '18px 40px', 
+              borderRadius: '6px', 
               color: '#000', 
               textDecoration: 'none', 
-              fontSize: '15px', 
-              fontWeight: '600'
+              fontSize: '16px', 
+              fontWeight: '700'
             }}>
-              Get Started Free
+              Start Trading
             </Link>
             <button style={{ 
-              background: 'transparent', 
-              border: '1px solid #333', 
-              padding: '14px 32px', 
-              borderRadius: '4px', 
+              background: 'rgba(255,255,255,0.05)', 
+              border: '1px solid rgba(255,255,255,0.15)', 
+              padding: '18px 40px', 
+              borderRadius: '6px', 
               color: '#aaa', 
-              fontSize: '15px',
+              fontSize: '16px',
               fontWeight: '600',
               cursor: 'pointer'
             }}>
-              View Markets
+              Explore Markets
             </button>
           </div>
         </section>
 
+        {/* Stats */}
+        <section style={{ padding: '48px', borderTop: '1px solid rgba(255,255,255,0.08)', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+          <div style={{ maxWidth: '900px', margin: '0 auto', display: 'flex', justifyContent: 'space-around', flexWrap: 'wrap', gap: '48px' }}>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '40px', fontWeight: '800', color: '#fff' }}>$2.4M</div>
+              <div style={{ color: '#666', fontSize: '13px', fontWeight: '500', marginTop: '4px', letterSpacing: '1px' }}>TOTAL VOLUME</div>
+            </div>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '40px', fontWeight: '800', color: '#fff' }}>12.5K</div>
+              <div style={{ color: '#666', fontSize: '13px', fontWeight: '500', marginTop: '4px', letterSpacing: '1px' }}>ACTIVE TRADERS</div>
+            </div>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '40px', fontWeight: '800', color: '#fff' }}>99.9%</div>
+              <div style={{ color: '#666', fontSize: '13px', fontWeight: '500', marginTop: '4px', letterSpacing: '1px' }}>UPTIME</div>
+            </div>
+          </div>
+        </section>
+
         {/* Markets */}
-        <section style={{ padding: '0 40px 80px', maxWidth: '1200px', margin: '0 auto' }}>
-          <h3 style={{ fontSize: '14px', fontWeight: '600', color: '#666', marginBottom: '20px', letterSpacing: '1px' }}>
+        <section style={{ padding: '80px 48px', maxWidth: '1200px', margin: '0 auto' }}>
+          <h3 style={{ fontSize: '14px', fontWeight: '600', color: '#6366f1', marginBottom: '24px', letterSpacing: '1.5px' }}>
             TRENDING MARKETS
           </h3>
           
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '16px' }}>
             {markets.map(m => (
               <div key={m.id} style={{ 
-                background: 'rgba(20,20,20,0.8)', 
-                padding: '20px', 
-                borderRadius: '8px', 
-                border: '1px solid rgba(255,255,255,0.1)',
+                background: 'rgba(20,20,30,0.8)', 
+                padding: '24px', 
+                borderRadius: '12px', 
+                border: '1px solid rgba(99,102,241,0.2)',
                 cursor: 'pointer',
-                backdropFilter: 'blur(10px)'
-              }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '14px' }}>
-                  <span style={{ background: '#222', padding: '4px 10px', borderRadius: '4px', fontSize: '12px', fontWeight: '700', color: '#fff' }}>{m.asset}</span>
+                transition: 'all 0.2s'
+              }}
+              onMouseOver={e => {
+                e.currentTarget.style.borderColor = 'rgba(99,102,241,0.5)'
+                e.currentTarget.style.transform = 'translateY(-4px)'
+              }}
+              onMouseOut={e => {
+                e.currentTarget.style.borderColor = 'rgba(99,102,241,0.2)'
+                e.currentTarget.style.transform = 'translateY(0)'
+              }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}>
+                  <span style={{ background: 'rgba(99,102,241,0.2)', padding: '6px 12px', borderRadius: '6px', fontSize: '12px', fontWeight: '700', color: '#a5b4fc' }}>{m.asset}</span>
                   <span style={{ color: '#555', fontSize: '12px' }}>{m.volume}</span>
                 </div>
-                <p style={{ fontSize: '14px', marginBottom: '16px', lineHeight: '1.5', color: '#ccc' }}>{m.question}</p>
-                <div style={{ display: 'flex', gap: '8px' }}>
-                  <div style={{ flex: 1, background: 'rgba(34,197,94,0.15)', padding: '10px', borderRadius: '4px', textAlign: 'center' }}>
+                <p style={{ fontSize: '15px', marginBottom: '20px', lineHeight: '1.5', color: '#ccc' }}>{m.question}</p>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <div style={{ flex: 1, background: 'rgba(34,197,94,0.12)', padding: '12px', borderRadius: '8px', textAlign: 'center' }}>
                     <div style={{ fontSize: '10px', color: '#22c55e', fontWeight: '600', letterSpacing: '0.5px' }}>YES</div>
-                    <div style={{ fontSize: '18px', fontWeight: '700', color: '#22c55e' }}>{m.yesPrice}%</div>
+                    <div style={{ fontSize: '20px', fontWeight: '800', color: '#22c55e' }}>{m.yesPrice}%</div>
                   </div>
-                  <div style={{ flex: 1, background: 'rgba(239,68,68,0.15)', padding: '10px', borderRadius: '4px', textAlign: 'center' }}>
+                  <div style={{ flex: 1, background: 'rgba(239,68,68,0.12)', padding: '12px', borderRadius: '8px', textAlign: 'center' }}>
                     <div style={{ fontSize: '10px', color: '#ef4444', fontWeight: '600', letterSpacing: '0.5px' }}>NO</div>
-                    <div style={{ fontSize: '18px', fontWeight: '700', color: '#ef4444' }}>{m.noPrice}%</div>
+                    <div style={{ fontSize: '20px', fontWeight: '800', color: '#ef4444' }}>{m.noPrice}%</div>
                   </div>
                 </div>
               </div>
@@ -170,17 +196,18 @@ export default function Home() {
         </section>
 
         {/* Features */}
-        <section style={{ padding: '80px 40px', background: 'rgba(0,0,0,0.5)', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+        <section style={{ padding: '80px 48px', background: 'rgba(0,0,0,0.4)', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
           <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '48px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '40px' }}>
               {[
-                { title: 'Real-Time Data', desc: 'Live prices from major exchanges' },
-                { title: 'Instant Execution', desc: 'Lightning fast trade fills' },
-                { title: '$10,000 Demo', desc: 'Practice with virtual funds' },
-                { title: 'Global Access', desc: 'Trade from anywhere' },
+                { icon: '⚡', title: 'Lightning Fast', desc: 'Real-time prices and instant execution' },
+                { icon: '🎯', title: 'Precise Predictions', desc: 'Advanced tools for better decisions' },
+                { icon: '🔒', title: 'Secure Platform', desc: 'Your data and funds are protected' },
+                { icon: '🌍', title: 'Global Markets', desc: 'Trade crypto, sports, and more' },
               ].map((f, i) => (
-                <div key={i}>
-                  <h4 style={{ fontSize: '16px', fontWeight: '600', color: '#fff', marginBottom: '8px' }}>{f.title}</h4>
+                <div key={i} style={{ textAlign: 'center' }}>
+                  <div style={{ fontSize: '36px', marginBottom: '16px' }}>{f.icon}</div>
+                  <h4 style={{ fontSize: '18px', fontWeight: '700', color: '#fff', marginBottom: '8px' }}>{f.title}</h4>
                   <p style={{ fontSize: '14px', color: '#666', lineHeight: '1.5' }}>{f.desc}</p>
                 </div>
               ))}
@@ -189,8 +216,8 @@ export default function Home() {
         </section>
 
         {/* Footer */}
-        <footer style={{ padding: '40px', borderTop: '1px solid rgba(255,255,255,0.1)', textAlign: 'center', color: '#444', fontSize: '13px' }}>
-          <p>© 2026 PredictX. Paper trading only.</p>
+        <footer style={{ padding: '40px', borderTop: '1px solid rgba(255,255,255,0.08)', textAlign: 'center', color: '#444', fontSize: '13px' }}>
+          <p>© 2026 PredictX. Paper trading platform.</p>
         </footer>
       </div>
     </div>
