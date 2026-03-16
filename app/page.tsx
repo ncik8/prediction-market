@@ -97,7 +97,7 @@ export default function Home() {
           
           <p style={{ 
             fontSize: '20px', 
-            color: '#999', 
+            color: '#fff', 
             maxWidth: '540px', 
             margin: '0 auto 48px',
             lineHeight: '1.7'
