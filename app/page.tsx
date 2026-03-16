@@ -24,7 +24,7 @@ export default function Home() {
         backgroundImage: 'url(/public.png)',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
-        opacity: 0.85,
+        opacity: 0.95,
         zIndex: 0
       }} />
       
