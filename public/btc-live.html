@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PredictX - BTC 5MIN</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { background: #0a0a0a; color: white; }
+    .btn-up { background: #22c55e; }
+    .btn-up:hover { background: #16a34a; }
+    .btn-down { background: #ef4444; }
+    .btn-down:hover { background: #dc2626; }
+    .btn-cashout { background: #f59e0b; }
+    .btn-cashout:hover { background: #d97706; }
+  </style>
+</head>
+<body>
+  <div class="flex">
+    <!-- Sidebar - desktop always, mobile toggle -->
+    <div id="sidebar" class="w-40 bg-slate-900 border-r border-slate-800 min-h-screen fixed left-0 top-0 z-50">
+      <div class="p-4">
+        <div class="flex justify-between items-center mb-4">
+          <h1 class="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">PredictX</h1>
+          <button onclick="toggleSidebar()" class="text-slate-400 md:hidden">✕</button>
+        </div>
+        <div class="text-xs text-slate-500 uppercase tracking-wider mb-2 pl-2">Markets</div>
+        <nav class="space-y-1">
+          <a href="#" class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-slate-400">Crypto</a>
+        </nav>
+        <div class="text-xs text-slate-500 uppercase tracking-wider mt-6 mb-2 pl-2">Timeframes</div>
+        <nav class="space-y-1">
+          <a href="btc-live.html" class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-bold text-white bg-slate-800">5 min</a>
+          <a href="btc-15min.html" class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-slate-400">15 min</a>
+          <a href="btc-30min.html" class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-slate-400">30 min</a>
+          <a href="btc-1hour.html" class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-slate-400">1 hour</a>
+        </nav>
+      </div>
+    </div>
+
+    <!-- Mobile hamburger - bigger icon -->
+    <button onclick="toggleSidebar()" class="md:hidden fixed top-4 left-4 z-40 bg-slate-800 px-5 py-4 rounded-lg text-white text-5xl" style="border: 10px solid #1e293b; margin: 20px;">☰</button>
+
+    <!-- Main Content -->
+    <div class="flex-1 md:ml-40">
+      <div class="max-w-3xl mx-auto p-4 pt-64 md:pt-4">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-3">
+      <div>
+        <div class="text-sm text-slate-400">Crypto • 5MIN</div>
+        <h1 class="text-xl font-bold" id="titlePrice">BTC $0</h1>
+        <div class="text-xs text-yellow-400" id="cycleLabel">05:00 remaining</div>
+      </div>
+      <div class="text-right">
+        <button onclick="toggleLang()" id="langToggle" class="text-xs bg-slate-700 px-2 py-1 rounded mb-1">中文</button>
+        <div class="text-3xl font-bold text-green-400" id="countdown">00:00</div>
+        <div class="text-xs text-slate-400"><span id="balanceLabel">Balance</span>: <span class="text-white font-bold" id="balance">$10,000</span></div>
+        <div class="text-xs text-yellow-400"><span id="revenueLabel">Revenue</span>: <span id="platformRevenue">$0</span></div>
+      </div>
+    </div>
+
+    <!-- Price Change from Beat -->
+    <div class="text-center mb-2">
+      <span id="priceChange" class="text-2xl font-bold">0.00%</span>
+      <span class="text-sm text-slate-400" id="fromBeatLabel"> from beat</span>
+    </div>
+
+    <!-- Chart -->
+    <div class="bg-slate-900 rounded-xl border border-slate-800 p-3 mb-3">
+      <div class="h-56">
+        <canvas id="chart"></canvas>
+      </div>
+      <div class="flex justify-between text-xs text-slate-500 mt-1" id="timeAxis"></div>
+    </div>
+    
+    <!-- Bot Trades -->
+    <div class="mt-2 text-xs space-y-0.5" id="botTrades"></div>
+
+    <!-- Market Rules (collapsible) -->
+    <div class="mt-4 bg-slate-900/80 rounded-lg border border-slate-800">
+      <div class="p-3 flex items-center justify-between cursor-pointer" onclick="toggleRules()">
+        <h3 class="text-sm font-bold text-slate-400" id="rulesTitle">📋 Market Rules</h3>
+        <span id="rulesArrow" class="text-slate-400">▼</span>
+      </div>
+      <div id="rulesContent" class="text-xs text-slate-500 space-y-1 px-3 pb-3" style="display: none;">
+        <p>• <strong>Beat Price</strong> = BTC price when 5-min round starts</p>
+        <p>• <strong>UP wins</strong> if final price is above beat</p>
+        <p>• <strong>DOWN wins</strong> if final price is below beat</p>
+        <p>• <strong>Payout</strong> decreases as round progresses (early = more)</p>
+        <p>• <strong>Data Source:</strong> Real-time BTC/USDT price from Binance</p>
+        <p>• <strong>Settlement:</strong> Final price is average of last 30 seconds</p>
+        <p>• <strong>Direction:</strong> Can't have UP and DOWN at same time - sell first to switch</p>
+        <p>• <strong>Lockout:</strong> 5 seconds between bets, 30s to avoid early-sell fee</p>
+      </div>
+    </div>
+
+    <script>
+    function toggleRules() {
+      const content = document.getElementById('rulesContent');
+      const arrow = document.getElementById('rulesArrow');
+      if (content.style.display === 'none') {
+        content.style.display = 'block';
+        arrow.textContent = '▲';
+        // Set content if empty
+        if (!content.innerHTML) {
+          content.innerHTML = `
+            <p>• <strong>${t('beatPrice')}</strong> - ${t('roundStart')}</p>
+            <p>• <strong>${t('upWins')}</strong></p>
+            <p>• <strong>${t('downWins')}</strong></p>
+            <p>• <strong>${t('payout')}</strong></p>
+            <p>• <strong>${t('dataSource')}</strong></p>
+            <p>• <strong>${t('settlement')}</strong></p>
+            <p>• <strong>${t('direction')}</strong></p>
+            <p>• <strong>${t('lockout')}</strong></p>
+          `;
+        }
+      } else {
+        content.style.display = 'none';
+        arrow.textContent = '▼';
+      }
+    }
+    </script>
+
+    <!-- Current Positions -->
+    <div id="positionPanel" class="bg-slate-800 rounded-lg p-3 mb-3" style="display: none;">
+      <div class="flex items-center justify-between mb-2">
+        <div>
+          <div class="text-sm text-slate-400" id="yourBetsLabel">Your Bets</div>
+          <div class="font-bold text-green-400" id="positionSummary">$0</div>
+        </div>
+        <div class="text-right">
+          <div class="text-sm text-slate-400" id="totalPotentialLabel">Total Potential</div>
+          <div class="text-green-400 font-bold text-lg" id="totalPayout">$0</div>
+        </div>
+      </div>
+      <div class="text-center text-xs text-slate-500 mb-2" id="holdTimer"></div>
+      <div class="flex gap-2">
+        <button onclick="cashOutPercent(25)" id="sell25Btn" class="flex-1 py-2 rounded-lg font-bold text-sm btn-cashout">Sell 25%</button>
+        <button onclick="cashOutPercent(50)" id="sell50Btn" class="flex-1 py-2 rounded-lg font-bold text-sm btn-cashout">Sell 50%</button>
+        <button onclick="cashOutPercent(100)" id="sellAllBtn" class="flex-1 py-2 rounded-lg font-bold text-sm bg-red-500 hover:bg-red-600">Sell All</button>
+      </div>
+    </div>
+
+    <!-- Betting Panel -->
+    <div class="bg-slate-900 rounded-xl border border-slate-800 p-3">
+      <div class="mb-3">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-sm text-slate-400" id="betAmountLabel">Bet Amount</span>
+          <span class="text-sm text-slate-400"><span id="strikeLabel">Beat</span>: <span class="text-white font-bold" id="strike">$0</span></span>
+        </div>
+        <div class="flex gap-2">
+          <button class="px-3 py-2 bg-slate-600 rounded-lg text-sm" id="clearBtn" onclick="document.getElementById('betAmount').value = '0'">Clear</button>
+          <input type="number" id="betAmount" value="0" class="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-white font-mono text-center">
+          <button class="px-3 py-2 bg-slate-700 rounded-lg text-sm" onclick="addBetAmount(1)">+$1</button>
+          <button class="px-3 py-2 bg-slate-700 rounded-lg text-sm" onclick="addBetAmount(10)">+$10</button>
+          <button class="px-3 py-2 bg-slate-700 rounded-lg text-sm" onclick="addBetAmount(50)">+$50</button>
+          <button class="px-3 py-2 bg-slate-700 rounded-lg text-sm" onclick="addBetAmount(100)">+$100</button>
+        </div>
+      </div>
+
+      <div class="flex gap-2">
+        <button id="upBtn" class="flex-1 py-4 rounded-xl font-bold text-lg btn-up">UP</button>
+        <button id="downBtn" class="flex-1 py-4 rounded-xl font-bold text-lg btn-down">DOWN</button>
+      </div>
+    </div>
+
+    <!-- Message -->
+    <div id="message" class="mt-3 text-center text-sm text-slate-400"></div>
+  </div>
+
+  <script>
+    // State
+    let btcPrice = 0;
+    let manualBeatPrice = 0;
+    let balance = 10000;
+    let platformRevenue = 0;
+    let currentBets = []; // Array of { type, amount, timeRemaining, settled }
+    let botTrades = []; // Bot trades for simulation
+    let currentRange = 100;
+    
+    // Bot trades simulation
+    function addBotTrade() {
+      const types = ['UP', 'DOWN'];
+      const type = types[Math.floor(Math.random() * 2)];
+      const amounts = [10, 20, 50, 100, 200];
+      const amount = amounts[Math.floor(Math.random() * amounts.length)];
+      
+      botTrades.push({ type, amount, time: Date.now() });
+      if (botTrades.length > 5) botTrades.shift();
+      updateBotDisplay();
+    }
+    
+    function updateBotDisplay() {
+      const container = document.getElementById('botTrades');
+      if (botTrades.length === 0) { container.innerHTML = ''; return; }
+      const now = Date.now();
+      let html = '';
+      for (let trade of botTrades) {
+        const secondsAgo = Math.floor((now - trade.time) / 1000);
+        const color = trade.type === 'UP' ? 'text-green-400' : 'text-red-400';
+        const icon = trade.type === 'UP' ? '▲' : '▼';
+        html += `<div class="${color}">${icon} $${trade.amount} · ${secondsAgo}s</div>`;
+      }
+      container.innerHTML = html;
+    }
+    
+    // Bot trades - random interval 1-5 seconds
+    function scheduleBotTrade() {
+      if (Math.random() > 0.4) addBotTrade();
+      setTimeout(scheduleBotTrade, 1000 + Math.random() * 4000);
+    }
+    scheduleBotTrade();
+    
+    const rawPrices = [];
+    const maPeriod = 10;
+    const maPrices = [];
+    const dataPoints = 150;
+    const cycleDuration = 300;
+    const payoutMultiplier = 1.95;
+
+    // DOM elements
+    const balanceEl = document.getElementById('balance');
+    const platformRevenueEl = document.getElementById('platformRevenue');
+    const titlePriceEl = document.getElementById('titlePrice');
+    const strikeEl = document.getElementById('strike');
+    const positionPanel = document.getElementById('positionPanel');
+    const positionSummaryEl = document.getElementById('positionSummary');
+    const totalPayoutEl = document.getElementById('totalPayout');
+    const messageEl = document.getElementById('message');
+    const betAmountInput = document.getElementById('betAmount');
+    let lastBetTime = 0;
+    let maxFeeTime = 30; // seconds for early sell fee to go to 0
+    
+    // Language support
+    let currentLang = 'en';
+    const translations = {
+      en: { market: 'Market Rules', beatPrice: 'Beat Price', up: 'UP', down: 'DOWN', upWins: 'UP wins if final price is above beat', downWins: 'DOWN wins if final price is below beat', payout: 'Payout decreases as round progresses', dataSource: 'Data Source: Real-time BTC/USDT price from Binance', settlement: 'Settlement: Final price is average of last 30 seconds', direction: "Can't have UP and DOWN at same time - sell first to switch", lockout: '5 seconds between bets, 30s to avoid early-sell fee', yourBets: 'Your Bets', totalPotential: 'Total Potential', betAmount: 'Bet Amount', remaining: 'remaining', insufficient: 'Insufficient balance!', betPlaced: 'Bet placed:', sold: 'Sold', left: 'Left', wait: 'Please wait 5 seconds between bets!', opposite: 'You have', bets: 'bets', sellFirst: 'Sell them first before betting', won: 'You WON', lost: 'You lost', breakEven: 'Break even!', carried: 'carried to next round', earlyFee: 'Early', fee: 'Fee', fromBeat: 'from beat', platform: 'platform fee', clear: 'Clear', sell: 'Sell', all: 'All', cycle: '5MIN', balance: 'Balance', revenue: 'Revenue', beat: 'Beat', roundStart: 'BTC price when 5-min round starts' },
+      zh: { market: '市场规则', beatPrice: '起始价格', up: '买涨', down: '买跌', upWins: '买涨 - 最终价格高于起始价格获胜', downWins: '买跌 - 最终价格低于起始价格获胜', payout: '越早下单赔付越高', dataSource: '数据来源：币安实时BTC/USDT价格', settlement: '结算：取最后30秒平均价格', direction: '不能同时持有买涨和买跌，需先平仓', lockout: '下单间隔5秒，30秒后无提前平仓费', yourBets: '您的投注', totalPotential: '预计收益', betAmount: '投注金额', remaining: '剩余', insufficient: '余额不足！', betPlaced: '已投注：', sold: '已卖出', left: '剩余', wait: '请等待5秒后再下单！', opposite: '您有', bets: '笔投注', sellFirst: '平仓后再下单', won: '您赢了', lost: '您输了', breakEven: '平局！', carried: '转入下一轮', earlyFee: '提前', fee: '费率', fromBeat: '偏离起始价', platform: '平台费', clear: '清除', sell: '卖出', all: '全部', cycle: '5分钟', balance: '余额', revenue: '收入', beat: '起始价', roundStart: '5分钟轮次开始时的BTC价格' }
+    };
+    function t(key) { 
+      return translations[currentLang][key] || key; 
+    }
+    function toggleLang() { 
+      currentLang = currentLang === 'en' ? 'zh' : 'en'; 
+      document.getElementById('langToggle').textContent = currentLang === 'en' ? '中文' : 'EN';
+      document.getElementById('rulesTitle').textContent = t('market');
+      document.getElementById('yourBetsLabel').textContent = t('yourBets');
+      document.getElementById('totalPotentialLabel').textContent = t('totalPotential');
+      document.getElementById('betAmountLabel').textContent = t('betAmount');
+      document.getElementById('strikeLabel').textContent = t('beat');
+      document.getElementById('upBtn').textContent = t('up');
+      document.getElementById('downBtn').textContent = t('down');
+      document.getElementById('sell25Btn').textContent = t('sell') + ' 25%';
+      document.getElementById('sell50Btn').textContent = t('sell') + ' 50%';
+      document.getElementById('sellAllBtn').textContent = t('sell') + ' ' + t('all');
+      document.getElementById('clearBtn').textContent = t('clear');
+      document.getElementById('fromBeatLabel').textContent = t('fromBeat');
+      
+      // Update header
+      document.getElementById('cycleLabel').textContent = '05:00 ' + t('remaining');
+      document.getElementById('balanceLabel').textContent = t('balance') + ':';
+      document.getElementById('revenueLabel').textContent = t('revenue') + ':';
+      
+      // Update market rules
+      const rules = document.getElementById('rulesContent');
+      rules.innerHTML = `
+        <p>• <strong>${t('beatPrice')}</strong> - ${t('roundStart')}</p>
+        <p>• <strong>${t('upWins')}</strong></p>
+        <p>• <strong>${t('downWins')}</strong></p>
+        <p>• <strong>${t('payout')}</strong></p>
+        <p>• <strong>${t('dataSource')}</strong></p>
+        <p>• <strong>${t('settlement')}</strong></p>
+        <p>• <strong>${t('direction')}</strong></p>
+        <p>• <strong>${t('lockout')}</strong></p>
+      `;
+    }
+    
+    // Calculate platform fee based on probability (flipped - higher when more certain)
+    // 50% outcome = 0.5% fee, 95% = 2% fee
+    function getPlatformFee() {
+      const beatDiff = Math.abs(btcPrice - manualBeatPrice);
+      const priceThreshold = manualBeatPrice * 0.01;
+      const probability = Math.min(beatDiff / priceThreshold, 1);
+      
+      // Flipped fee curve: higher at extremes, lower at 50%
+      // fee = 0.005 + probability * 0.015 (linear from 0.5% to 2%)
+      const minFee = 0.005;
+      const maxFee = 0.02;
+      const fee = minFee + probability * (maxFee - minFee);
+      return fee;
+    }
+    
+    // Add to bet amount
+    function addBetAmount(amount) {
+      const current = parseInt(betAmountInput.value) || 0;
+      betAmountInput.value = current + amount;
+    }
+    
+    // Toggle sidebar on mobile
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      if (sidebar.style.display === 'none') {
+        sidebar.style.display = 'block';
+      } else {
+        sidebar.style.display = 'none';
+      }
+    }
+    
+    function updateBalance() {
+      balanceEl.textContent = '$' + balance.toLocaleString();
+      platformRevenueEl.textContent = '$' + platformRevenue.toLocaleString();
+    }
+
+    // Calculate total bet amount (not settled)
+    function getTotalBetAmount() {
+      return currentBets.filter(b => !b.settled).reduce((sum, b) => sum + b.amount, 0);
+    }
+
+    // Calculate payout for a single bet
+    function calculateBetPayout(bet) {
+      const { remaining } = getCycleInfo();
+      const timeRemaining = remaining / cycleDuration;
+      const minPayout = 1.02; // 2% at very end
+      const maxPayout = 1.95; // 95% at start
+      const payoutRatio = minPayout + (maxPayout - minPayout) * timeRemaining;
+      
+      const beatDiff = btcPrice - manualBeatPrice;
+      const priceThreshold = manualBeatPrice * 0.01; // 1% threshold
+      
+      // Base value starts at your bet amount
+      let currentValue = bet.amount;
+      
+      if (bet.type === 'UP') {
+        if (beatDiff > 0) {
+          // Price is above beat - you're winning!
+          const profitRatio = Math.min(Math.abs(beatDiff) / priceThreshold, 1);
+          currentValue = bet.amount + (bet.amount * (payoutRatio - 1) * profitRatio * timeRemaining);
+        } else {
+          // Price is below beat - you're losing
+          const lossRatio = Math.min(Math.abs(beatDiff) / priceThreshold, 1);
+          currentValue = bet.amount - (bet.amount * 0.5 * lossRatio * (1 - timeRemaining));
+        }
+      } else { // DOWN
+        if (beatDiff < 0) {
+          // Price is below beat - you're winning!
+          const profitRatio = Math.min(Math.abs(beatDiff) / priceThreshold, 1);
+          currentValue = bet.amount + (bet.amount * (payoutRatio - 1) * profitRatio * timeRemaining);
+        } else {
+          // Price is above beat - you're losing
+          const lossRatio = Math.min(Math.abs(beatDiff) / priceThreshold, 1);
+          currentValue = bet.amount - (bet.amount * 0.5 * lossRatio * (1 - timeRemaining));
+        }
+      }
+      
+      return Math.max(0, currentValue); // Never negative
+    }
+
+    // Update payout display
+    function updatePayout() {
+      const panel = document.getElementById('positionPanel');
+      const holdTimerEl = document.getElementById('holdTimer');
+      
+      if (currentBets.length === 0) {
+        panel.style.display = 'none';
+        return;
+      }
+      
+      panel.style.display = 'block';
+      
+      // Show current fee if selling now
+      const now = Date.now();
+      const oldestBet = currentBets[0];
+      const secondsSinceBet = (now - oldestBet.betTime) / 1000;
+      const maxFee = 0.10;
+      const feeRatio = Math.max(0, 1 - (secondsSinceBet / maxFeeTime));
+      const currentEarlyFee = feeRatio * maxFee * 100;
+      const currentPlatFee = getPlatformFee() * 100;
+      
+      if (currentEarlyFee > 0.1) {
+        holdTimerEl.textContent = `⚡ Early: ${currentEarlyFee.toFixed(2)}% + Fee: ${currentPlatFee.toFixed(2)}%`;
+        holdTimerEl.className = 'text-center text-xs text-yellow-500 mb-2';
+      } else {
+        holdTimerEl.textContent = `✅ Fee: ${currentPlatFee.toFixed(2)}%`;
+        holdTimerEl.className = 'text-center text-xs text-green-500 mb-2';
+      }
+      
+      const totalAmount = currentBets.reduce((sum, b) => sum + b.amount, 0);
+      const totalPotential = currentBets.reduce((sum, b) => sum + calculateBetPayout(b), 0);
+      
+      // Show direction with color
+      const direction = currentBets[0].type;
+      const directionIcon = direction === 'UP' ? '▲' : '▼';
+      const directionColor = direction === 'UP' ? 'text-green-400' : 'text-red-400';
+      
+      positionSummaryEl.innerHTML = `${currentBets.length} bet${currentBets.length > 1 ? 's' : ''} • $${totalAmount} <span class="${directionColor}">${directionIcon} ${direction}</span>`;
+      totalPayoutEl.textContent = '$' + Math.round(totalPotential).toLocaleString();
+    }
+
+    // Place bet
+    function placeBet(type) {
+      const amount = parseInt(betAmountInput.value);
+      const { remaining } = getCycleInfo();
+      const timeRemaining = remaining / cycleDuration;
+      
+      // Check if already have opposite bet - must sell first
+      if (currentBets.length > 0) {
+        const existingType = currentBets[0].type;
+        if (existingType !== type) {
+          messageEl.textContent = `You have ${existingType} bets! Sell them first before betting ${type}.`;
+          return;
+        }
+      }
+      
+      // Check lockout (5 seconds between bets)
+      const now = Date.now();
+      if (now - lastBetTime < 5000) {
+        messageEl.textContent = 'Please wait 5 seconds between bets!';
+        return;
+      }
+      
+      if (amount > balance) {
+        messageEl.textContent = 'Insufficient balance!';
+        return;
+      }
+      
+      balance -= amount;
+      currentBets.push({
+        type: type,
+        amount: amount,
+        timeRemaining: timeRemaining,
+        settled: false,
+        betTime: now // Track when bet was placed
+      });
+      
+      lastBetTime = now;
+      updateBalance();
+      messageEl.textContent = `Bet placed: $${amount} ${type}!`;
+      updatePayout();
+    }
+
+    // Cash out percentage - with fee for fast sells
+    function cashOutPercent(percent) {
+      if (currentBets.length === 0) return;
+      
+      // Calculate total current value
+      let totalValue = 0;
+      for (let bet of currentBets) {
+        totalValue += calculateBetPayout(bet);
+      }
+      
+      // Calculate fee based on how fast selling
+      const now = Date.now();
+      const oldestBet = currentBets[0];
+      const secondsSinceBet = (now - oldestBet.betTime) / 1000;
+      const maxFee = 0.10; // 10% early sell fee max
+      const feeRatio = Math.max(0, 1 - (secondsSinceBet / maxFeeTime));
+      const earlyFee = totalValue * feeRatio * maxFee;
+      const platFee = totalValue * getPlatformFee(); // Dynamic Polymarket-style fee
+      const totalFee = earlyFee + platFee;
+      
+      // How much to cash out after fees
+      const cashOutAmount = totalValue * (percent / 100) - totalFee * (percent / 100);
+      
+      // Reduce each bet by the percentage
+      let removed = 0;
+      for (let bet of currentBets) {
+        const betValue = calculateBetPayout(bet);
+        const removeFromThis = betValue * (percent / 100);
+        bet.amount = bet.amount * (1 - percent / 100); // Reduce amount
+        removed += removeFromThis;
+      }
+      
+      // Remove bets that are now near zero
+      currentBets = currentBets.filter(b => b.amount > 1);
+      
+      // Deduct platform fee from user balance and add to revenue
+      platformRevenue += platFee * (percent / 100);
+      balance += Math.round(cashOutAmount);
+      updateBalance();
+      
+      // Show message with fee info
+      if (currentBets.length === 0) {
+        messageEl.textContent = `Sold ${percent}% = $${Math.round(cashOutAmount)}! (early: $${Math.round(earlyFee * percent / 100)}, platform: $${Math.round(platFee * percent / 100)})`;
+      } else {
+        const remaining = currentBets.reduce((s, b) => s + b.amount, 0);
+        const remainingValue = currentBets.reduce((s, b) => s + calculateBetPayout(b), 0);
+        messageEl.textContent = `Sold ${percent}% = $${Math.round(cashOutAmount)}. Left: $${remaining} ($${Math.round(remainingValue)})`;
+      }
+      
+      updatePayout();
+    }
+
+    // Settle all bets at end of cycle
+    function settleBets() {
+      if (currentBets.length === 0) return;
+      
+      let totalWinnings = 0;
+      let totalBetAmount = 0;
+      
+      for (let bet of currentBets) {
+        const beatDiff = btcPrice - manualBeatPrice;
+        const won = (bet.type === 'UP' && beatDiff > 0) || (bet.type === 'DOWN' && beatDiff < 0);
+        totalBetAmount += bet.amount;
+        
+        if (won) {
+          totalWinnings += bet.amount * payoutMultiplier;
+        }
+      }
+      
+      // Deduct platform fee from winnings and add to revenue (dynamic Polymarket-style)
+      const platFeeCollected = totalWinnings * getPlatformFee();
+      platformRevenue += platFeeCollected;
+      const netWinnings = totalWinnings - platFeeCollected;
+      
+      balance += Math.round(netWinnings);
+      updateBalance();
+      
+      const profit = Math.round(netWinnings) - totalBetAmount;
+      if (profit > 0) {
+        messageEl.textContent = `You WON $${profit}! (platform fee: $${Math.round(platFeeCollected)}) 🎉`;
+      } else if (profit < 0) {
+        messageEl.textContent = `You lost $${Math.abs(profit)}. Better luck next time!`;
+      } else {
+        messageEl.textContent = 'Break even!';
+      }
+      
+      // Clear all bets
+      currentBets = [];
+      updatePayout();
+    }
+
+    // Reset for new cycle
+    function resetCycle() {
+      currentBets = [];
+      positionPanel.classList.add('hidden');
+    }
+
+    async function fetchPrice() {
+      try {
+        const res = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT');
+        const data = await res.json();
+        return parseFloat(data.price);
+      } catch { return 82500; }
+    }
+
+    function calculateMA(prices, period) {
+      if (prices.length < period) return prices[prices.length - 1];
+      let sum = 0;
+      for (let i = prices.length - period; i < prices.length; i++) {
+        sum += prices[i];
+      }
+      return sum / period;
+    }
+
+    function getCycleInfo() {
+      const now = new Date();
+      const totalSeconds = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+      const cyclePosition = totalSeconds % cycleDuration;
+      const remaining = cycleDuration - cyclePosition;
+      const cycleNum = Math.floor(totalSeconds / cycleDuration);
+      return { remaining, cycleNum, now };
+    }
+
+    // Chart plugin
+    const dotPlugin = {
+      id: 'dotPlugin',
+      afterDatasetsDraw: (chart) => {
+        const ctx = chart.ctx;
+        const meta = chart.getDatasetMeta(0);
+        const points = meta.data;
+        const lastPoint = points[points.length - 1];
+        
+        const x = lastPoint.x;
+        const y = lastPoint.y;
+        
+        const strikeY = chart.scales.y.getPixelForValue(manualBeatPrice);
+        ctx.beginPath();
+        ctx.setLineDash([5, 5]);
+        ctx.moveTo(chart.chartArea.left, strikeY);
+        ctx.lineTo(chart.chartArea.right, strikeY);
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        ctx.setLineDash([]);
+        
+        const boxWidth = 80, boxHeight = 20;
+        const boxX = chart.chartArea.left - 5;
+        const boxY = strikeY - boxHeight / 2;
+        
+        ctx.beginPath();
+        ctx.moveTo(boxX + 4, boxY);
+        ctx.lineTo(boxX + boxWidth - 4, boxY);
+        ctx.lineTo(boxX + boxWidth, boxY + 4);
+        ctx.lineTo(boxX + boxWidth, boxY + boxHeight - 4);
+        ctx.lineTo(boxX + boxWidth - 4, boxY + boxHeight);
+        ctx.lineTo(boxX + 4, boxY + boxHeight);
+        ctx.lineTo(boxX, boxY + boxHeight - 4);
+        ctx.lineTo(boxX, boxY + 4);
+        ctx.closePath();
+        ctx.fillStyle = '#ffffff';
+        ctx.fill();
+        
+        ctx.font = 'bold 11px Arial';
+        ctx.fillStyle = '#000000';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('$' + Math.round(manualBeatPrice), boxX + boxWidth / 2, boxY + boxHeight / 2);
+        
+        ctx.beginPath();
+        ctx.arc(x, y, 10, 0, 2 * Math.PI);
+        ctx.fillStyle = 'rgba(249, 115, 22, 0.25)';
+        ctx.fill();
+        
+        ctx.beginPath();
+        ctx.arc(x, y, 4, 0, 2 * Math.PI);
+        ctx.fillStyle = '#f97316';
+        ctx.fill();
+      }
+    };
+
+    // Initialize sidebar state
+    function initSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      if (window.innerWidth < 768) {
+        sidebar.style.display = 'none';
+      }
+    }
+    
+    async function init() {
+      btcPrice = await fetchPrice();
+      
+      // Check URL for existing cycle
+      const params = new URLSearchParams(window.location.search);
+      const urlBeat = params.get('beat');
+      const urlCycle = params.get('cycle');
+      
+      if (urlBeat) {
+        manualBeatPrice = parseFloat(urlBeat);
+      } else {
+        manualBeatPrice = btcPrice;
+      }
+      
+      // Set initial URL if not present
+      if (!urlCycle) {
+        const now = new Date();
+        const h = now.getHours().toString().padStart(2,'0');
+        const cycleId = `${h}:${(Math.floor(now.getMinutes() / 5) * 5).toString().padStart(2,'0')}`;
+        window.history.replaceState({}, '', `?cycle=${cycleId}&beat=${Math.round(manualBeatPrice)}`);
+      }
+      
+      prevPrice = btcPrice;
+      
+      document.getElementById('cycleLabel').textContent = '05:00 remaining';
+      strikeEl.textContent = '$' + Math.round(manualBeatPrice);
+      titlePriceEl.textContent = 'BTC $' + Math.round(btcPrice);
+      
+      rawPrices.length = 0;
+      maPrices.length = 0;
+      for (let i = 0; i < dataPoints; i++) {
+        rawPrices.push(btcPrice);
+        maPrices.push(btcPrice);
+      }
+      
+      const chart = new Chart(document.getElementById('chart'), {
+        type: 'line',
+        data: {
+          labels: Array(dataPoints).fill(''),
+          datasets: [{
+            data: maPrices,
+            borderColor: '#22c55e',
+            backgroundColor: 'rgba(34,197,94,0.1)',
+            fill: true,
+            tension: 0.8,
+            borderWidth: 2,
+            pointRadius: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { display: false },
+            y: { 
+              position: 'right',
+              min: manualBeatPrice - 100,
+              max: manualBeatPrice + 100,
+              grid: { color: 'rgba(255,255,255,0.05)' },
+              ticks: { color: '#64748b', callback: v => '$' + Math.round(v) }
+            }
+          }
+        },
+        plugins: [dotPlugin]
+      });
+
+      let lastCycleNum = getCycleInfo().cycleNum;
+
+      function updateTime() {
+        const { remaining, cycleNum, now } = getCycleInfo();
+        
+        if (cycleNum !== lastCycleNum) {
+          settleBets();
+          lastCycleNum = cycleNum;
+          manualBeatPrice = btcPrice;
+          document.getElementById('cycleLabel').textContent = '05:00 remaining';
+          strikeEl.textContent = '$' + Math.round(manualBeatPrice);
+          
+          // Update URL with new cycle
+          const h = now.getHours().toString().padStart(2,'0');
+          const cycleId = `${h}:${(Math.floor(now.getMinutes() / 5) * 5).toString().padStart(2,'0')}`;
+          window.history.replaceState({}, '', `?cycle=${cycleId}&beat=${Math.round(manualBeatPrice)}`);
+          
+          for (let i = 0; i < dataPoints; i++) {
+            rawPrices[i] = btcPrice;
+            maPrices[i] = btcPrice;
+          }
+        }
+        
+        const mins = Math.floor(remaining / 60);
+        const secs = remaining % 60;
+        const timeStr = mins.toString().padStart(2,'0') + ':' + secs.toString().padStart(2,'0');
+        document.getElementById('countdown').textContent = timeStr;
+        document.getElementById('cycleLabel').textContent = timeStr + ' remaining';
+        
+        const h = now.getHours().toString().padStart(2,'0');
+        const s = now.getSeconds();
+        const html = [];
+        for (let i = 5; i >= 0; i--) {
+          let sec = s - (i * 5);
+          let min = now.getMinutes();
+          if (sec < 0) { sec += 60; min -= 1; }
+          let label = h + ':' + min.toString().padStart(2,'0') + ':' + sec.toString().padStart(2,'0');
+          html.push(`<span class="${i === 0 ? 'text-green-400 font-bold' : ''}">${label}</span>`);
+        }
+        document.getElementById('timeAxis').innerHTML = html.join('');
+      }
+
+      async function update() {
+        const newPrice = await fetchPrice();
+        const variation = (Math.random() - 0.5) * (manualBeatPrice * 0.002);
+        btcPrice = newPrice + variation;
+        prevPrice = btcPrice;
+        
+        rawPrices.shift();
+        rawPrices.push(btcPrice);
+        
+        const ma = calculateMA(rawPrices, maPeriod);
+        maPrices.shift();
+        maPrices.push(ma);
+        
+        const priceDistance = Math.abs(btcPrice - manualBeatPrice);
+        const threshold = currentRange * 0.65;
+        
+        if (priceDistance > threshold) {
+          currentRange += (priceDistance - threshold) * 0.1;
+        } else if (currentRange > 100 && priceDistance < threshold * 0.5) {
+          currentRange -= 0.5;
+          if (currentRange < 100) currentRange = 100;
+        }
+        
+        chart.options.scales.y.min = manualBeatPrice - currentRange;
+        chart.options.scales.y.max = manualBeatPrice + currentRange;
+        
+        const currentMA = maPrices[maPrices.length - 1];
+        const lineColor = currentMA >= manualBeatPrice ? '#22c55e' : '#ef4444';
+        chart.data.datasets[0].borderColor = lineColor;
+        chart.data.datasets[0].backgroundColor = lineColor + '1A';
+        
+        titlePriceEl.textContent = 'BTC $' + Math.round(btcPrice);
+        
+        // Update percentage - use MA for consistency with chart color
+        const priceChange = ((currentMA - manualBeatPrice) / manualBeatPrice) * 100;
+        const changeEl = document.getElementById('priceChange');
+        changeEl.textContent = (priceChange >= 0 ? '+' : '') + priceChange.toFixed(2) + '%';
+        changeEl.className = 'text-2xl font-bold ' + (priceChange >= 0 ? 'text-green-400' : 'text-red-400');
+        
+        chart.update('none');
+        
+        updateTime();
+        updatePayout();
+      }
+
+      document.getElementById('upBtn').onclick = () => placeBet('UP');
+      document.getElementById('downBtn').onclick = () => placeBet('DOWN');
+
+      updateTime();
+      update();
+      setInterval(update, 200);
+    }
+
+    initSidebar();
+    init();
+  </script>
+</body>
+</html>
