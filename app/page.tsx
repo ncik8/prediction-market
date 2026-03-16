@@ -12,100 +12,145 @@ const markets = [
 
 export default function Home() {
   return (
-    <div style={{ background: '#131722', minHeight: '100vh', color: '#d1d4dc', fontFamily: 'Trebuchet MS, Arial, sans-serif' }}>
-      {/* Header - TradingView style */}
+    <div style={{ background: '#000', minHeight: '100vh', color: 'white', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
+      {/* Animated background */}
+      <div style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        background: 'radial-gradient(ellipse at top right, #1a0a2e 0%, #0a0a0a 40%, #000 100%)',
+        zIndex: -1
+      }} />
+      
+      {/* Header */}
       <header style={{ 
-        background: '#1e222d', 
-        padding: '0 24px', 
-        height: '56px', 
+        padding: '24px 48px', 
         display: 'flex', 
+        justifyContent: 'space-between', 
         alignItems: 'center', 
-        justifyContent: 'space-between',
-        borderBottom: '1px solid #2a2e39'
+        borderBottom: '1px solid rgba(255,255,255,0.1)',
+        backdropFilter: 'blur(20px)',
+        position: 'sticky',
+        top: 0,
+        background: 'rgba(0,0,0,0.7)'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
-          <h1 style={{ 
-            fontSize: '22px', 
-            fontWeight: '700', 
-            color: '#2962ff',
-            letterSpacing: '-0.5px'
+        <h1 style={{ 
+          fontSize: '32px', 
+          fontWeight: '900', 
+          letterSpacing: '-1px',
+          background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 50%, #8b5cf6 100%)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          fontStyle: 'italic'
+        }}>
+          PREDICTX
+        </h1>
+        <nav style={{ display: 'flex', gap: '32px', alignItems: 'center' }}>
+          <Link href="/btc-live.html" style={{ color: '#fff', textDecoration: 'none', fontWeight: '500', fontSize: '15px', opacity: 0.9 }}>Markets</Link>
+          <a href="#" style={{ color: '#fff', textDecoration: 'none', fontWeight: '500', fontSize: '15px', opacity: 0.6 }}>How it Works</a>
+          <a href="#" style={{ color: '#fff', textDecoration: 'none', fontWeight: '500', fontSize: '15px', opacity: 0.6 }}>FAQ</a>
+          <Link href="/btc-live.html" style={{ 
+            background: 'linear-gradient(135deg, #f093fb 0%, #8b5cf6 100%)', 
+            padding: '12px 32px', 
+            borderRadius: '30px', 
+            color: 'white', 
+            textDecoration: 'none', 
+            fontWeight: '700',
+            fontSize: '14px',
+            boxShadow: '0 10px 40px rgba(139, 92, 246, 0.4)'
           }}>
-            predict<span style={{ color: '#fff' }}>x</span>
-          </h1>
-          <nav style={{ display: 'flex', gap: '24px' }}>
-            <a href="#" style={{ color: '#787b86', textDecoration: 'none', fontSize: '14px', fontWeight: '500' }}>Markets</a>
-            <a href="#" style={{ color: '#787b86', textDecoration: 'none', fontSize: '14px', fontWeight: '500' }}>Products</a>
-            <a href="#" style={{ color: '#787b86', textDecoration: 'none', fontSize: '14px', fontWeight: '500' }}>Community</a>
-          </nav>
-        </div>
-        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-          <button style={{ background: 'transparent', border: '1px solid #2a2e39', color: '#787b86', padding: '8px 20px', borderRadius: '4px', fontSize: '14px', fontWeight: '600' }}>
-            Sign In
-          </button>
-          <Link href="/btc-live.html" style={{ background: '#2962ff', border: 'none', color: '#fff', padding: '8px 20px', borderRadius: '4px', fontSize: '14px', fontWeight: '600', textDecoration: 'none' }}>
-            Get Started
+            START TRADING
           </Link>
-        </div>
+        </nav>
       </header>
 
       {/* Hero */}
-      <section style={{ padding: '80px 24px', textAlign: 'center', background: 'linear-gradient(180deg, #131722 0%, #1e222d 100%)' }}>
-        <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+      <section style={{ 
+        padding: '140px 48px', 
+        textAlign: 'center',
+        position: 'relative',
+        overflow: 'hidden'
+      }}>
+        {/* Glow */}
+        <div style={{
+          position: 'absolute',
+          top: '20%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: '800px',
+          height: '600px',
+          background: 'radial-gradient(circle, rgba(139, 92, 246, 0.2) 0%, transparent 60%)',
+          pointerEvents: 'none'
+        }} />
+        
+        <div style={{ position: 'relative', zIndex: 1 }}>
           <div style={{ 
             display: 'inline-block',
-            background: 'rgba(41, 98, 255, 0.15)',
-            border: '1px solid rgba(41, 98, 255, 0.3)',
-            padding: '8px 16px',
-            borderRadius: '4px',
-            fontSize: '12px',
+            background: 'rgba(139, 92, 246, 0.2)',
+            border: '1px solid rgba(139, 92, 246, 0.4)',
+            padding: '10px 24px',
+            borderRadius: '30px',
+            fontSize: '13px',
             fontWeight: '600',
-            color: '#2962ff',
-            marginBottom: '24px',
+            color: '#c4b5fd',
+            marginBottom: '32px',
             letterSpacing: '1px'
           }}>
-            📈 PAPER TRADING PLATFORM
+            ⚡ PAPER TRADING PLATFORM
           </div>
           
           <h2 style={{ 
-            fontSize: 'clamp(36px, 6vw, 56px)', 
-            fontWeight: '800', 
-            marginBottom: '20px', 
-            color: '#fff',
-            letterSpacing: '-1px'
+            fontSize: 'clamp(52px, 9vw, 90px)', 
+            fontWeight: '950', 
+            marginBottom: '28px', 
+            lineHeight: '1',
+            letterSpacing: '-3px',
+            fontStyle: 'italic'
           }}>
-            Predict. Trade. <span style={{ color: '#2962ff' }}>Profit.</span>
+            TRADE THE<br/>
+            <span style={{ 
+              background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 50%, #f97316 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent'
+            }}>
+              FUTURE
+            </span>
           </h2>
           
           <p style={{ 
-            fontSize: '18px', 
-            color: '#787b86', 
-            marginBottom: '40px',
-            lineHeight: '1.6'
+            fontSize: '22px', 
+            color: '#9ca3af', 
+            maxWidth: '540px', 
+            margin: '0 auto 56px',
+            lineHeight: '1.7',
+            fontWeight: '400'
           }}>
-            Trade predictions on crypto, sports & world events.<br/>
-            Start with <span style={{ color: '#21a366', fontWeight: '700' }}>$10,000</span> demo funds. Zero risk.
+            Predict on crypto, sports & world events. Start with <span style={{ color: '#f093fb', fontWeight: '700' }}>$10,000</span> in demo funds.
           </p>
           
-          <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: '20px', justifyContent: 'center', flexWrap: 'wrap' }}>
             <Link href="/btc-live.html" style={{ 
-              background: '#2962ff', 
-              padding: '14px 36px', 
-              borderRadius: '4px', 
-              color: '#fff', 
+              background: 'linear-gradient(135deg, #f093fb 0%, #8b5cf6 100%)',
+              padding: '20px 56px', 
+              borderRadius: '30px', 
+              color: 'white', 
               textDecoration: 'none', 
-              fontSize: '15px', 
-              fontWeight: '700',
-              letterSpacing: '0.5px'
+              fontSize: '17px', 
+              fontWeight: '800',
+              letterSpacing: '1px',
+              boxShadow: '0 20px 60px rgba(139, 92, 246, 0.5)'
             }}>
-              START TRADING
+              START TRADING →
             </Link>
             <button style={{ 
-              background: 'transparent', 
-              border: '1px solid #2a2e39', 
-              padding: '14px 36px', 
-              borderRadius: '4px', 
-              color: '#787b86', 
-              fontSize: '15px',
+              background: 'rgba(255,255,255,0.05)', 
+              border: '1px solid rgba(255,255,255,0.15)', 
+              padding: '20px 44px', 
+              borderRadius: '30px', 
+              color: 'white', 
+              fontSize: '17px',
               fontWeight: '600'
             }}>
               EXPLORE MARKETS
@@ -114,100 +159,100 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Markets - TradingView style */}
-      <section style={{ padding: '24px', background: '#131722' }}>
-        <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
-          <h3 style={{ 
-            fontSize: '18px', 
-            fontWeight: '700', 
-            color: '#fff',
-            marginBottom: '16px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '12px'
-          }}>
-            <span style={{ color: '#f0b90b' }}>★</span> TRENDING MARKETS
-          </h3>
-          
-          <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', 
-            gap: '12px' 
-          }}>
-            {markets.map(m => (
-              <div key={m.id} style={{ 
-                background: '#1e222d', 
-                padding: '16px', 
-                borderRadius: '4px', 
-                border: '1px solid #2a2e39',
-                cursor: 'pointer',
-                transition: 'all 0.2s'
-              }}
-              onMouseOver={e => {
-                e.currentTarget.style.borderColor = '#2962ff'
-                e.currentTarget.style.transform = 'translateY(-2px)'
-              }}
-              onMouseOut={e => {
-                e.currentTarget.style.borderColor = '#2a2e39'
-                e.currentTarget.style.transform = 'translateY(0)'
-              }}
-              >
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
-                  <span style={{ 
-                    background: '#2962ff', 
-                    padding: '4px 10px', 
-                    borderRadius: '3px', 
-                    fontSize: '12px', 
-                    fontWeight: '700',
-                    color: '#fff'
-                  }}>{m.asset}</span>
-                  <span style={{ color: '#787b86', fontSize: '12px' }}>{m.volume}</span>
-                </div>
-                <p style={{ fontSize: '14px', marginBottom: '16px', lineHeight: '1.4', color: '#d1d4dc', fontWeight: '500' }}>{m.question}</p>
-                <div style={{ display: 'flex', gap: '8px' }}>
-                  <div style={{ 
-                    flex: 1, 
-                    background: 'rgba(33, 163, 102, 0.15)', 
-                    padding: '10px', 
-                    borderRadius: '3px', 
-                    textAlign: 'center',
-                    border: '1px solid rgba(33, 163, 102, 0.3)'
-                  }}>
-                    <div style={{ fontSize: '10px', color: '#21a366', fontWeight: '600', letterSpacing: '0.5px' }}>YES</div>
-                    <div style={{ fontSize: '18px', fontWeight: '700', color: '#21a366' }}>{m.yesPrice}%</div>
-                  </div>
-                  <div style={{ 
-                    flex: 1, 
-                    background: 'rgba(239, 68, 68, 0.15)', 
-                    padding: '10px', 
-                    borderRadius: '3px', 
-                    textAlign: 'center',
-                    border: '1px solid rgba(239, 68, 68, 0.3)'
-                  }}>
-                    <div style={{ fontSize: '10px', color: '#ef4444', fontWeight: '600', letterSpacing: '0.5px' }}>NO</div>
-                    <div style={{ fontSize: '18px', fontWeight: '700', color: '#ef4444' }}>{m.noPrice}%</div>
-                  </div>
-                </div>
-              </div>
-            ))}
+      {/* Stats */}
+      <section style={{ padding: '48px', borderTop: '1px solid rgba(255,255,255,0.1)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+        <div style={{ maxWidth: '900px', margin: '0 auto', display: 'flex', justifyContent: 'space-around', flexWrap: 'wrap', gap: '48px' }}>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: '48px', fontWeight: '950', letterSpacing: '-2px', background: 'linear-gradient(135deg, #f093fb, #8b5cf6)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>$2.4M</div>
+            <div style={{ color: '#6b7280', fontSize: '14px', fontWeight: '600', marginTop: '6px', letterSpacing: '1px' }}>TOTAL VOLUME</div>
+          </div>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: '48px', fontWeight: '950', letterSpacing: '-2px', background: 'linear-gradient(135deg, #f093fb, #8b5cf6)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>12.5K</div>
+            <div style={{ color: '#6b7280', fontSize: '14px', fontWeight: '600', marginTop: '6px', letterSpacing: '1px' }}>ACTIVE TRADERS</div>
+          </div>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: '48px', fontWeight: '950', letterSpacing: '-2px', background: 'linear-gradient(135deg, #f093fb, #8b5cf6)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>99.9%</div>
+            <div style={{ color: '#6b7280', fontSize: '14px', fontWeight: '600', marginTop: '6px', letterSpacing: '1px' }}>UPTIME</div>
           </div>
         </div>
       </section>
 
+      {/* Markets */}
+      <section style={{ padding: '100px 48px', maxWidth: '1200px', margin: '0 auto' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '48px' }}>
+          <h3 style={{ fontSize: '36px', fontWeight: '950', letterSpacing: '-1px' }}>
+            🔥 TRENDING
+          </h3>
+          <Link href="/btc-live.html" style={{ color: '#c4b5fd', textDecoration: 'none', fontWeight: '600', fontSize: '15px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            View All <span style={{ fontSize: '18px' }}>→</span>
+          </Link>
+        </div>
+        
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px' }}>
+          {markets.map(m => (
+            <div key={m.id} style={{ 
+              background: 'linear-gradient(180deg, rgba(30,20,50,0.8) 0%, rgba(15,10,30,0.9) 100%)', 
+              padding: '32px', 
+              borderRadius: '24px', 
+              border: '1px solid rgba(139, 92, 246, 0.2)',
+              transition: 'all 0.3s ease',
+              cursor: 'pointer'
+            }}
+            onMouseOver={e => {
+              e.currentTarget.style.transform = 'translateY(-8px)'
+              e.currentTarget.style.boxShadow = '0 30px 60px rgba(139, 92, 246, 0.3)'
+              e.currentTarget.style.borderColor = 'rgba(139, 92, 246, 0.5)'
+            }}
+            onMouseOut={e => {
+              e.currentTarget.style.transform = 'translateY(0)'
+              e.currentTarget.style.boxShadow = 'none'
+              e.currentTarget.style.borderColor = 'rgba(139, 92, 246, 0.2)'
+            }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px', alignItems: 'center' }}>
+                <span style={{ 
+                  background: 'linear-gradient(135deg, #f093fb 0%, #8b5cf6 100%)', 
+                  padding: '8px 18px', 
+                  borderRadius: '24px', 
+                  fontSize: '13px', 
+                  fontWeight: '900',
+                  letterSpacing: '0.5px'
+                }}>{m.asset}</span>
+                <span style={{ color: '#6b7280', fontSize: '14px' }}>📊 {m.volume}</span>
+              </div>
+              <p style={{ fontSize: '17px', marginBottom: '28px', lineHeight: '1.5', fontWeight: '500' }}>{m.question}</p>
+              <div style={{ display: 'flex', gap: '14px' }}>
+                <div style={{ flex: 1, background: 'rgba(16, 185, 129, 0.15)', padding: '16px', borderRadius: '16px', textAlign: 'center', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
+                  <div style={{ fontSize: '11px', color: '#34d399', fontWeight: '700', letterSpacing: '1px' }}>YES</div>
+                  <div style={{ fontSize: '26px', fontWeight: '950', color: '#10b981' }}>{m.yesPrice}%</div>
+                </div>
+                <div style={{ flex: 1, background: 'rgba(239, 68, 68, 0.15)', padding: '16px', borderRadius: '16px', textAlign: 'center', border: '1px solid rgba(239, 68, 68, 0.3)' }}>
+                  <div style={{ fontSize: '11px', color: '#f87171', fontWeight: '700', letterSpacing: '1px' }}>NO</div>
+                  <div style={{ fontSize: '26px', fontWeight: '950', color: '#ef4444' }}>{m.noPrice}%</div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* Features */}
-      <section style={{ padding: '60px 24px', background: '#1e222d' }}>
+      <section style={{ padding: '100px 48px', background: 'linear-gradient(180deg, transparent 0%, rgba(20,10,40,0.5) 100%)' }}>
         <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '32px' }}>
+          <h3 style={{ fontSize: '36px', fontWeight: '950', letterSpacing: '-1px', textAlign: 'center', marginBottom: '72px' }}>
+            WHY PREDICTX?
+          </h3>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '40px' }}>
             {[
-              { num: '01', title: 'Real-Time Data', desc: 'Live prices from major exchanges' },
-              { num: '02', title: 'Instant Execution', desc: 'Lightning fast trade fills' },
-              { num: '03', title: 'Demo Account', desc: '$10,000 virtual funds to practice' },
-              { num: '04', title: 'Multiple Assets', desc: 'Crypto, sports, politics & more' },
+              { icon: '💰', title: '$10,000 Demo', desc: 'Practice with virtual funds before risking real money' },
+              { icon: '⚡', title: 'Lightning Fast', desc: 'Real-time prices and instant trade execution' },
+              { icon: '🔒', title: 'Secure & Transparent', desc: 'All trades verified. Complete transparency' },
+              { icon: '🌍', title: 'Global Access', desc: 'Trade from anywhere in the world' }
             ].map((f, i) => (
-              <div key={i}>
-                <div style={{ fontSize: '12px', color: '#2962ff', fontWeight: '700', marginBottom: '8px' }}>{f.num}</div>
-                <h4 style={{ fontSize: '18px', fontWeight: '700', color: '#fff', marginBottom: '8px' }}>{f.title}</h4>
-                <p style={{ fontSize: '14px', color: '#787b86', lineHeight: '1.5' }}>{f.desc}</p>
+              <div key={i} style={{ textAlign: 'center', padding: '24px' }}>
+                <div style={{ fontSize: '56px', marginBottom: '20px' }}>{f.icon}</div>
+                <h4 style={{ fontSize: '22px', fontWeight: '800', marginBottom: '12px' }}>{f.title}</h4>
+                <p style={{ color: '#9ca3af', fontSize: '15px', lineHeight: '1.6' }}>{f.desc}</p>
               </div>
             ))}
           </div>
@@ -215,30 +260,33 @@ export default function Home() {
       </section>
 
       {/* CTA */}
-      <section style={{ padding: '80px 24px', textAlign: 'center', background: '#131722' }}>
-        <h2 style={{ fontSize: '32px', fontWeight: '800', color: '#fff', marginBottom: '16px' }}>
-          START PREDICTING TODAY
+      <section style={{ padding: '120px 48px', textAlign: 'center' }}>
+        <h2 style={{ fontSize: '56px', fontWeight: '950', letterSpacing: '-2px', marginBottom: '20px' }}>
+          READY TO TRADE?
         </h2>
-        <p style={{ color: '#787b86', marginBottom: '32px', fontSize: '16px' }}>
-          Join thousands of traders on PredictX
+        <p style={{ color: '#9ca3af', marginBottom: '48px', fontSize: '20px' }}>
+          Join thousands predicting the future
         </p>
         <Link href="/btc-live.html" style={{ 
-          background: '#2962ff', 
-          padding: '16px 48px', 
-          borderRadius: '4px', 
-          color: '#fff', 
+          background: 'linear-gradient(135deg, #f093fb 0%, #8b5cf6 100%)',
+          padding: '24px 72px', 
+          borderRadius: '30px', 
+          color: 'white', 
           textDecoration: 'none', 
-          fontSize: '16px', 
-          fontWeight: '700',
-          display: 'inline-block'
+          fontSize: '20px', 
+          fontWeight: '800',
+          letterSpacing: '1px',
+          display: 'inline-block',
+          boxShadow: '0 30px 80px rgba(139, 92, 246, 0.6)'
         }}>
-          GET STARTED FREE →
+          GET STARTED →
         </Link>
       </section>
 
       {/* Footer */}
-      <footer style={{ padding: '24px', borderTop: '1px solid #2a2e39', textAlign: 'center', color: '#565a69', fontSize: '12px' }}>
-        <p>© 2026 PredictX. All rights reserved. Paper trading only — no real money involved.</p>
+      <footer style={{ padding: '48px', borderTop: '1px solid rgba(255,255,255,0.1)', textAlign: 'center', color: '#4b5563', fontSize: '14px' }}>
+        <p style={{ fontWeight: '700', letterSpacing: '3px', marginBottom: '12px' }}>© 2026 PREDICTX</p>
+        <p>All rights reserved. This is a demo platform for paper trading.</p>
       </footer>
     </div>
   )
