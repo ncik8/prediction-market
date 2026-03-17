@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Header</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { background: #0a0a0a; color: white; }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="flex items-center justify-between" style="position: fixed; top: 0; left: 0; right: 0; background: rgba(10,10,10,0.98); backdrop-filter: blur(10px); z-index: 100; padding: 12px 24px; border-bottom: 1px solid #1e293b;">
+    <div class="flex items-center gap-6">
+      <a href="/" class="text-xl font-bold text-white">PREDICTX</a>
+      <nav class="hidden md:flex items-center gap-3">
+        <a href="#" class="text-sm text-slate-400 hover:text-white">Markets</a>
+        <a href="#" class="text-sm text-blue-400">5m</a>
+        <a href="#" class="text-sm text-slate-400 hover:text-white">15m</a>
+        <a href="#" class="text-sm text-slate-400 hover:text-white">30m</a>
+        <a href="#" class="text-sm text-slate-400 hover:text-white">1h</a>
+      </nav>
+    </div>
+    <div class="flex items-center gap-2">
+      <button class="text-xs bg-slate-700 px-2 py-1 rounded">中文</button>
+      <button class="text-xs bg-transparent border border-slate-600 px-3 py-1 rounded text-slate-400">Sign In</button>
+      <button class="text-xs bg-blue-600 px-3 py-1 rounded text-white">Get Started</button>
+    </div>
+  </header>
+
+  <!-- Content -->
+  <div style="padding-top: 80px; padding: 20px;">
+    <h1>Test Page</h1>
+    <p>If you can see this, the header should be above.</p>
+  </div>
+</body>
+</html>
