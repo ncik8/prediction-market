@@ -230,11 +230,11 @@
       modal.innerHTML = `
         <div class="bg-slate-900 border border-slate-700 rounded-xl p-6 w-80">
           <h2 class="text-xl font-bold mb-4 text-center">Login to PredictX</h2>
-          <input type="text" id="loginUsername" placeholder="Username" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 mb-3 text-white">
+          <input type="email" id="loginEmail" placeholder="Email" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 mb-3 text-white">
           <input type="password" id="loginPassword" placeholder="Password" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 mb-3 text-white">
           <button onclick="doLogin()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg mb-2">Login</button>
+          <button onclick="doSignup()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 rounded-lg mb-2">Sign Up</button>
           <button onclick="closeLogin()" class="w-full bg-slate-700 hover:bg-slate-600 text-white py-2 rounded-lg">Cancel</button>
-          <p class="text-center text-xs text-slate-500 mt-3">Demo: any username/password</p>
         </div>
       `;
       document.body.appendChild(modal);
@@ -244,12 +244,62 @@
       document.getElementById('loginModal').remove();
     }
     
-    function doLogin() {
-      const username = document.getElementById('loginUsername').value || 'User';
+    async function doLogin() {
+      const email = document.getElementById('loginEmail').value;
+      const password = document.getElementById('loginPassword').value;
+      
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email,
+        password: password
+      });
+      
+      if (error) {
+        alert('Login error: ' + error.message);
+        return;
+      }
+      
+      // Get user profile
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', data.user.id)
+        .single();
+      
+      // Save to localStorage
+      localStorage.setItem('user', JSON.stringify(profile || { email: email }));
+      
+      // Update UI
       document.getElementById('loginArea').style.display = 'none';
       document.getElementById('userArea').style.display = 'block';
-      document.getElementById('username').textContent = username;
+      document.getElementById('username').textContent = profile?.username || email.split('@')[0];
+      
       closeLogin();
+    }
+    
+    async function doSignup() {
+      const email = document.getElementById('loginEmail').value;
+      const password = document.getElementById('loginPassword').value;
+      
+      const { data, error } = await supabase.auth.signUp({
+        email: email,
+        password: password
+      });
+      
+      if (error) {
+        alert('Signup error: ' + error.message);
+        return;
+      }
+      
+      // Create profile
+      if (data.user) {
+        await supabase.from('profiles').insert({
+          id: data.user.id,
+          username: email.split('@')[0],
+          balance: 10000
+        });
+      }
+      
+      alert('Check your email to verify!');
     }
     </script>
 
@@ -925,3 +975,4 @@
   </script>
 </body>
 </html>
+
