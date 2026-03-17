@@ -82,14 +82,16 @@ export default function Home() {
         {/* Login Modal */}
         {showLogin && (
           <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(10px)' }}>
-            <div style={{ background: '#1e293b', border: '1px solid #334155', borderRadius: 16, padding: 28, width: '90%', maxWidth: 340 }}>
+            <div style={{ background: '#1e293b', border: '1px solid #334155', borderRadius: 16, padding: 20, width: '90%', maxWidth: 300 }}>
               <h3 style={{ fontSize: 22, fontWeight: 700, marginBottom: 6, textAlign: 'center', color: '#fff' }}>Join PredictX</h3>
               <p style={{ fontSize: 13, color: '#94a3b8', textAlign: 'center', marginBottom: 20 }}>Create account to start trading</p>
-              <input type="email" placeholder="Email" style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: 8, padding: '14px 16px', color: '#fff', fontSize: 14, marginBottom: 12, boxSizing: 'border-box' }} />
-              <input type="text" placeholder="Username" style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: 8, padding: '14px 16px', color: '#fff', fontSize: 14, marginBottom: 12, boxSizing: 'border-box' }} />
-              <input type="password" placeholder="Password" style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: 8, padding: '14px 16px', color: '#fff', fontSize: 14, marginBottom: 16, boxSizing: 'border-box' }} />
-              <Link href="/btc-live.html" onClick={() => setShowLogin(false)} style={{ display: 'block', width: '100%', background: '#22c55e', border: 'none', borderRadius: 8, padding: 14, color: '#fff', fontSize: 15, fontWeight: 600, textAlign: 'center', textDecoration: 'none', marginBottom: 10, cursor: 'pointer' }}>Sign Up - Get $10,000</Link>
-              <Link href="/btc-live.html?login=1" onClick={() => setShowLogin(false)} style={{ display: 'block', width: '100%', background: '#3b82f6', border: 'none', borderRadius: 8, padding: 14, color: '#fff', fontSize: 15, fontWeight: 600, textAlign: 'center', textDecoration: 'none', marginBottom: 16, cursor: 'pointer' }}>Login</Link>
+              <input type="email" placeholder="Email" style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: 8, padding: '10px 12px', color: '#fff', fontSize: 13, marginBottom: 10, boxSizing: 'border-box' }} />
+              <input type="text" placeholder="Username" style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: 8, padding: '10px 12px', color: '#fff', fontSize: 13, marginBottom: 10, boxSizing: 'border-box' }} />
+              <input type="password" placeholder="Password" style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: 8, padding: '12px 14px', color: '#fff', fontSize: 14, marginBottom: 14, boxSizing: 'border-box' }} />
+              <div style={{ display: 'flex', gap: 10 }}>
+                <Link href="/btc-live.html?login=1" onClick={() => setShowLogin(false)} style={{ flex: 1, background: '#3b82f6', border: 'none', borderRadius: 8, padding: '10px 16px', color: '#fff', fontSize: 14, fontWeight: 600, textAlign: 'center', textDecoration: 'none', cursor: 'pointer' }}>Login</Link>
+                <Link href="/btc-live.html" onClick={() => setShowLogin(false)} style={{ flex: 1, background: '#22c55e', border: 'none', borderRadius: 8, padding: '10px 16px', color: '#fff', fontSize: 14, fontWeight: 600, textAlign: 'center', textDecoration: 'none', cursor: 'pointer' }}>Sign Up</Link>
+              </div>
               
               <div style={{ display: 'flex', alignItems: 'center', marginBottom: 16 }}>
                 <div style={{ flex: 1, height: 1, background: '#334155' }}></div>
