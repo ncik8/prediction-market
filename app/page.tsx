@@ -84,7 +84,7 @@ export default function Home() {
               <Link href="/btc-live.html" onClick={() => setMenuOpen(false)} style={{ color: '#fff', textDecoration: 'none', fontSize: 16, fontWeight: 500, padding: '12px 0', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>Markets</Link>
               <Link href="/btc-live.html" onClick={() => setMenuOpen(false)} style={{ color: '#fff', textDecoration: 'none', fontSize: 16, fontWeight: 500, padding: '12px 0', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>Products</Link>
               <Link href="/btc-live.html" onClick={() => setMenuOpen(false)} style={{ color: '#fff', textDecoration: 'none', fontSize: 16, fontWeight: 500, padding: '12px 0', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>Community</Link>
-              <Link href="/btc-live.html" onClick={() => setMenuOpen(false)} style={{ background: '#2962ff', color: '#fff', textDecoration: 'none', fontSize: 15, fontWeight: 600, padding: '14px', borderRadius: 6, textAlign: 'center', marginTop: 8 }}>Get Started</Link>
+              <Link href="/btc-live.html?login=1" onClick={() => setMenuOpen(false)} style={{ background: '#2962ff', color: '#fff', textDecoration: 'none', fontSize: 15, fontWeight: 600, padding: '14px', borderRadius: 6, textAlign: 'center', marginTop: 8 }}>Get Started</Link>
             </nav>
           </div>
         )}
@@ -100,8 +100,8 @@ export default function Home() {
           </p>
           
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexDirection: isMobile ? 'column' : 'row' }}>
-            <Link href="/btc-live.html" style={{ background: '#fff', padding: '14px 32px', borderRadius: 6, color: '#000', textDecoration: 'none', fontSize: 15, fontWeight: 700 }}>Get Started Free</Link>
-            <button style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.15)', padding: '14px 32px', borderRadius: 6, color: '#aaa', fontSize: 15, fontWeight: 600, cursor: 'pointer' }}>View Markets</button>
+            <Link href="/btc-live.html?login=1" style={{ background: '#fff', padding: '14px 32px', borderRadius: 6, color: '#000', textDecoration: 'none', fontSize: 15, fontWeight: 700 }}>Get Started Free</Link>
+            <Link href="/btc-live.html?login=1" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.15)', padding: '14px 32px', borderRadius: 6, color: '#aaa', textDecoration: 'none', fontSize: 15, fontWeight: 600, textAlign: 'center' }}>View Markets</Link>
           </div>
         </section>
 

@@ -416,6 +416,14 @@
     // Run checkLogin on load
     checkLogin();
     
+    // Auto-show login if ?login=1 in URL
+    if (new URLSearchParams(window.location.search).get('login') === '1') {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      if (!user.id) {
+        showLogin();
+      }
+    }
+    
     // Update betting panel based on login status
     function updateBettingPanel() {
       const user = JSON.parse(localStorage.getItem('user') || '{}');
