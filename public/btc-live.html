@@ -111,42 +111,6 @@
       <div class="flex justify-between text-xs text-slate-500 mt-1" id="timeAxis"></div>
     </div>
     
-    <!-- Tabs: Positions | Open Orders | History + Search -->
-    <div class="bg-slate-900 rounded-xl border border-slate-800 p-3 mb-3">
-      <!-- Tab Headers -->
-      <div class="flex border-b border-slate-700 mb-3">
-        <button onclick="switchTab('positions')" id="tab-positions" class="tab-btn flex-1 pb-2 text-sm font-bold text-green-400 border-b-2 border-green-400">Positions</button>
-        <button onclick="switchTab('openOrders')" id="tab-openOrders" class="tab-btn flex-1 pb-2 text-sm font-bold text-slate-400">Open Orders</button>
-        <button onclick="switchTab('history')" id="tab-history" class="tab-btn flex-1 pb-2 text-sm font-bold text-slate-400">History</button>
-      </div>
-      
-      <!-- Search Bar -->
-      <div class="mb-3">
-        <input type="text" id="tradeSearch" placeholder="🔍 Search trades..." class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500">
-      </div>
-      
-      <!-- Tab Content: Positions -->
-      <div id="content-positions" class="tab-content">
-        <div id="positionsList" class="space-y-2">
-          <div class="text-center text-slate-500 text-sm py-4" id="noPositions">No open positions</div>
-        </div>
-      </div>
-      
-      <!-- Tab Content: Open Orders -->
-      <div id="content-openOrders" class="tab-content" style="display: none;">
-        <div id="openOrdersList" class="space-y-2">
-          <div class="text-center text-slate-500 text-sm py-4">No open orders</div>
-        </div>
-      </div>
-      
-      <!-- Tab Content: History -->
-      <div id="content-history" class="tab-content" style="display: none;">
-        <div id="historyList" class="space-y-2">
-          <div class="text-center text-slate-500 text-sm py-4">No trade history</div>
-        </div>
-      </div>
-    </div>
-    
     <!-- Bot Trades (Hidden) -->
     <div class="mt-2 text-xs space-y-0.5" id="botTrades" style="display: none;"></div>
 
@@ -484,6 +448,42 @@
       <div class="flex gap-2">
         <button id="upBtn" class="flex-1 py-4 rounded-xl font-bold text-lg btn-up">UP</button>
         <button id="downBtn" class="flex-1 py-4 rounded-xl font-bold text-lg btn-down">DOWN</button>
+      </div>
+    </div>
+
+    <!-- Tabs Container -->
+    <div class="mt-4 bg-slate-900 rounded-xl border border-slate-800 p-3">
+      <!-- Tab Headers -->
+      <div class="flex border-b border-slate-700 mb-3">
+        <button onclick="switchTab('positions')" id="tab-positions" class="tab-btn flex-1 pb-2 text-sm font-bold text-green-400 border-b-2 border-green-400">Positions</button>
+        <button onclick="switchTab('openOrders')" id="tab-openOrders" class="tab-btn flex-1 pb-2 text-sm font-bold text-slate-400">Open Orders</button>
+        <button onclick="switchTab('history')" id="tab-history" class="tab-btn flex-1 pb-2 text-sm font-bold text-slate-400">History</button>
+      </div>
+      
+      <!-- Search Bar -->
+      <div class="mb-3">
+        <input type="text" id="tradeSearch" placeholder="🔍 Search trades..." class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500">
+      </div>
+      
+      <!-- Tab Content: Positions -->
+      <div id="content-positions" class="tab-content">
+        <div id="positionsList" class="space-y-2">
+          <div class="text-center text-slate-500 text-sm py-4" id="noPositions">No open positions</div>
+        </div>
+      </div>
+      
+      <!-- Tab Content: Open Orders -->
+      <div id="content-openOrders" class="tab-content" style="display: none;">
+        <div id="openOrdersList" class="space-y-2">
+          <div class="text-center text-slate-500 text-sm py-4">No open orders</div>
+        </div>
+      </div>
+      
+      <!-- Tab Content: History -->
+      <div id="content-history" class="tab-content" style="display: none;">
+        <div id="historyList" class="space-y-2">
+          <div class="text-center text-slate-500 text-sm py-4">No trade history</div>
+        </div>
       </div>
     </div>
 
