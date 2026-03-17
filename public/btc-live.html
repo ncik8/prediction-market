@@ -721,6 +721,13 @@
 
     // Place bet
     function placeBet(type) {
+      // Check if logged in
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      if (!user.id) {
+        showLogin();
+        return;
+      }
+      
       const amount = parseInt(betAmountInput.value);
       const { remaining } = getCycleInfo();
       const timeRemaining = remaining / cycleDuration;
