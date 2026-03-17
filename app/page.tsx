@@ -18,6 +18,7 @@ export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [lang, setLang] = useState('en')
   const [showLogin, setShowLogin] = useState(false)
+  const [showSignup, setShowSignup] = useState(false)
   
   useEffect(() => {
     setWidth(window.innerWidth)
@@ -62,7 +63,7 @@ export default function Home() {
               <Link href="#" style={{ color: '#888', textDecoration: 'none', fontSize: 14, fontWeight: 500 }}>Products</Link>
               <Link href="#" style={{ color: '#888', textDecoration: 'none', fontSize: 14, fontWeight: 500 }}>Community</Link>
               <Link href="#" onClick={() => setShowLogin(true)} style={{ background: 'transparent', border: '1px solid #333', color: '#fff', padding: '10px 20px', borderRadius: 4, fontSize: 14, fontWeight: 500, textDecoration: 'none' }}>Sign In</Link>
-              <Link href="#" onClick={() => setShowLogin(true)} style={{ background: '#2962ff', border: 'none', color: '#fff', padding: '10px 20px', borderRadius: 4, fontSize: 14, fontWeight: 600, textDecoration: 'none' }}>Get Started</Link>
+              <Link href="#" onClick={() => setShowSignup(true)} style={{ background: '#2962ff', border: 'none', color: '#fff', padding: '10px 20px', borderRadius: 4, fontSize: 14, fontWeight: 600, textDecoration: 'none' }}>Get Started</Link>
             </div>
           )}
         </header>
@@ -83,14 +84,11 @@ export default function Home() {
         {showLogin && (
           <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(10px)' }}>
             <div style={{ background: '#1e293b', border: '1px solid #334155', borderRadius: 16, padding: 20, width: '90%', maxWidth: 300 }}>
-              <h3 style={{ fontSize: 22, fontWeight: 700, marginBottom: 6, textAlign: 'center', color: '#fff' }}>Join PredictX</h3>
-              <p style={{ fontSize: 13, color: '#94a3b8', textAlign: 'center', marginBottom: 20 }}>Create account to start trading</p>
+              <h3 style={{ fontSize: 22, fontWeight: 700, marginBottom: 6, textAlign: 'center', color: '#fff' }}>Welcome Back</h3>
+              <p style={{ fontSize: 13, color: '#94a3b8', textAlign: 'center', marginBottom: 20 }}>Login to your account</p>
               <input type="email" placeholder="Email" style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: 8, padding: '10px 12px', color: '#fff', fontSize: 13, marginBottom: 10, boxSizing: 'border-box' }} />
-              <input type="password" placeholder="Password" style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: 8, padding: '12px 14px', color: '#fff', fontSize: 14, marginBottom: 14, boxSizing: 'border-box' }} />
-              <div style={{ display: 'flex', gap: 10 }}>
-                <Link href="/btc-live.html?login=1" onClick={() => setShowLogin(false)} style={{ flex: 1, background: '#3b82f6', border: 'none', borderRadius: 8, padding: '10px 16px', color: '#fff', fontSize: 14, fontWeight: 600, textAlign: 'center', textDecoration: 'none', cursor: 'pointer' }}>Login</Link>
-                <Link href="/btc-live.html" onClick={() => setShowLogin(false)} style={{ flex: 1, background: '#22c55e', border: 'none', borderRadius: 8, padding: '10px 16px', color: '#fff', fontSize: 14, fontWeight: 600, textAlign: 'center', textDecoration: 'none', cursor: 'pointer' }}>Sign Up</Link>
-              </div>
+              <input type="password" placeholder="Password" style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: 8, padding: '10px 12px', color: '#fff', fontSize: 13, marginBottom: 14, boxSizing: 'border-box' }} />
+              <Link href="/btc-live.html?login=1" onClick={() => setShowLogin(false)} style={{ display: 'block', width: '100%', background: '#3b82f6', border: 'none', borderRadius: 8, padding: 12, color: '#fff', fontSize: 14, fontWeight: 600, textAlign: 'center', textDecoration: 'none', cursor: 'pointer', marginBottom: 16 }}>Login</Link>
               
               <div style={{ display: 'flex', alignItems: 'center', marginBottom: 16 }}>
                 <div style={{ flex: 1, height: 1, background: '#334155' }}></div>
@@ -103,7 +101,31 @@ export default function Home() {
                 Continue with Google
               </button>
               
+              <p style={{ textAlign: 'center', marginTop: 16, fontSize: 13, color: '#94a3b8' }}>
+                Don't have an account? <button onClick={() => { setShowLogin(false); setShowSignup(true); }} style={{ background: 'none', border: 'none', color: '#3b82f6', cursor: 'pointer', fontSize: 13, fontWeight: 600 }}>Sign Up</button>
+              </p>
+              
               <button onClick={() => setShowLogin(false)} style={{ width: '100%', background: 'transparent', border: '1px solid #475569', borderRadius: 8, padding: 12, color: '#94a3b8', fontSize: 13, cursor: 'pointer', marginTop: 16 }}>Cancel</button>
+            </div>
+          </div>
+        )}
+
+        {/* Sign Up Modal */}
+        {showSignup && (
+          <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(10px)' }}>
+            <div style={{ background: '#1e293b', border: '1px solid #334155', borderRadius: 16, padding: 20, width: '90%', maxWidth: 300 }}>
+              <h3 style={{ fontSize: 22, fontWeight: 700, marginBottom: 6, textAlign: 'center', color: '#fff' }}>Create Account</h3>
+              <p style={{ fontSize: 13, color: '#94a3b8', textAlign: 'center', marginBottom: 20 }}>Sign up to get $10,000 demo</p>
+              <input type="email" placeholder="Email" style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: 8, padding: '10px 12px', color: '#fff', fontSize: 13, marginBottom: 10, boxSizing: 'border-box' }} />
+              <input type="password" placeholder="Password" style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: 8, padding: '10px 12px', color: '#fff', fontSize: 13, marginBottom: 10, boxSizing: 'border-box' }} />
+              <input type="password" placeholder="Confirm Password" style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: 8, padding: '10px 12px', color: '#fff', fontSize: 13, marginBottom: 14, boxSizing: 'border-box' }} />
+              <Link href="/btc-live.html" onClick={() => setShowSignup(false)} style={{ display: 'block', width: '100%', background: '#22c55e', border: 'none', borderRadius: 8, padding: 12, color: '#fff', fontSize: 14, fontWeight: 600, textAlign: 'center', textDecoration: 'none', cursor: 'pointer', marginBottom: 16 }}>Sign Up</Link>
+              
+              <p style={{ textAlign: 'center', fontSize: 13, color: '#94a3b8' }}>
+                Already have an account? <button onClick={() => { setShowSignup(false); setShowLogin(true); }} style={{ background: 'none', border: 'none', color: '#3b82f6', cursor: 'pointer', fontSize: 13, fontWeight: 600 }}>Login</button>
+              </p>
+              
+              <button onClick={() => setShowSignup(false)} style={{ width: '100%', background: 'transparent', border: '1px solid #475569', borderRadius: 8, padding: 12, color: '#94a3b8', fontSize: 13, cursor: 'pointer', marginTop: 16 }}>Cancel</button>
             </div>
           </div>
         )}
@@ -119,8 +141,8 @@ export default function Home() {
           </p>
           
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexDirection: isMobile ? 'column' : 'row' }}>
-            <Link href="#" onClick={() => setShowLogin(true)} style={{ background: '#fff', padding: '14px 32px', borderRadius: 6, color: '#000', textDecoration: 'none', fontSize: 15, fontWeight: 700, display: 'inline-block' }}>Get Started Free</Link>
-            <Link href="#" onClick={() => setShowLogin(true)} style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.15)', padding: '14px 32px', borderRadius: 6, color: '#aaa', textDecoration: 'none', fontSize: 15, fontWeight: 600, display: 'inline-block' }}>View Markets</Link>
+            <button onClick={() => setShowSignup(true)} style={{ background: '#fff', padding: '14px 32px', borderRadius: 6, color: '#000', textDecoration: 'none', fontSize: 15, fontWeight: 700, display: 'inline-block', border: 'none', cursor: 'pointer' }}>Get Started Free</button>
+            <Link href="/btc-live.html" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.15)', padding: '14px 32px', borderRadius: 6, color: '#aaa', textDecoration: 'none', fontSize: 15, fontWeight: 600, display: 'inline-block' }}>View Markets</Link>
           </div>
         </section>
 
