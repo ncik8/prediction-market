@@ -13,6 +13,7 @@ const markets = [
 export default function Home() {
   const [width, setWidth] = useState(1200)
   const [menuOpen, setMenuOpen] = useState(false)
+  const [lang, setLang] = useState('en')
   
   useEffect(() => {
     setWidth(window.innerWidth)
@@ -53,16 +54,21 @@ export default function Home() {
           <h1 style={{ fontSize: isMobile ? '18px' : '22px', fontWeight: 800, color: '#fff', letterSpacing: '-0.5px' }}>PREDICTX</h1>
           
           {isMobile ? (
-            <button onClick={() => setMenuOpen(!menuOpen)} style={{ background: 'none', border: 'none', color: '#fff', fontSize: 24, cursor: 'pointer', padding: 8 }}>
-              {menuOpen ? '✕' : '☰'}
-            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <button onClick={() => setLang(lang === 'en' ? 'zh' : 'en')} style={{ background: '#222', border: 'none', color: '#fff', padding: '8px 10px', borderRadius: 4, fontSize: 11, fontWeight: 600, cursor: 'pointer' }}>{lang === 'en' ? '中文' : 'EN'}</button>
+              <Link href="/btc-live.html?login=1" style={{ background: '#2962ff', color: '#fff', padding: '8px 14px', borderRadius: 4, fontSize: 12, fontWeight: 600, textDecoration: 'none' }}>Login</Link>
+              <button onClick={() => setMenuOpen(!menuOpen)} style={{ background: 'none', border: 'none', color: '#fff', fontSize: 24, cursor: 'pointer', padding: 8 }}>
+                {menuOpen ? '✕' : '☰'}
+              </button>
+            </div>
           ) : (
             <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+              <button onClick={() => setLang(lang === 'en' ? 'zh' : 'en')} style={{ background: '#222', border: 'none', color: '#888', padding: '8px 12px', borderRadius: 4, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>{lang === 'en' ? '中文' : 'EN'}</button>
               <Link href="#" style={{ color: '#888', textDecoration: 'none', fontSize: 14, fontWeight: 500 }}>Markets</Link>
               <Link href="#" style={{ color: '#888', textDecoration: 'none', fontSize: 14, fontWeight: 500 }}>Products</Link>
               <Link href="#" style={{ color: '#888', textDecoration: 'none', fontSize: 14, fontWeight: 500 }}>Community</Link>
-              <Link href="/btc-live.html" style={{ background: 'transparent', border: '1px solid #333', color: '#fff', padding: '10px 20px', borderRadius: 4, fontSize: 14, fontWeight: 500, textDecoration: 'none' }}>Sign In</Link>
-              <Link href="/btc-live.html" style={{ background: '#2962ff', border: 'none', color: '#fff', padding: '10px 20px', borderRadius: 4, fontSize: 14, fontWeight: 600, textDecoration: 'none' }}>Get Started</Link>
+              <Link href="/btc-live.html?login=1" style={{ background: 'transparent', border: '1px solid #333', color: '#fff', padding: '10px 20px', borderRadius: 4, fontSize: 14, fontWeight: 500, textDecoration: 'none' }}>Sign In</Link>
+              <Link href="/btc-live.html?login=1" style={{ background: '#2962ff', border: 'none', color: '#fff', padding: '10px 20px', borderRadius: 4, fontSize: 14, fontWeight: 600, textDecoration: 'none' }}>Get Started</Link>
             </div>
           )}
         </header>
