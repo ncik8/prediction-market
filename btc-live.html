@@ -238,6 +238,7 @@
         <div class="bg-slate-900 border border-slate-700 rounded-xl p-6 w-80">
           <h2 class="text-xl font-bold mb-4 text-center">Login to PredictX</h2>
           <input type="email" id="loginEmail" placeholder="Email" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 mb-3 text-white">
+          <input type="text" id="loginUsername" placeholder="Username" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 mb-3 text-white">
           <input type="password" id="loginPassword" placeholder="Password" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 mb-3 text-white">
           <button onclick="doLogin()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg mb-2">Login</button>
           <button onclick="doSignup()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 rounded-lg mb-4">Sign Up</button>
@@ -322,7 +323,13 @@
     
     async function doSignup() {
       const email = document.getElementById('loginEmail').value;
+      const username = document.getElementById('loginUsername').value;
       const password = document.getElementById('loginPassword').value;
+      
+      if (!username) {
+        alert('Please enter a username');
+        return;
+      }
       
       const { data, error } = await supabase.auth.signUp({
         email: email,
@@ -334,16 +341,16 @@
         return;
       }
       
-      // Create profile
+      // Create profile with username
       if (data.user) {
         await supabase.from('profiles').insert({
           id: data.user.id,
-          username: email.split('@')[0],
+          username: username,
           balance: 10000
         });
       }
       
-      alert('Check your email to verify!');
+      alert('Account created! You now have $10,000 demo balance. Please login.');
     }
     
     // Top up balance to $10,000 max
