@@ -12,10 +12,14 @@ const markets = [
 
 export default function Home() {
   const [width, setWidth] = useState(1200)
+  const [menuOpen, setMenuOpen] = useState(false)
   
   useEffect(() => {
     setWidth(window.innerWidth)
-    const handleResize = () => setWidth(window.innerWidth)
+    const handleResize = () => {
+      setWidth(window.innerWidth)
+      if (window.innerWidth >= 768) setMenuOpen(false)
+    }
     window.addEventListener('resize', handleResize)
     return () => window.removeEventListener('resize', handleResize)
   }, [])
@@ -49,17 +53,44 @@ export default function Home() {
           <h1 style={{ fontSize: isMobile ? '18px' : '22px', fontWeight: 800, color: '#fff', letterSpacing: '-0.5px' }}>PREDICTX</h1>
           
           {isMobile ? (
-            <Link href="/btc-live.html" style={{ background: '#2962ff', color: '#fff', padding: '8px 16px', borderRadius: 4, fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>Start</Link>
+            <button onClick={() => setMenuOpen(!menuOpen)} style={{ background: 'none', border: 'none', color: '#fff', fontSize: 24, cursor: 'pointer', padding: 8 }}>
+              {menuOpen ? '✕' : '☰'}
+            </button>
           ) : (
-            <div style={{ display: 'flex', gap: 12 }}>
+            <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+              <Link href="#" style={{ color: '#888', textDecoration: 'none', fontSize: 14, fontWeight: 500 }}>Markets</Link>
+              <Link href="#" style={{ color: '#888', textDecoration: 'none', fontSize: 14, fontWeight: 500 }}>Products</Link>
+              <Link href="#" style={{ color: '#888', textDecoration: 'none', fontSize: 14, fontWeight: 500 }}>Community</Link>
               <Link href="/btc-live.html" style={{ background: 'transparent', border: '1px solid #333', color: '#fff', padding: '10px 20px', borderRadius: 4, fontSize: 14, fontWeight: 500, textDecoration: 'none' }}>Sign In</Link>
               <Link href="/btc-live.html" style={{ background: '#2962ff', border: 'none', color: '#fff', padding: '10px 20px', borderRadius: 4, fontSize: 14, fontWeight: 600, textDecoration: 'none' }}>Get Started</Link>
             </div>
           )}
         </header>
 
+        {/* Mobile Menu */}
+        {isMobile && menuOpen && (
+          <div style={{ 
+            position: 'fixed', 
+            top: 64, 
+            left: 0, 
+            right: 0, 
+            background: 'rgba(0,0,0,0.95)', 
+            backdropFilter: 'blur(20px)',
+            zIndex: 99,
+            padding: '20px 16px',
+            borderBottom: '1px solid rgba(255,255,255,0.1)'
+          }}>
+            <nav style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <Link href="/btc-live.html" onClick={() => setMenuOpen(false)} style={{ color: '#fff', textDecoration: 'none', fontSize: 16, fontWeight: 500, padding: '12px 0', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>Markets</Link>
+              <Link href="/btc-live.html" onClick={() => setMenuOpen(false)} style={{ color: '#fff', textDecoration: 'none', fontSize: 16, fontWeight: 500, padding: '12px 0', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>Products</Link>
+              <Link href="/btc-live.html" onClick={() => setMenuOpen(false)} style={{ color: '#fff', textDecoration: 'none', fontSize: 16, fontWeight: 500, padding: '12px 0', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>Community</Link>
+              <Link href="/btc-live.html" onClick={() => setMenuOpen(false)} style={{ background: '#2962ff', color: '#fff', textDecoration: 'none', fontSize: 15, fontWeight: 600, padding: '14px', borderRadius: 6, textAlign: 'center', marginTop: 8 }}>Get Started</Link>
+            </nav>
+          </div>
+        )}
+
         {/* Hero */}
-        <section style={{ padding: isMobile ? '100px 20px 60px' : '160px 48px 100px', maxWidth: 1000, margin: '0 auto', textAlign: 'center' }}>
+        <section style={{ padding: isMobile ? (menuOpen ? '180px 20px 60px' : '100px 20px 60px') : '160px 48px 100px', maxWidth: 1000, margin: '0 auto', textAlign: 'center', transition: 'padding 0.3s' }}>
           <h2 style={{ fontSize: isMobile ? '28px' : 'clamp(36px, 7vw, 58px)', fontWeight: 900, marginBottom: 20, color: '#fff', letterSpacing: -1.5, lineHeight: 1.15 }}>
             Train Hard<br/><span style={{ color: '#6366f1' }}>/ Trade Easy</span>
           </h2>
