@@ -84,15 +84,22 @@
       <div class="text-right">
         <!-- Login / User Area -->
         <div id="loginArea">
-          <button onclick="showLogin()" class="text-xs bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded mb-1">Login</button>
+          <button onclick="showLogin()" class="text-xs bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded mb-1">Login to Trade</button>
         </div>
         <div id="userArea" style="display: none;">
-          <div class="text-xs text-slate-400">👤 <span id="username">User</span></div>
+          <div class="flex items-center gap-2 justify-end mb-1">
+            <span class="text-xs text-slate-400">👤 <span id="username">User</span></span>
+            <button onclick="topUp()" class="text-xs bg-yellow-600 hover:bg-yellow-700 px-2 py-0.5 rounded">Top up $10K</button>
+            <button onclick="logout()" class="text-xs bg-slate-600 hover:bg-slate-500 px-2 py-0.5 rounded">Logout</button>
+          </div>
         </div>
         <button onclick="toggleLang()" id="langToggle" class="text-xs bg-slate-700 px-2 py-1 rounded mb-1">中文</button>
-        <div class="text-3xl font-bold text-green-400" id="countdown">00:00</div>
-        <div class="text-xs text-slate-400"><span id="balanceLabel">Balance</span>: <span class="text-white font-bold" id="balance">$10,000</span></div>
-        <div class="text-xs text-yellow-400"><span id="revenueLabel">Revenue</span>: <span id="platformRevenue">$0</span></div>
+        <div id="balanceArea" style="display: none;">
+          <div class="text-3xl font-bold text-green-400" id="countdown">00:00</div>
+          <div class="text-xs text-slate-400"><span id="balanceLabel">Balance</span>: <span class="text-white font-bold" id="balance">$10,000</span></div>
+          <div class="text-xs text-yellow-400"><span id="revenueLabel">Revenue</span>: <span id="platformRevenue">$0</span></div>
+        </div>
+        <div id="loginPrompt" class="text-xs text-slate-500">Login to start trading</div>
       </div>
     </div>
 
@@ -297,12 +304,18 @@
         .single();
       
       // Save to localStorage
-      localStorage.setItem('user', JSON.stringify(profile || { email: email }));
+      localStorage.setItem('user', JSON.stringify(profile || { email: email, balance: 10000 }));
       
-      // Update UI
+      // Update UI - show logged in state
       document.getElementById('loginArea').style.display = 'none';
       document.getElementById('userArea').style.display = 'block';
+      document.getElementById('balanceArea').style.display = 'block';
+      document.getElementById('loginPrompt').style.display = 'none';
       document.getElementById('username').textContent = profile?.username || email.split('@')[0];
+      
+      // Update balance display
+      const balance = profile?.balance || 10000;
+      document.getElementById('balance').textContent = '$' + balance.toLocaleString();
       
       closeLogin();
     }
@@ -332,6 +345,80 @@
       
       alert('Check your email to verify!');
     }
+    
+    // Top up balance to $10,000
+    async function topUp() {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      if (!user.id) {
+        alert('Please login first');
+        return;
+      }
+      
+      // Reset balance in Supabase
+      const { error } = await supabase
+        .from('profiles')
+        .update({ balance: 10000 })
+        .eq('id', user.id);
+      
+      if (error) {
+        alert('Error: ' + error.message);
+        return;
+      }
+      
+      // Update local
+      user.balance = 10000;
+      localStorage.setItem('user', JSON.stringify(user));
+      
+      // Update UI
+      document.getElementById('balance').textContent = '$10,000';
+      alert('Balance topped up to $10,000!');
+    }
+    
+    // Logout
+    function logout() {
+      localStorage.removeItem('user');
+      document.getElementById('loginArea').style.display = 'block';
+      document.getElementById('userArea').style.display = 'none';
+      document.getElementById('balanceArea').style.display = 'none';
+      document.getElementById('loginPrompt').style.display = 'block';
+      document.getElementById('balance').textContent = '$10,000';
+    }
+    
+    // Check login on page load
+    async function checkLogin() {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      if (user.id) {
+        document.getElementById('loginArea').style.display = 'none';
+        document.getElementById('userArea').style.display = 'block';
+        document.getElementById('balanceArea').style.display = 'block';
+        document.getElementById('loginPrompt').style.display = 'none';
+        document.getElementById('username').textContent = user.username || 'User';
+        document.getElementById('balance').textContent = '$' + (user.balance || 10000).toLocaleString();
+      }
+    }
+    
+    // Run checkLogin on load
+    checkLogin();
+    
+    // Update betting panel based on login status
+    function updateBettingPanel() {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      const prompt = document.getElementById('bettingLoginPrompt');
+      const form = document.getElementById('bettingForm');
+      
+      if (!user.id) {
+        if (prompt) prompt.style.display = 'block';
+        // Hide trading buttons
+        const upBtn = document.getElementById('upBtn');
+        const downBtn = document.getElementById('downBtn');
+        if (upBtn) upBtn.style.display = 'none';
+        if (downBtn) downBtn.style.display = 'none';
+      } else {
+        if (prompt) prompt.style.display = 'none';
+      }
+    }
+    
+    updateBettingPanel();
     </script>
 
     <!-- Current Positions -->
@@ -355,7 +442,12 @@
     </div>
 
     <!-- Betting Panel -->
-    <div class="bg-slate-900 rounded-xl border border-slate-800 p-3">
+    <div id="bettingPanel" class="bg-slate-900 rounded-xl border border-slate-800 p-3">
+      <div id="bettingLoginPrompt" class="text-center py-8" style="display: none;">
+        <p class="text-slate-400 mb-4">🔒 Login required to trade</p>
+        <button onclick="showLogin()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg">Login to Start Trading</button>
+      </div>
+      <div id="bettingForm">
       <div class="mb-3">
         <div class="flex items-center justify-between mb-2">
           <span class="text-sm text-slate-400" id="betAmountLabel">Bet Amount</span>
