@@ -73,9 +73,9 @@ export default function Home() {
             </nav>
           </div>
           <div style={{ display: 'flex', gap: '12px' }}>
-            <button style={{ background: 'transparent', border: 'none', color: '#888', padding: '12px 24px', fontSize: '14px', fontWeight: '500', cursor: 'pointer' }}>
+            <Link href="/btc-live.html" style={{ background: 'transparent', border: '1px solid #333', color: '#fff', padding: '12px 24px', borderRadius: '4px', fontSize: '14px', fontWeight: '500', textDecoration: 'none' }}>
               Sign In
-            </button>
+            </Link>
             <Link href="/btc-live.html" style={{ background: '#2962ff', border: 'none', color: '#fff', padding: '12px 24px', borderRadius: '4px', fontSize: '14px', fontWeight: '600', textDecoration: 'none' }}>
               Get Started
             </Link>
