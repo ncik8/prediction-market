@@ -14,6 +14,7 @@ export default function Home() {
   const [width, setWidth] = useState(1200)
   const [menuOpen, setMenuOpen] = useState(false)
   const [lang, setLang] = useState('en')
+  const [showLogin, setShowLogin] = useState(false)
   
   useEffect(() => {
     setWidth(window.innerWidth)
@@ -29,37 +30,19 @@ export default function Home() {
   
   return (
     <div style={{ background: '#050505', minHeight: '100vh', color: '#ececec', fontFamily: 'Inter, -apple-system, sans-serif', overflowX: 'hidden' }}>
-      
-      {/* Background */}
       <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundImage: 'url(/public.png)', backgroundSize: 'cover', backgroundPosition: 'center', opacity: 0.95, zIndex: 0 }} />
       <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'linear-gradient(135deg, rgba(0,0,0,0.5) 0%, rgba(10,5,20,0.6) 100%)', zIndex: 1 }} />
 
       <div style={{ position: 'relative', zIndex: 2 }}>
         {/* Header */}
-        <header style={{ 
-          padding: isMobile ? '0 16px' : '0 48px', 
-          height: 64, 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'space-between',
-          borderBottom: '1px solid rgba(255,255,255,0.08)',
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          background: 'rgba(0,0,0,0.8)',
-          backdropFilter: 'blur(20px)',
-          zIndex: 100
-        }}>
+        <header style={{ padding: isMobile ? '0 16px' : '0 48px', height: 64, display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.08)', position: 'fixed', top: 0, left: 0, right: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(20px)', zIndex: 100 }}>
           <h1 style={{ fontSize: isMobile ? '18px' : '22px', fontWeight: 800, color: '#fff', letterSpacing: '-0.5px' }}>PREDICTX</h1>
           
           {isMobile ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <button onClick={() => setLang(lang === 'en' ? 'zh' : 'en')} style={{ background: '#222', border: 'none', color: '#fff', padding: '8px 10px', borderRadius: 4, fontSize: 11, fontWeight: 600, cursor: 'pointer' }}>{lang === 'en' ? '中文' : 'EN'}</button>
-              <Link href="/btc-live.html?login=1" style={{ background: '#2962ff', color: '#fff', padding: '8px 14px', borderRadius: 4, fontSize: 12, fontWeight: 600, textDecoration: 'none' }}>Login</Link>
-              <button onClick={() => setMenuOpen(!menuOpen)} style={{ background: 'none', border: 'none', color: '#fff', fontSize: 24, cursor: 'pointer', padding: 8 }}>
-                {menuOpen ? '✕' : '☰'}
-              </button>
+              <Link href="#" onClick={() => setShowLogin(true)} style={{ background: '#2962ff', color: '#fff', padding: '8px 14px', borderRadius: 4, fontSize: 12, fontWeight: 600, textDecoration: 'none' }}>Login</Link>
+              <button onClick={() => setMenuOpen(!menuOpen)} style={{ background: 'none', border: 'none', color: '#fff', fontSize: 24, cursor: 'pointer', padding: 8 }}>{menuOpen ? '✕' : '☰'}</button>
             </div>
           ) : (
             <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
@@ -67,36 +50,42 @@ export default function Home() {
               <Link href="#" style={{ color: '#888', textDecoration: 'none', fontSize: 14, fontWeight: 500 }}>Markets</Link>
               <Link href="#" style={{ color: '#888', textDecoration: 'none', fontSize: 14, fontWeight: 500 }}>Products</Link>
               <Link href="#" style={{ color: '#888', textDecoration: 'none', fontSize: 14, fontWeight: 500 }}>Community</Link>
-              <Link href="/btc-live.html?login=1" style={{ background: 'transparent', border: '1px solid #333', color: '#fff', padding: '10px 20px', borderRadius: 4, fontSize: 14, fontWeight: 500, textDecoration: 'none' }}>Sign In</Link>
-              <Link href="/btc-live.html?login=1" style={{ background: '#2962ff', border: 'none', color: '#fff', padding: '10px 20px', borderRadius: 4, fontSize: 14, fontWeight: 600, textDecoration: 'none' }}>Get Started</Link>
+              <Link href="#" onClick={() => setShowLogin(true)} style={{ background: 'transparent', border: '1px solid #333', color: '#fff', padding: '10px 20px', borderRadius: 4, fontSize: 14, fontWeight: 500, textDecoration: 'none' }}>Sign In</Link>
+              <Link href="#" onClick={() => setShowLogin(true)} style={{ background: '#2962ff', border: 'none', color: '#fff', padding: '10px 20px', borderRadius: 4, fontSize: 14, fontWeight: 600, textDecoration: 'none' }}>Get Started</Link>
             </div>
           )}
         </header>
 
         {/* Mobile Menu */}
         {isMobile && menuOpen && (
-          <div style={{ 
-            position: 'fixed', 
-            top: 64, 
-            left: 0, 
-            right: 0, 
-            background: 'rgba(0,0,0,0.95)', 
-            backdropFilter: 'blur(20px)',
-            zIndex: 99,
-            padding: '20px 16px',
-            borderBottom: '1px solid rgba(255,255,255,0.1)'
-          }}>
+          <div style={{ position: 'fixed', top: 64, left: 0, right: 0, background: 'rgba(0,0,0,0.95)', backdropFilter: 'blur(20px)', zIndex: 99, padding: '20px 16px', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
             <nav style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              <Link href="/btc-live.html" onClick={() => setMenuOpen(false)} style={{ color: '#fff', textDecoration: 'none', fontSize: 16, fontWeight: 500, padding: '12px 0', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>Markets</Link>
-              <Link href="/btc-live.html" onClick={() => setMenuOpen(false)} style={{ color: '#fff', textDecoration: 'none', fontSize: 16, fontWeight: 500, padding: '12px 0', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>Products</Link>
-              <Link href="/btc-live.html" onClick={() => setMenuOpen(false)} style={{ color: '#fff', textDecoration: 'none', fontSize: 16, fontWeight: 500, padding: '12px 0', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>Community</Link>
-              <Link href="/btc-live.html?login=1" onClick={() => setMenuOpen(false)} style={{ background: '#2962ff', color: '#fff', textDecoration: 'none', fontSize: 15, fontWeight: 600, padding: '14px', borderRadius: 6, textAlign: 'center', marginTop: 8 }}>Get Started</Link>
+              <Link href="#" onClick={() => setMenuOpen(false)} style={{ color: '#fff', textDecoration: 'none', fontSize: 16, fontWeight: 500, padding: '12px 0', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>Markets</Link>
+              <Link href="#" onClick={() => setMenuOpen(false)} style={{ color: '#fff', textDecoration: 'none', fontSize: 16, fontWeight: 500, padding: '12px 0', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>Products</Link>
+              <Link href="#" onClick={() => setMenuOpen(false)} style={{ color: '#fff', textDecoration: 'none', fontSize: 16, fontWeight: 500, padding: '12px 0', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>Community</Link>
+              <Link href="#" onClick={() => { setMenuOpen(false); setShowLogin(true); }} style={{ background: '#2962ff', color: '#fff', textDecoration: 'none', fontSize: 15, fontWeight: 600, padding: '14px', borderRadius: 6, textAlign: 'center', marginTop: 8 }}>Get Started</Link>
             </nav>
           </div>
         )}
 
+        {/* Login Modal */}
+        {showLogin && (
+          <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(10px)' }}>
+            <div style={{ background: '#1e293b', border: '1px solid #334155', borderRadius: 16, padding: 28, width: '90%', maxWidth: 340 }}>
+              <h3 style={{ fontSize: 22, fontWeight: 700, marginBottom: 6, textAlign: 'center', color: '#fff' }}>Join PredictX</h3>
+              <p style={{ fontSize: 13, color: '#94a3b8', textAlign: 'center', marginBottom: 20 }}>Create account to start trading</p>
+              <input type="email" placeholder="Email" style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: 8, padding: '14px 16px', color: '#fff', fontSize: 14, marginBottom: 12, boxSizing: 'border-box' }} />
+              <input type="text" placeholder="Username" style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: 8, padding: '14px 16px', color: '#fff', fontSize: 14, marginBottom: 12, boxSizing: 'border-box' }} />
+              <input type="password" placeholder="Password" style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: 8, padding: '14px 16px', color: '#fff', fontSize: 14, marginBottom: 16, boxSizing: 'border-box' }} />
+              <Link href="/btc-live.html" onClick={() => setShowLogin(false)} style={{ display: 'block', width: '100%', background: '#22c55e', border: 'none', borderRadius: 8, padding: 14, color: '#fff', fontSize: 15, fontWeight: 600, textAlign: 'center', textDecoration: 'none', marginBottom: 10, cursor: 'pointer' }}>Sign Up - Get $10,000</Link>
+              <Link href="/btc-live.html?login=1" onClick={() => setShowLogin(false)} style={{ display: 'block', width: '100%', background: '#3b82f6', border: 'none', borderRadius: 8, padding: 14, color: '#fff', fontSize: 15, fontWeight: 600, textAlign: 'center', textDecoration: 'none', marginBottom: 16, cursor: 'pointer' }}>Login</Link>
+              <button onClick={() => setShowLogin(false)} style={{ width: '100%', background: 'transparent', border: '1px solid #475569', borderRadius: 8, padding: 12, color: '#94a3b8', fontSize: 13, cursor: 'pointer' }}>Cancel</button>
+            </div>
+          </div>
+        )}
+
         {/* Hero */}
-        <section style={{ padding: isMobile ? (menuOpen ? '180px 20px 60px' : '100px 20px 60px') : '160px 48px 100px', maxWidth: 1000, margin: '0 auto', textAlign: 'center', transition: 'padding 0.3s' }}>
+        <section style={{ padding: isMobile ? (menuOpen ? '180px 20px 60px' : '100px 20px 60px') : '160px 48px 100px', maxWidth: 1000, margin: '0 auto', textAlign: 'center' }}>
           <h2 style={{ fontSize: isMobile ? '28px' : 'clamp(36px, 7vw, 58px)', fontWeight: 900, marginBottom: 20, color: '#fff', letterSpacing: -1.5, lineHeight: 1.15 }}>
             Train Hard<br/><span style={{ color: '#6366f1' }}>/ Trade Easy</span>
           </h2>
@@ -106,19 +95,15 @@ export default function Home() {
           </p>
           
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexDirection: isMobile ? 'column' : 'row' }}>
-            <Link href="/btc-live.html?login=1" style={{ background: '#fff', padding: '14px 32px', borderRadius: 6, color: '#000', textDecoration: 'none', fontSize: 15, fontWeight: 700 }}>Get Started Free</Link>
-            <Link href="/btc-live.html?login=1" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.15)', padding: '14px 32px', borderRadius: 6, color: '#aaa', textDecoration: 'none', fontSize: 15, fontWeight: 600, textAlign: 'center' }}>View Markets</Link>
+            <Link href="#" onClick={() => setShowLogin(true)} style={{ background: '#fff', padding: '14px 32px', borderRadius: 6, color: '#000', textDecoration: 'none', fontSize: 15, fontWeight: 700, display: 'inline-block' }}>Get Started Free</Link>
+            <Link href="#" onClick={() => setShowLogin(true)} style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.15)', padding: '14px 32px', borderRadius: 6, color: '#aaa', textDecoration: 'none', fontSize: 15, fontWeight: 600, display: 'inline-block' }}>View Markets</Link>
           </div>
         </section>
 
         {/* Stats */}
         <section style={{ padding: isMobile ? '24px 20px' : '36px', borderTop: '1px solid rgba(255,255,255,0.08)', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
           <div style={{ maxWidth: 700, margin: '0 auto', display: 'flex', justifyContent: 'space-around', flexWrap: 'wrap', gap: 24 }}>
-            {[
-              { label: '$2.4M', sub: 'TOTAL VOLUME' },
-              { label: '12.5K', sub: 'ACTIVE TRADERS' },
-              { label: '99.9%', sub: 'UPTIME' }
-            ].map((stat, i) => (
+            {[{ label: '$2.4M', sub: 'TOTAL VOLUME' }, { label: '12.5K', sub: 'ACTIVE TRADERS' }, { label: '99.9%', sub: 'UPTIME' }].map((stat, i) => (
               <div key={i} style={{ textAlign: 'center' }}>
                 <div style={{ fontSize: isMobile ? '22px' : '32px', fontWeight: 800, color: '#fff' }}>{stat.label}</div>
                 <div style={{ color: '#666', fontSize: 10, fontWeight: 500, marginTop: 4, letterSpacing: 1 }}>{stat.sub}</div>
@@ -157,12 +142,7 @@ export default function Home() {
         {/* Features */}
         <section style={{ padding: isMobile ? '32px 20px' : '48px', background: 'rgba(0,0,0,0.4)', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
           <div style={{ maxWidth: 800, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 24 }}>
-            {[
-              { title: 'Lightning Fast', desc: 'Real-time prices' },
-              { title: '$10,000 Demo', desc: 'Practice free' },
-              { title: 'Secure Platform', desc: 'Safe & transparent' },
-              { title: 'Global Access', desc: 'Trade from anywhere' },
-            ].map((f, i) => (
+            {[{ title: 'Lightning Fast', desc: 'Real-time prices' }, { title: '$10,000 Demo', desc: 'Practice free' }, { title: 'Secure Platform', desc: 'Safe & transparent' }, { title: 'Global Access', desc: 'Trade from anywhere' }].map((f, i) => (
               <div key={i}>
                 <h4 style={{ fontSize: 14, fontWeight: 600, color: '#fff', marginBottom: 6 }}>{f.title}</h4>
                 <p style={{ fontSize: 12, color: '#666', lineHeight: 1.5 }}>{f.desc}</p>
