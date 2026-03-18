@@ -6,6 +6,7 @@
   <title>PredictX - BTC Live Chart</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     body { background: #0a0a0a; color: white; }
   </style>
@@ -31,8 +32,14 @@
     const dataPoints = 150;
     const maPeriod = 10;
     
-    // Supabase disabled for now - just use live price
+    // Supabase client
     let supa = null;
+    try {
+      supa = window.supabase.createClient(
+        'https://oepmupwniliblkuxevyr.supabase.co',
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9lcG11cHduaWxpa2JsdXhldnlyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2NzA2NzksImV4cCI6MjA4OTI0NjY3OX0.OWHh1MW8qewCvXF5JW2a5-LVuQP9TWiOFGwnhIiifN0'
+      );
+    } catch(e) { console.log('Supabase not available'); }
     
     // Broadcast channel for sharing data between tabs
     const channel = new BroadcastChannel('btc-price');
@@ -117,9 +124,48 @@
         }
       });
       
-      // Start fetching (no supabase for now)
+      // Load history from Supabase
+      await loadHistory();
+      
+      // Start fetching
       update();
       setInterval(update, 200);
+      // Save to Supabase every 5 seconds
+      setInterval(saveToSupa, 5000);
+    }
+    
+    async function loadHistory() {
+      if (!supa) return;
+      try {
+        const { data } = await supa
+          .from('price_history_global')
+          .select('price, created_at')
+          .order('created_at', { ascending: false })
+          .limit(150);
+        
+        if (data && data.length > 0) {
+          rawPrices.length = 0;
+          maPrices.length = 0;
+          for (let i = data.length - 1; i >= 0; i--) {
+            rawPrices.push(data[i].price);
+            maPrices.push(calculateMA(rawPrices, maPeriod));
+          }
+          chart.data.datasets[0].data = maPrices;
+          chart.update('none');
+        }
+      } catch(e) { console.log('Load error:', e); }
+    }
+    
+    async function saveToSupa() {
+      if (!supa) return;
+      const price = rawPrices[rawPrices.length - 1];
+      if (!price) return;
+      try {
+        await supa.from('price_history_global').insert({
+          price: price,
+          created_at: new Date().toISOString()
+        });
+      } catch(e) { /* ignore */ }
     }
     
     async function loadHistory() {
