@@ -1020,19 +1020,17 @@
       // Fetch current price
       btcPrice = await fetchPrice();
       
-      // Only load if data is very recent (last 10 seconds)
+      // Try to read from live data feed (data-feed.html)
       let savedPrices = [];
       try {
-        const data = localStorage.getItem('btcPriceHistory');
-        if (data) {
-          const arr = JSON.parse(data);
-          if (arr.length > 0) {
-            const lastTime = arr[arr.length - 1].time;
-            const now = Date.now();
-            // Only use if within last 10 seconds
-            if (now - lastTime < 10000) {
-              savedPrices = arr.slice(-150).map(x => (x.price || x));
-            }
+        const latest = localStorage.getItem('btcLatestPrice');
+        const latestTime = localStorage.getItem('btcLatestTime');
+        
+        if (latest && latestTime && (Date.now() - parseInt(latestTime) < 5000)) {
+          // Data feed is running - get history
+          const data = localStorage.getItem('btcPriceHistory');
+          if (data) {
+            savedPrices = JSON.parse(data).slice(-150).map(x => (x.price || x));
           }
         }
       } catch(e) {}

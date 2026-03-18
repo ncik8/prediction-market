@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>PredictX Data Feed</title>
+  <meta http-equiv="refresh" content="60">
+</head>
+<body>
+<script>
+// This page runs continuously to collect price data
+// Other pages read from localStorage
+
+async function fetchPrice() {
+  try {
+    const res = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT');
+    const data = await res.json();
+    return parseFloat(data.price);
+  } catch { return null; }
+}
+
+async function update() {
+  const price = await fetchPrice();
+  if (!price) return;
+  
+  const now = Date.now();
+  const entry = { price, time: now };
+  
+  // Get existing data
+  let data = [];
+  try {
+    data = JSON.parse(localStorage.getItem('btcPriceHistory') || '[]');
+  } catch(e) {}
+  
+  // Add new price
+  data.push(entry);
+  
+  // Keep last 1 hour (max 18000 points at 200ms)
+  const oneHour = 60 * 60 * 1000;
+  const cutoff = now - oneHour;
+  data = data.filter(p => p.time > cutoff);
+  
+  // Save
+  localStorage.setItem('btcPriceHistory', JSON.stringify(data));
+  
+  // Also save latest for other pages to read quickly
+  localStorage.setItem('btcLatestPrice', price);
+  localStorage.setItem('btcLatestTime', now);
+  
+  console.log('Saved:', price, '| Total points:', data.length);
+}
+
+// Run every 200ms
+update();
+setInterval(update, 200);
+</script>
+</body>
+</html>
