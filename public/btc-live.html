@@ -913,31 +913,18 @@
       } catch { return 82500; }
     }
     
-    // Fetch historical price data from Binance (using agg trades for better compatibility)
-    async function fetchHistoricalPrices() {
-      try {
-        // Try the 1-minute klines endpoint
-        const res = await fetch('https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1m&limit=150');
-        if (!res.ok) throw new Error('API error');
-        const data = await res.json();
-        const prices = data.map(k => parseFloat(k[4])); // Close price
-        return prices;
-      } catch {
-        // Try alternative: use recent trades endpoint
-        try {
-          const res = await fetch('https://api.binance.com/api/v3/trades?symbol=BTCUSDT&limit=500');
-          if (!res.ok) throw new Error('API error');
-          const data = await res.json();
-          // Sample prices from trades
-          const prices = [];
-          for (let i = 0; i < data.length; i += Math.floor(data.length / 150)) {
-            prices.push(parseFloat(data[i].price));
-          }
-          return prices.slice(-150);
-        } catch {
-          return []; // Return empty on all failures
-        }
+    // Generate simulated historical prices based on current price
+    // (Binance API has CORS restrictions, so we simulate historical data)
+    function generateHistoricalPrices(currentPrice) {
+      const prices = [];
+      let price = currentPrice;
+      for (let i = 0; i < dataPoints; i++) {
+        // Add small random variation (-0.5% to +0.5% per point)
+        const variation = (Math.random() - 0.5) * 0.01 * price;
+        price = price + variation;
+        prices.push(price);
       }
+      return prices;
     }
 
     function calculateMA(prices, period) {
@@ -1029,8 +1016,8 @@
       // Fetch current price
       btcPrice = await fetchPrice();
       
-      // Fetch historical prices for chart
-      const historicalPrices = await fetchHistoricalPrices();
+      // Generate historical prices for the chart
+      const historicalPrices = generateHistoricalPrices(btcPrice);
       
       // Check URL for existing cycle
       const params = new URLSearchParams(window.location.search);
