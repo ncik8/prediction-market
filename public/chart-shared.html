@@ -132,9 +132,12 @@
       // Load history from Supabase
       await loadHistory();
       
-      // Start fetching
-      update();
-      setInterval(update, 200);
+      // Start fetching after a short delay to let history render
+      setTimeout(() => {
+        update();
+        setInterval(update, 200);
+      }, 500);
+      
       // Save to Supabase every 5 seconds
       setInterval(saveToSupa, 5000);
     }
