@@ -139,8 +139,8 @@
       try {
         const { data } = await supa
           .from('price_history_global')
-          .select('price, created_at')
-          .order('created_at', { ascending: false })
+          .select('price, timestamp')
+          .order('timestamp', { ascending: false })
           .limit(150);
         
         if (data && data.length > 0) {
@@ -163,7 +163,7 @@
       try {
         await supa.from('price_history_global').insert({
           price: price,
-          created_at: new Date().toISOString()
+          timestamp: new Date().toISOString()
         });
       } catch(e) { /* ignore */ }
     }
@@ -173,8 +173,8 @@
       try {
         const { data } = await supa
           .from('price_history_global')
-          .select('price, created_at')
-          .order('created_at', { ascending: false })
+          .select('price, timestamp')
+          .order('timestamp', { ascending: false })
           .limit(150);
         
         if (data && data.length > 0) {
@@ -199,7 +199,7 @@
       try {
         await supa.from('price_history_global').insert({
           price: price,
-          created_at: new Date().toISOString()
+          timestamp: new Date().toISOString()
         });
       } catch(e) { /* ignore */ }
     }
