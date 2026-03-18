@@ -923,46 +923,10 @@
       } catch { return 82500; }
     }
     
-    // Historical data - disabled for now (API blocked on server)
+    // Historical data - disabled for now
     // For real data, need to store in Supabase
     async function fetchHistoricalPrices() {
       return []; // Return empty - will use current price
-    }
-
-    // Backup price data to Supabase for long-term storage
-    async function backupPriceData(priceData) {
-      try {
-        const user = JSON.parse(localStorage.getItem('user') || '{}');
-        if (!user.id) return; // Only backup if logged in
-        
-        // Get existing backup
-        const { data: existing } = await supabase
-          .from('price_history')
-          .select('data')
-          .eq('user_id', user.id)
-          .single();
-        
-        // Merge with existing data
-        let allData = [];
-        if (existing?.data) {
-          allData = existing.data;
-        }
-        allData = allData.concat(priceData);
-        
-        // Keep last 2 years
-        const twoYears = 2 * 365 * 24 * 60 * 60 * 1000;
-        const cutoff = Date.now() - twoYears;
-        allData = allData.filter(p => p.time > cutoff);
-        
-        // Save to Supabase
-        await supabase.from('price_history').upsert({
-          user_id: user.id,
-          data: allData,
-          updated_at: new Date().toISOString()
-        });
-      } catch(e) {
-        // Silently fail - backup is optional
-      }
     }
 
     function calculateMA(prices, period) {
@@ -1184,11 +1148,6 @@
           const cutoff = Date.now() - oneHour;
           const recent = priceData.filter(p => p.time > cutoff);
           localStorage.setItem('btcPriceHistory', JSON.stringify(recent));
-          
-          // Backup to Supabase every 100 points
-          if (priceData.length % 100 === 0) {
-            backupPriceData(priceData);
-          }
         } catch(e) {}
         
         rawPrices.shift();
