@@ -11,7 +11,7 @@ export async function GET() {
     .from('price_history_global')
     .select('price, timestamp')
     .order('timestamp', { ascending: true })
-    .limit(150);
+    .limit(300);
   
   return Response.json(data || []);
 }
