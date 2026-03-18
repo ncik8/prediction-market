@@ -178,14 +178,17 @@
     }
     
     // Search functionality
-    document.getElementById('tradeSearch').addEventListener('input', function(e) {
-      const query = e.target.value.toLowerCase();
-      const items = document.querySelectorAll('#historyList .trade-item');
-      items.forEach(item => {
-        const text = item.textContent.toLowerCase();
-        item.style.display = text.includes(query) ? 'block' : 'none';
+    const tradeSearchEl = document.getElementById('tradeSearch');
+    if (tradeSearchEl) {
+      tradeSearchEl.addEventListener('input', function(e) {
+        const query = e.target.value.toLowerCase();
+        const items = document.querySelectorAll('#historyList .trade-item');
+        items.forEach(item => {
+          const text = item.textContent.toLowerCase();
+          item.style.display = text.includes(query) ? 'block' : 'none';
+        });
       });
-    });
+    }
     
     // Login functions
     function showLogin() {
