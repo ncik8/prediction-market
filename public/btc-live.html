@@ -912,6 +912,20 @@
         return parseFloat(data.price);
       } catch { return 82500; }
     }
+    
+    // Fetch historical price data from Binance
+    async function fetchHistoricalPrices() {
+      try {
+        const res = await fetch('https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1m&limit=150');
+        const data = await res.json();
+        // Extract close prices from klines data
+        const prices = data.map(k => parseFloat(k[4])); // Close price is index 4
+        return prices;
+      } catch {
+        // Return empty array on error
+        return [];
+      }
+    }
 
     function calculateMA(prices, period) {
       if (prices.length < period) return prices[prices.length - 1];
@@ -999,7 +1013,11 @@
     }
     
     async function init() {
+      // Fetch current price
       btcPrice = await fetchPrice();
+      
+      // Fetch historical prices for chart
+      const historicalPrices = await fetchHistoricalPrices();
       
       // Check URL for existing cycle
       const params = new URLSearchParams(window.location.search);
@@ -1018,6 +1036,19 @@
         const h = now.getHours().toString().padStart(2,'0');
         const cycleId = `${h}:${(Math.floor(now.getMinutes() / 5) * 5).toString().padStart(2,'0')}`;
         window.history.replaceState({}, '', `?cycle=${cycleId}&beat=${Math.round(manualBeatPrice)}`);
+      }
+      
+      // Populate historical data
+      if (historicalPrices.length > 0) {
+        for (let i = 0; i < Math.min(historicalPrices.length, dataPoints); i++) {
+          rawPrices[i] = historicalPrices[i];
+          maPrices[i] = calculateMA(rawPrices.slice(0, i + 1), maPeriod);
+        }
+      } else {
+        for (let i = 0; i < dataPoints; i++) {
+          rawPrices[i] = btcPrice;
+          maPrices[i] = btcPrice;
+        }
       }
       
       prevPrice = btcPrice;
