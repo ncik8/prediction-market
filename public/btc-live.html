@@ -1020,19 +1020,13 @@
       // Fetch current price
       btcPrice = await fetchPrice();
       
-      // Try to load saved data
+      // Try to load saved data - just use it directly
       let savedPrices = [];
       try {
         const data = localStorage.getItem('btcPriceHistory');
         if (data) {
           const arr = JSON.parse(data);
-          if (arr.length > 50) {
-            const last50 = arr.slice(-50).map(x => x.price || x);
-            const avg = last50.reduce((a,b) => a+b, 0) / last50.length;
-            if (Math.abs(avg - btcPrice) / btcPrice < 0.001) {
-              savedPrices = last50;
-            }
-          }
+          savedPrices = arr.slice(-150).map(x => (x.price || x));
         }
       } catch(e) {}
       
