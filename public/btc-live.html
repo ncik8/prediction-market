@@ -1020,21 +1020,6 @@
       // Fetch current price
       btcPrice = await fetchPrice();
       
-      // Try to read from live data feed (data-feed.html)
-      let savedPrices = [];
-      try {
-        const latest = localStorage.getItem('btcLatestPrice');
-        const latestTime = localStorage.getItem('btcLatestTime');
-        
-        if (latest && latestTime && (Date.now() - parseInt(latestTime) < 5000)) {
-          // Data feed is running - get history
-          const data = localStorage.getItem('btcPriceHistory');
-          if (data) {
-            savedPrices = JSON.parse(data).slice(-150).map(x => (x.price || x));
-          }
-        }
-      } catch(e) {}
-      
       // Check URL for existing cycle
       
       // Check URL for existing cycle
@@ -1056,11 +1041,10 @@
         window.history.replaceState({}, '', `?cycle=${cycleId}&beat=${Math.round(manualBeatPrice)}`);
       }
       
-      // Initialize - use saved data or current price
+      // Initialize with current price
       for (let i = 0; i < dataPoints; i++) {
-        const price = savedPrices[i] || btcPrice;
-        rawPrices.push(price);
-        maPrices.push(calculateMA(rawPrices, maPeriod));
+        rawPrices.push(btcPrice);
+        maPrices.push(btcPrice);
       }
       
       prevPrice = btcPrice;
