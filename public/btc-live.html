@@ -919,21 +919,6 @@
       return []; // Return empty - will use current price
     }
 
-    function generateHistoricalPrices(currentPrice) {
-      // Disabled - using current price only
-      return [];
-    }
-      const prices = [];
-      let price = currentPrice;
-      for (let i = 0; i < dataPoints; i++) {
-        // Add small random variation (-0.5% to +0.5% per point)
-        const variation = (Math.random() - 0.5) * 0.01 * price;
-        price = price + variation;
-        prices.push(price);
-      }
-      return prices;
-    }
-
     function calculateMA(prices, period) {
       if (prices.length < period) return prices[prices.length - 1];
       let sum = 0;
