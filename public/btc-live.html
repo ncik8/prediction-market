@@ -1054,31 +1054,23 @@
         window.history.replaceState({}, '', `?cycle=${cycleId}&beat=${Math.round(manualBeatPrice)}`);
       }
       
-      // Populate historical data
-      if (historicalPrices.length > 0) {
+      // Populate historical data (only if we got real data)
+      if (historicalPrices.length > 0 && historicalPrices[0] !== historicalPrices[historicalPrices.length-1]) {
+        rawPrices.length = 0;
+        maPrices.length = 0;
         for (let i = 0; i < Math.min(historicalPrices.length, dataPoints); i++) {
-          rawPrices[i] = historicalPrices[i];
-          maPrices[i] = calculateMA(rawPrices.slice(0, i + 1), maPeriod);
+          rawPrices.push(historicalPrices[i]);
+          maPrices.push(calculateMA(rawPrices, maPeriod));
         }
       } else {
+        // Use current price as fallback
         for (let i = 0; i < dataPoints; i++) {
-          rawPrices[i] = btcPrice;
-          maPrices[i] = btcPrice;
+          rawPrices.push(btcPrice);
+          maPrices.push(btcPrice);
         }
       }
       
       prevPrice = btcPrice;
-      
-      document.getElementById('cycleLabel').textContent = '05:00 remaining';
-      strikeEl.textContent = '$' + Math.round(manualBeatPrice);
-      titlePriceEl.textContent = 'BTC $' + Math.round(btcPrice);
-      
-      rawPrices.length = 0;
-      maPrices.length = 0;
-      for (let i = 0; i < dataPoints; i++) {
-        rawPrices.push(btcPrice);
-        maPrices.push(btcPrice);
-      }
       
       const chart = new Chart(document.getElementById('chart'), {
         type: 'line',
