@@ -45,9 +45,9 @@
 </head>
 <body>
   <!-- Top Header - Fixed -->
-  <header class="flex items-center justify-between" style="position: fixed; top: 0; left: 0; right: 0; background: rgba(10,10,10,0.98); backdrop-filter: blur(10px); z-index: 100; padding: 12px 24px; border-bottom: 1px solid #1e293b;">
-    <div class="flex items-center gap-6">
-      <a href="/" class="text-xl font-bold text-white" style="text-decoration: none;">PREDICTX</a>
+  <header class="flex items-center justify-between" style="position: fixed; top: 0; left: 0; right: 0; background: rgba(10,10,10,0.98); backdrop-filter: blur(10px); z-index: 100; padding: 10px 12px; border-bottom: 1px solid #1e293b;">
+    <div class="flex items-center gap-3">
+      <a href="/" class="text-lg font-bold text-white" style="text-decoration: none;">PREDICTX</a>
       <nav class="hidden md:flex items-center gap-3">
         <a href="#" class="text-sm text-slate-400 hover:text-white" style="text-decoration: none;">Markets</a>
         <a href="btc-live.html" class="text-sm text-blue-400" style="text-decoration: none;">5m</a>
@@ -56,10 +56,10 @@
         <a href="btc-1hour.html" class="text-sm text-slate-400 hover:text-white" style="text-decoration: none;">1h</a>
       </nav>
     </div>
-    <div class="flex items-center gap-2">
+    <div class="flex items-center gap-1">
       <button onclick="toggleLang()" class="text-xs bg-slate-700 px-2 py-1 rounded" style="border: none; color: #94a3b8; cursor: pointer;">中文</button>
-      <button onclick="showLogin()" class="text-xs bg-transparent border border-slate-600 px-3 py-1 rounded" style="color: #94a3b8; cursor: pointer;">Sign In</button>
-      <button onclick="showLogin()" class="text-xs bg-blue-600 px-3 py-1 rounded" style="border: none; color: white; cursor: pointer;">Get Started</button>
+      <button onclick="showLogin()" class="text-xs bg-transparent border border-slate-600 px-2 py-1 rounded" style="color: #94a3b8; cursor: pointer;">Sign In</button>
+      <button onclick="showLogin()" class="text-xs bg-blue-600 px-2 py-1 rounded" style="border: none; color: white; cursor: pointer;">Get Started</button>
     </div>
   </header>
 
@@ -472,13 +472,13 @@
           <span class="text-sm text-slate-400" id="betAmountLabel">Bet Amount</span>
           <span class="text-sm text-slate-400"><span id="strikeLabel">Beat</span>: <span class="text-white font-bold" id="strike">$0</span></span>
         </div>
-        <div class="flex gap-2">
-          <button class="px-3 py-2 bg-slate-600 rounded-lg text-sm" id="clearBtn" onclick="document.getElementById('betAmount').value = '0'">Clear</button>
-          <input type="number" id="betAmount" value="0" class="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-white font-mono text-center">
-          <button class="px-3 py-2 bg-slate-700 rounded-lg text-sm" onclick="addBetAmount(1)">+$1</button>
-          <button class="px-3 py-2 bg-slate-700 rounded-lg text-sm" onclick="addBetAmount(10)">+$10</button>
-          <button class="px-3 py-2 bg-slate-700 rounded-lg text-sm" onclick="addBetAmount(50)">+$50</button>
-          <button class="px-3 py-2 bg-slate-700 rounded-lg text-sm" onclick="addBetAmount(100)">+$100</button>
+        <div class="flex gap-1" style="overflow-x: auto;">
+          <button class="px-2 py-1 bg-slate-600 rounded-lg text-xs" id="clearBtn" onclick="document.getElementById('betAmount').value = '0'">Clear</button>
+          <input type="number" id="betAmount" value="0" class="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-2 py-1 text-white font-mono text-center" style="min-width: 60px;">
+          <button class="px-2 py-1 bg-slate-700 rounded-lg text-xs" onclick="addBetAmount(1)">+1</button>
+          <button class="px-2 py-1 bg-slate-700 rounded-lg text-xs" onclick="addBetAmount(10)">+10</button>
+          <button class="px-2 py-1 bg-slate-700 rounded-lg text-xs" onclick="addBetAmount(50)">+50</button>
+          <button class="px-2 py-1 bg-slate-700 rounded-lg text-xs" onclick="addBetAmount(100)">+100</button>
         </div>
       </div>
 
