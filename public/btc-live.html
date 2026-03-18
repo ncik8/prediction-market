@@ -1066,15 +1066,18 @@
       
       // Load historical data from API
       const historicalPrices = await fetchHistoricalPrices();
+      console.log('BTC-Live: Got historical prices:', historicalPrices.length);
       
       // Initialize with historical data or current price
       if (historicalPrices.length > 0) {
+        console.log('BTC-Live: Using historical data');
         for (let i = 0; i < dataPoints; i++) {
           const price = historicalPrices[i] || historicalPrices[historicalPrices.length - 1] || btcPrice;
           rawPrices.push(price);
           maPrices.push(calculateMA(rawPrices, maPeriod));
         }
       } else {
+        console.log('BTC-Live: No historical data, using current price');
         for (let i = 0; i < dataPoints; i++) {
           rawPrices.push(btcPrice);
           maPrices.push(btcPrice);
