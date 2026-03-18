@@ -4,10 +4,11 @@
   <title>PredictX Data Feed</title>
   <meta http-equiv="refresh" content="60">
 </head>
-<body>
+<body style="background:#111;color:#666;font-family:monospace;padding:20px;">
+<h3 style="color:#333">PredictX Data Feed</h3>
+<p id="status">Starting...</p>
 <script>
-// This page runs continuously to collect price data
-// Other pages read from localStorage
+document.getElementById('status').textContent = 'Running...';
 
 async function fetchPrice() {
   try {
@@ -19,10 +20,12 @@ async function fetchPrice() {
 
 async function update() {
   const price = await fetchPrice();
-  if (!price) return;
+  if (!price) {
+    document.getElementById('status').textContent = 'Error fetching price';
+    return;
+  }
   
   const now = Date.now();
-  const entry = { price, time: now };
   
   // Get existing data
   let data = [];
@@ -31,24 +34,22 @@ async function update() {
   } catch(e) {}
   
   // Add new price
-  data.push(entry);
+  data.push({price: price, time: now});
   
-  // Keep last 1 hour (max 18000 points at 200ms)
+  // Keep last 1 hour
   const oneHour = 60 * 60 * 1000;
   const cutoff = now - oneHour;
-  data = data.filter(p => p.time > cutoff);
+  data = data.filter(function(p) { return p.time > cutoff; });
   
   // Save
   localStorage.setItem('btcPriceHistory', JSON.stringify(data));
-  
-  // Also save latest for other pages to read quickly
   localStorage.setItem('btcLatestPrice', price);
   localStorage.setItem('btcLatestTime', now);
   
-  console.log('Saved:', price, '| Total points:', data.length);
+  document.getElementById('status').textContent = 'Price: $' + price + ' | Points: ' + data.length;
 }
 
-// Run every 200ms
+// Run
 update();
 setInterval(update, 200);
 </script>
