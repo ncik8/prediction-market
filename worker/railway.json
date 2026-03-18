@@ -2,15 +2,11 @@
   "$schema": "https://railway.app/schema.json",
   "name": "price-worker",
   "build": {
-    "builder": "NIXPACKS",
-    "install": {
-      "packages": ["ws", "@supabase/supabase-js"]
-    }
+    "builder": "NIXPACKS"
   },
   "deploy": {
     "numReplicas": 1,
     "restartPolicyType": "ON_FAILURE",
-    "restartPolicyMaxRetries": 10,
-    "startCommand": "node price-worker.js"
+    "restartPolicyMaxRetries": 10
   }
 }
