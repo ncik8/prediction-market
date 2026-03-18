@@ -1122,9 +1122,7 @@
       }
 
       async function update() {
-        const newPrice = await fetchPrice();
-        const variation = (Math.random() - 0.5) * (manualBeatPrice * 0.002);
-        btcPrice = newPrice + variation;
+        btcPrice = await fetchPrice();
         prevPrice = btcPrice;
         
         // Save to localStorage (keep last 1 hour for chart)
