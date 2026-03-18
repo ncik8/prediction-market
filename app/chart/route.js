@@ -1,17 +1,10 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabase = createClient(
-  'https://oepmupwniliblkuxevyr.supabase.co',
-  process.env.SUPABASE_SERVICE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9lcG11cHduaWxpYmxrdXhldnlyIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MzY3MDY3OSwiZXhwIjoyMDg5MjQ2Njc5fQ.FjlfBgNDUO7Skhgg-hpq3vVYrDaMOn3M4afhvkat9Wg'
-);
-
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 async function getPrices() {
   try {
-    // Fetch last 30 seconds of real data
-    const thirtySecondsAgo = new Date(Date.now() - 30000).toISOString();
     const res = await fetch('https://px-fawn.vercel.app/api/price?t=' + Date.now());
     const data = await res.json();
     return data?.map(p => p.price) || [];
@@ -20,9 +13,8 @@ async function getPrices() {
   }
 }
 
-export async function GET() {
-  const prices = await getPrices();
-  const pricesJson = JSON.stringify(prices);
+export default async function ChartPage() {
+  const pricesJson = JSON.stringify([]); // Start empty, Realtime will fill it
 
   const html = `<!DOCTYPE html>
 <html lang="en">
@@ -32,12 +24,13 @@ export async function GET() {
   <title>PredictX - BTC Live Chart</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>body { background: #0a0a0a; color: white; }</style>
 </head>
 <body class="p-4">
   <div class="max-w-3xl mx-auto">
     <h1 class="text-2xl font-bold mb-2">BTC Live Chart</h1>
-    <p class="text-slate-400 text-sm mb-4">Server-rendered with historical data (${prices.length} points)</p>
+    <p class="text-slate-400 text-sm mb-4">Realtime updates via Supabase</p>
     
     <div class="bg-slate-900 rounded-xl border border-slate-800 p-3 mb-3">
       <div style="height: 300px;">
@@ -46,36 +39,33 @@ export async function GET() {
     </div>
     
     <div class="text-center text-xl font-bold" id="priceDisplay">Loading...</div>
+    <div class="text-center text-sm text-slate-500" id="status">Connecting...</div>
   </div>
 
   <script>
-    const initialPrices = ${pricesJson};
+    const SUPABASE_URL = 'https://oepmupwniliblkuxevyr.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9lcG11cHduaWxpa2JsdXhldnlyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2NzA2NzksImV4cCI6MjA4OTI0NjY3OX0.OWHh1MW8qewCvXF5JW2a5-LVuQP9TWiOFGwnhIiifN0';
+    
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    
     const rawPrices = [];
     const maPrices = [];
     const dataPoints = 150;
     const maPeriod = 10;
     
+    // Initialize with placeholder data
+    for (let i = 0; i < dataPoints; i++) {
+      rawPrices.push(72000);
+      maPrices.push(72000);
+    }
+    
     function calculateMA(prices, period) {
-      if (prices.length < period) return prices[prices.length - 1] || 74000;
+      if (prices.length < period) return prices[prices.length - 1] || 72000;
       let sum = 0;
       for (let i = prices.length - period; i < prices.length; i++) {
         sum += prices[i];
       }
       return sum / period;
-    }
-    
-    // Initialize with server data
-    if (initialPrices && initialPrices.length > 0) {
-      for (let i = 0; i < dataPoints; i++) {
-        const price = initialPrices[i] || initialPrices[initialPrices.length - 1] || 74000;
-        rawPrices.push(price);
-        maPrices.push(calculateMA(rawPrices, maPeriod));
-      }
-    } else {
-      for (let i = 0; i < dataPoints; i++) {
-        rawPrices.push(74000);
-        maPrices.push(74000);
-      }
     }
     
     function updateChart(price) {
@@ -88,7 +78,6 @@ export async function GET() {
       
       window.chart.data.datasets[0].data = maPrices;
       
-      // Dynamic y-axis
       const minPrice = Math.min(...rawPrices);
       const maxPrice = Math.max(...rawPrices);
       window.chart.options.scales.y.min = minPrice - 50;
@@ -97,17 +86,10 @@ export async function GET() {
       window.chart.update('none');
       
       document.getElementById('priceDisplay').textContent = 'BTC $' + Math.round(price);
+      document.getElementById('status').textContent = 'Live • ' + new Date().toLocaleTimeString();
     }
     
-    async function fetchPrice() {
-      try {
-        const res = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT');
-        const data = await res.json();
-        return parseFloat(data.price);
-      } catch { return 74000; }
-    }
-    
-    const latestPrice = rawPrices[rawPrices.length - 1] || 74000;
+    // Initialize chart
     window.chart = new Chart(document.getElementById('chart'), {
       type: 'line',
       data: {
@@ -130,8 +112,8 @@ export async function GET() {
           x: { display: false },
           y: { 
             position: 'right',
-            min: latestPrice - 100,
-            max: latestPrice + 100,
+            min: 71500,
+            max: 72500,
             grid: { color: 'rgba(255,255,255,0.05)' },
             ticks: { color: '#64748b', callback: v => '$' + Math.round(v) }
           }
@@ -139,13 +121,30 @@ export async function GET() {
       }
     });
     
-    async function update() {
-      const price = await fetchPrice();
-      updateChart(price);
-    }
+    // Subscribe to Realtime updates
+    const channel = supabase
+      .channel('price-updates')
+      .on('postgres_changes', { 
+        event: 'INSERT', 
+        schema: 'public', 
+        table: 'price_history_global' 
+      }, (payload) => {
+        console.log('New price:', payload.new.price);
+        updateChart(payload.new.price);
+      })
+      .subscribe();
     
-    update();
-    setInterval(update, 200);
+    document.getElementById('status').textContent = 'Connected to Realtime!';
+    
+    // Also fetch current price immediately
+    async function fetchInitialPrice() {
+      try {
+        const res = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT');
+        const data = await res.json();
+        updateChart(parseFloat(data.price));
+      } catch(e) { console.log(e); }
+    }
+    fetchInitialPrice();
   </script>
 </body>
 </html>`;
@@ -153,9 +152,7 @@ export async function GET() {
   return new Response(html, {
     headers: { 
       'Content-Type': 'text/html',
-      'Cache-Control': 'no-cache, no-store, must-revalidate',
-      'Pragma': 'no-cache',
-      'Expires': '0'
+      'Cache-Control': 'no-cache, no-store, must-revalidate'
     }
   });
 }
