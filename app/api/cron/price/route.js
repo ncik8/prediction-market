@@ -5,7 +5,7 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9lcG11cHduaWxpYmxrdXhldnlyIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MzY3MDY3OSwiZXhwIjoyMDg5MjQ2Njc5fQ.FjlfBgNDUO7Skhgg-hpq3vVYrDaMOn3M4afhvkat9Wg'
 );
 
-// Cron runs every minute - save current BTC price
+// Cron runs every minute - save current BTC price AND broadcast via Realtime
 export async function GET() {
   try {
     // Fetch current BTC price from Binance
@@ -17,6 +17,14 @@ export async function GET() {
     await supabase
       .from('price_history_global')
       .insert({ price });
+    
+    // Broadcast via Realtime to all connected clients
+    const channel = supabase.channel('live-price');
+    await channel.send({
+      type: 'broadcast',
+      event: 'price-update',
+      payload: { price: price }
+    });
     
     return Response.json({ success: true, price: price });
   } catch(e) {

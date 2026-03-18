@@ -121,16 +121,12 @@ export default async function ChartPage() {
       }
     });
     
-    // Subscribe to Realtime updates
+    // Subscribe to Realtime broadcast
     const channel = supabase
-      .channel('price-updates')
-      .on('postgres_changes', { 
-        event: 'INSERT', 
-        schema: 'public', 
-        table: 'price_history_global' 
-      }, (payload) => {
-        console.log('New price:', payload.new.price);
-        updateChart(payload.new.price);
+      .channel('live-price')
+      .on('broadcast', { event: 'price-update' }, (payload) => {
+        console.log('Live price:', payload.payload.price);
+        updateChart(payload.payload.price);
       })
       .subscribe();
     
