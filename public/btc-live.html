@@ -1094,8 +1094,9 @@
             x: { display: false },
             y: { 
               position: 'right',
-              min: manualBeatPrice - 100,
-              max: manualBeatPrice + 100,
+              // Calculate range from historical data or use current price
+              min: Math.min(...rawPrices) - 50,
+              max: Math.max(...rawPrices) + 50,
               grid: { color: 'rgba(255,255,255,0.05)' },
               ticks: { color: '#64748b', callback: v => '$' + Math.round(v) }
             }
