@@ -8,39 +8,46 @@ export default function ChartPage() {
   const [price, setPrice] = useState('Loading...');
   const pricesRef = useRef([]);
   const maxPoints = 150;
-  const initialized = useRef(false);
 
   useEffect(() => {
-    // Fetch initial price first
+    // Dynamically load Chart.js
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/chart.js';
+    script.onload = initChart;
+    script.onerror = () => {
+      // Fallback: try again or show error
+      setPrice('Error loading chart');
+    };
+    document.head.appendChild(script);
+
+    return () => {
+      if (chartRef.current) chartRef.current.destroy();
+    };
+  }, []);
+
+  const initChart = () => {
+    if (!canvasRef.current || chartRef.current || !window.Chart) return;
+
+    // Fetch initial price
     fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT')
       .then(r => r.json())
       .then(d => {
         const initialPrice = parseFloat(d.price);
-        // Fill with initial price instead of dummy 72000
         for (let i = 0; i < maxPoints; i++) {
           pricesRef.current.push(initialPrice);
         }
-        if (initialized.current) {
-          chartRef.current.data.datasets[0].data = [...pricesRef.current];
-          chartRef.current.update();
-        }
+        createChart();
       })
       .catch(() => {
         for (let i = 0; i < maxPoints; i++) {
           pricesRef.current.push(70000);
         }
+        createChart();
       });
-  }, []);
 
-  useEffect(() => {
-    if (!canvasRef.current || chartRef.current) return;
-
-    const init = () => {
-      if (!window.Chart) {
-        setTimeout(init, 100);
-        return;
-      }
-
+    function createChart() {
+      if (!window.Chart) return;
+      
       chartRef.current = new window.Chart(canvasRef.current, {
         type: 'line',
         data: {
@@ -70,42 +77,27 @@ export default function ChartPage() {
         }
       });
 
-      initialized.current = true;
-
-      // Fetch price every second
-      async function fetchPrice() {
+      // Update every second
+      setInterval(async () => {
         try {
           const res = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT');
           const data = await res.json();
           const p = parseFloat(data.price);
-          updateChart(p);
+          
+          pricesRef.current.push(p);
+          if (pricesRef.current.length > maxPoints) pricesRef.current.shift();
+          chartRef.current.data.datasets[0].data = pricesRef.current;
+          chartRef.current.update('none');
+          setPrice('BTC $' + Math.round(p));
         } catch (e) {
-          console.error('Price fetch error:', e);
+          console.error(e);
         }
-      }
-
-      fetchPrice();
-      setInterval(fetchPrice, 1000);
-
-      function updateChart(p) {
-        pricesRef.current.push(p);
-        if (pricesRef.current.length > maxPoints) pricesRef.current.shift();
-        chartRef.current.data.datasets[0].data = pricesRef.current;
-        chartRef.current.update('none');
-        setPrice('BTC $' + Math.round(p));
-      }
-    };
-
-    init();
-
-    return () => {
-      if (chartRef.current) chartRef.current.destroy();
-    };
-  }, []);
+      }, 1000);
+    }
+  };
 
   return (
     <div style={{ background: '#0a0a0a', minHeight: '100vh', padding: 20 }}>
-      <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
       <h1 style={{ color: 'white', fontSize: 24, marginBottom: 10 }}>BTC Live Chart</h1>
       <div style={{ height: '60vh', background: '#1e293b', borderRadius: 12, padding: 10 }}>
         <canvas ref={canvasRef}></canvas>
