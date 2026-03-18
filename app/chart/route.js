@@ -30,7 +30,7 @@ export default async function ChartPage() {
 <body class="p-4">
   <div class="max-w-3xl mx-auto">
     <h1 class="text-2xl font-bold mb-2">BTC Live Chart</h1>
-    <p class="text-slate-400 text-sm mb-4">Realtime updates via Supabase</p>
+    <p class="text-slate-400 text-sm mb-4">Last 30 seconds • Realtime</p>
     
     <div class="bg-slate-900 rounded-xl border border-slate-800 p-3 mb-3">
       <div style="height: 300px;">
@@ -48,16 +48,11 @@ export default async function ChartPage() {
     
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     
-    const rawPrices = [];
-    const maPrices = [];
+    let rawPrices = [];
+    let maPrices = [];
     const dataPoints = 150;
     const maPeriod = 10;
-    
-    // Initialize with placeholder data
-    for (let i = 0; i < dataPoints; i++) {
-      rawPrices.push(72000);
-      maPrices.push(72000);
-    }
+    const bufferSeconds = 30;
     
     function calculateMA(prices, period) {
       if (prices.length < period) return prices[prices.length - 1] || 72000;
@@ -70,26 +65,39 @@ export default async function ChartPage() {
     
     function updateChart(price) {
       rawPrices.push(price);
-      if (rawPrices.length > dataPoints) rawPrices.shift();
+      
+      // Keep only last 30 seconds of data (approx 150 points at 200ms)
+      const maxPoints = (bufferSeconds * 1000) / 200;
+      if (rawPrices.length > maxPoints) {
+        rawPrices = rawPrices.slice(-maxPoints);
+      }
       
       const ma = calculateMA(rawPrices, maPeriod);
       maPrices.push(ma);
-      if (maPrices.length > dataPoints) maPrices.shift();
+      if (maPrices.length > maxPoints) {
+        maPrices = maPrices.slice(-maxPoints);
+      }
       
       window.chart.data.datasets[0].data = maPrices;
       
-      const minPrice = Math.min(...rawPrices);
-      const maxPrice = Math.max(...rawPrices);
-      window.chart.options.scales.y.min = minPrice - 50;
-      window.chart.options.scales.y.max = maxPrice + 50;
+      if (rawPrices.length > 1) {
+        const minPrice = Math.min(...rawPrices);
+        const maxPrice = Math.max(...rawPrices);
+        window.chart.options.scales.y.min = minPrice - 30;
+        window.chart.options.scales.y.max = maxPrice + 30;
+      }
       
       window.chart.update('none');
-      
       document.getElementById('priceDisplay').textContent = 'BTC $' + Math.round(price);
       document.getElementById('status').textContent = 'Live • ' + new Date().toLocaleTimeString();
     }
     
     // Initialize chart
+    for (let i = 0; i < dataPoints; i++) {
+      rawPrices.push(72000);
+      maPrices.push(72000);
+    }
+    
     window.chart = new Chart(document.getElementById('chart'), {
       type: 'line',
       data: {
@@ -121,26 +129,38 @@ export default async function ChartPage() {
       }
     });
     
-    // Subscribe to Realtime broadcast
+    // Load initial history from DB
+    async function loadHistory() {
+      try {
+        const thirtySecsAgo = new Date(Date.now() - bufferSeconds * 1000).toISOString();
+        const { data } = await supabase
+          .from('price_history_global')
+          .select('price, timestamp')
+          .gte('timestamp', thirtySecsAgo)
+          .order('timestamp', { ascending: true });
+        
+        if (data && data.length > 0) {
+          rawPrices = data.map(d => d.price);
+          maPrices = rawPrices.map((p, i) => calculateMA(rawPrices.slice(0, i + 1), maPeriod));
+          window.chart.data.datasets[0].data = maPrices;
+          window.chart.update('none');
+          document.getElementById('priceDisplay').textContent = 'BTC $' + Math.round(rawPrices[rawPrices.length - 1]);
+        }
+      } catch(e) { console.log('Load error:', e); }
+    }
+    
+    // Subscribe to realtime broadcasts
     const channel = supabase
       .channel('live-price')
       .on('broadcast', { event: 'price-update' }, (payload) => {
-        console.log('Live price:', payload.payload.price);
         updateChart(payload.payload.price);
       })
       .subscribe();
     
-    document.getElementById('status').textContent = 'Connected to Realtime!';
+    document.getElementById('status').textContent = 'Connected!';
     
-    // Also fetch current price immediately
-    async function fetchInitialPrice() {
-      try {
-        const res = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT');
-        const data = await res.json();
-        updateChart(parseFloat(data.price));
-      } catch(e) { console.log(e); }
-    }
-    fetchInitialPrice();
+    // Load history, then start live updates
+    loadHistory();
   </script>
 </body>
 </html>`;
