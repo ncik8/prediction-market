@@ -131,13 +131,13 @@
       update();
       setInterval(update, 200);
       // Save to Supabase every 5 seconds
-      setInterval(saveTosupa, 5000);
+      setInterval(saveToSupa, 5000);
     }
     
     async function loadHistory() {
-      if (!supabase) return;
+      if (!supa) return;
       try {
-        const { data } = await supabase
+        const { data } = await supa
           .from('price_history_global')
           .select('price, created_at')
           .order('created_at', { ascending: false })
@@ -158,8 +158,8 @@
       } catch(e) { console.log('Load error:', e); }
     }
     
-    async function saveToSupabase() {
-      if (!supabase) return;
+    async function saveToSupa() {
+      if (!supa) return;
       const price = rawPrices[rawPrices.length - 1];
       if (!price) return;
       try {
