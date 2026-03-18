@@ -1067,7 +1067,7 @@
         for (let i = 0; i < dataPoints; i++) {
           const price = historicalPrices[i] || historicalPrices[historicalPrices.length - 1] || btcPrice;
           rawPrices.push(price);
-          maPrices.push(calculateMA(rawPrices, maPeriod);
+          maPrices.push(calculateMA(rawPrices, maPeriod));
         }
       } else {
         console.log('BTC-Live: No historical data, using current price');
