@@ -922,7 +922,7 @@
     async function fetchPrice() {
       try {
         // First try to get from our API (which has recent history)
-        const res = await fetch(PRICE_API);
+        const res = await fetch(PRICE_API + '?t=' + Date.now());
         const data = await res.json();
         if (data && data.length > 0) {
           // Return the most recent price
@@ -937,7 +937,7 @@
     
     async function fetchHistoricalPrices() {
       try {
-        const res = await fetch(PRICE_API);
+        const res = await fetch(PRICE_API + '?t=' + Date.now());
         const data = await res.json();
         return data.map(d => d.price);
       } catch { return []; }
