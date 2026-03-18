@@ -107,7 +107,7 @@
     <!-- Chart -->
     <div class="bg-slate-900 rounded-xl border border-slate-800 p-3 mb-3">
       <div style="height: 55vh; width: 100%;">
-        <canvas id="chart"></canvas>
+        <iframe src="/chart" style="height: 100% !important; width: 100% !important; border: none; background: #0f172a;"></iframe>
       </div>
       <div class="flex justify-between text-xs text-slate-500 mt-1" id="timeAxis"></div>
     </div>
@@ -1053,8 +1053,7 @@
       if (!urlCycle) {
         const now = new Date();
         const h = now.getHours().toString().padStart(2,'0');
-        const cycleMinutes = Math.floor(now.getMinutes() / 5) * 5;
-        const cycleId = `${h}:${cycleMinutes.toString().padStart(2,'0')}`;
+        const cycleId = `${h}:${(Math.floor(now.getMinutes() / 5) * 5).toString().padStart(2,'0')}`;
         window.history.replaceState({}, '', `?cycle=${cycleId}&beat=${Math.round(manualBeatPrice)}`);
       }
       
@@ -1080,58 +1079,83 @@
       
       prevPrice = btcPrice;
       
-      // Initialize chart
-      window.chart = new Chart(document.getElementById('chart'), {
-        type: 'line',
-        data: {
-          labels: Array(dataPoints).fill(''),
-          datasets: [{
-            data: maPrices,
-            borderColor: '#22c55e',
-            backgroundColor: 'rgba(34,197,94,0.1)',
-            fill: true,
-            tension: 0.8,
-            borderWidth: 2,
-            pointRadius: 0
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
-          scales: {
-            x: { display: false },
-            y: { 
-              position: 'right',
-              min: manualBeatPrice - 100,
+      // Chart is now in iframe - skip local chart creation
+      // Start the update loop for price display
+      updateTime();
+      update();
+      setInterval(update, 200);
+    }
               max: manualBeatPrice + 100,
               grid: { color: 'rgba(255,255,255,0.05)' },
               ticks: { color: '#64748b', callback: v => '$' + Math.round(v) }
             }
           }
-        }
+        },
+        plugins: [dotPlugin]
       });
-      
-      // Subscribe to Supabase Realtime for live updates
-      const SUPABASE_URL = 'https://oepmupwniliblkuxevyr.supabase.co';
-      const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9lcG11cHduaWxpa2JsdXhldnlyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2NzA2NzksImV4cCI6MjA4OTI0NjY3OX0.OWHh1MW8qewCvXF5JW2a5-LVuQP9TWiOFGwnhIiifN0';
-      const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-      
-      supabase
-        .channel('ticks-stream')
-        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'price_history_global' }, payload => {
-          const price = payload.new.price;
-          rawPrices.shift();
-          rawPrices.push(price);
-          const ma = calculateMA(rawPrices, maPeriod);
-          maPrices.shift();
-          maPrices.push(ma);
-          window.chart.data.datasets[0].data = maPrices;
-          window.chart.update('none');
-        })
-        .subscribe();
-      
-      // Start the update loop
+
+      let lastCycleNum = getCycleInfo().cycleNum;
+
+      function updateTime() {
+        const { remaining, cycleNum, now } = getCycleInfo();
+        
+        if (cycleNum !== lastCycleNum) {
+          settleBets();
+          lastCycleNum = cycleNum;
+          manualBeatPrice = btcPrice;
+          document.getElementById('cycleLabel').textContent = '05:00 remaining';
+          strikeEl.textContent = '$' + Math.round(manualBeatPrice);
+          
+          // Update URL with new cycle
+          const h = now.getHours().toString().padStart(2,'0');
+          const cycleId = `${h}:${(Math.floor(now.getMinutes() / 5) * 5).toString().padStart(2,'0')}`;
+          window.history.replaceState({}, '', `?cycle=${cycleId}&beat=${Math.round(manualBeatPrice)}`);
+          
+          for (let i = 0; i < dataPoints; i++) {
+            rawPrices[i] = btcPrice;
+            maPrices[i] = btcPrice;
+          }
+        }
+        
+        const mins = Math.floor(remaining / 60);
+        const secs = remaining % 60;
+        const timeStr = mins.toString().padStart(2,'0') + ':' + secs.toString().padStart(2,'0');
+        document.getElementById('countdown').textContent = timeStr;
+        document.getElementById('cycleLabel').textContent = timeStr + ' remaining';
+        
+        const h = now.getHours().toString().padStart(2,'0');
+        const s = now.getSeconds();
+        const html = [];
+        for (let i = 5; i >= 0; i--) {
+          let sec = s - (i * 5);
+          let min = now.getMinutes();
+          if (sec < 0) { sec += 60; min -= 1; }
+          let label = h + ':' + min.toString().padStart(2,'0') + ':' + sec.toString().padStart(2,'0');
+          html.push(`<span class="${i === 0 ? 'text-green-400 font-bold' : ''}">${label}</span>`);
+        }
+        document.getElementById('timeAxis').innerHTML = html.join('');
+      }
+
+      async function update() {
+        btcPrice = await fetchPrice();
+        prevPrice = btcPrice;
+        
+        // Update price display (chart is now in iframe)
+        titlePriceEl.textContent = 'BTC $' + Math.round(btcPrice);
+        
+        // Update percentage 
+        const priceChange = ((btcPrice - manualBeatPrice) / manualBeatPrice) * 100;
+        const changeEl = document.getElementById('priceChange');
+        changeEl.textContent = (priceChange >= 0 ? '+' : '') + priceChange.toFixed(2) + '%';
+        changeEl.className = 'text-2xl font-bold ' + (priceChange >= 0 ? 'text-green-400' : 'text-red-400');
+        
+        updateTime();
+        updatePayout();
+      }
+
+      document.getElementById('upBtn').onclick = () => placeBet('UP');
+      document.getElementById('downBtn').onclick = () => placeBet('DOWN');
+
       updateTime();
       update();
       setInterval(update, 200);
