@@ -2,19 +2,22 @@ import { NextResponse } from 'next/server';
 
 export async function GET() {
   try {
-    // Fetch 150 minutes of 1-minute klines from Binance
-    const res = await fetch('https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1m&limit=150');
+    // Try CoinGecko API (more server-friendly)
+    const res = await fetch('https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=1&interval=minute');
     
     if (!res.ok) {
-      throw new Error('Failed to fetch from Binance');
+      throw new Error('Failed to fetch from CoinGecko');
     }
     
     const data = await res.json();
     
-    // Extract close prices (index 4)
-    const prices = data.map(k => parseFloat(k[4]));
+    // Extract prices from the response
+    const prices = data.prices.map(p => p[1]); // [timestamp, price]
     
-    return NextResponse.json({ prices });
+    // Take last 150 points
+    const last150 = prices.slice(-150);
+    
+    return NextResponse.json({ prices: last150 });
   } catch (error) {
     console.error('API Error:', error);
     return NextResponse.json({ error: 'Failed to fetch data' }, { status: 500 });
