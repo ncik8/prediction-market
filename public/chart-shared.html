@@ -141,9 +141,12 @@
     
     async function loadHistory() {
       try {
+        console.log('Loading history...');
         const data = await supaSelect();
+        console.log('Got data:', data);
         
         if (data && data.length > 0) {
+          console.log('Setting history, count:', data.length);
           rawPrices.length = 0;
           maPrices.length = 0;
           for (let i = data.length - 1; i >= 0; i--) {
