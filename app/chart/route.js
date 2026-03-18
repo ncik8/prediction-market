@@ -10,11 +10,9 @@ export const revalidate = 0;
 
 async function getPrices() {
   try {
-    const { data } = await supabase
-      .from('price_history_global')
-      .select('price')
-      .order('timestamp', { ascending: true })
-      .limit(300);
+    // Fetch from API instead of direct DB (to ensure fresh data)
+    const res = await fetch('https://px-fawn.vercel.app/api/price');
+    const data = await res.json();
     return data?.map(p => p.price) || [];
   } catch(e) {
     return [];
