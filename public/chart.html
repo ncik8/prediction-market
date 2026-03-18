@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BTC Chart</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body{background:#0a0a0a;margin:0;padding:20px;font-family:system-ui,sans-serif}
+    .container{max-width:800px;margin:0 auto}
+    h1{color:#fff;font-size:24px;margin-bottom:10px}
+    .chart-box{height:60vh;background:#1e293b;border-radius:12px;padding:10px}
+    .price{color:#22c55e;font-size:32px;font-weight:bold;text-align:center;margin-top:10px}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>BTC Live Chart</h1>
+    <div class="chart-box"><canvas id="c"></canvas></div>
+    <div class="price" id="p">Loading...</div>
+  </div>
+  <script>
+var prices=[];
+for(var i=0;i<150;i++)prices.push(70000);
+var chart=new Chart(document.getElementById('c'),{type:'line',data:{labels:Array(150).fill(''),datasets:[{data:prices,borderColor:'#22c55e',backgroundColor:'rgba(34,197,94,0.1)',fill:true,tension:0.8,borderWidth:2,pointRadius:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{display:false},y:{position:'right',grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#64748b',callback:function(v){return'$'+Math.round(v)}}}}}});
+function upd(p){prices.push(p);if(prices.length>150)prices.shift();chart.data.datasets[0].data=prices;chart.update('none');document.getElementById('p').textContent='BTC $'+Math.round(p);}
+fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT').then(function(r){return r.json()}).then(function(d){upd(parseFloat(d.price))});
+setInterval(function(){fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT').then(function(r){return r.json()}).then(function(d){upd(parseFloat(d.price))})},1000);
+  </script>
+</body>
+</html>
