@@ -1020,6 +1020,16 @@
       // Fetch current price
       btcPrice = await fetchPrice();
       
+      // Load last ~30 seconds of saved data (150 points)
+      let savedPrices = [];
+      try {
+        const priceData = JSON.parse(localStorage.getItem('btcPriceHistory') || '[]');
+        if (priceData.length > 10) {
+          // Get last 150 points
+          savedPrices = priceData.slice(-150).map(p => p.price);
+        }
+      } catch(e) {}
+      
       // Check URL for existing cycle
       const params = new URLSearchParams(window.location.search);
       const urlBeat = params.get('beat');
@@ -1039,10 +1049,19 @@
         window.history.replaceState({}, '', `?cycle=${cycleId}&beat=${Math.round(manualBeatPrice)}`);
       }
       
-      // Use current price for chart
-      for (let i = 0; i < dataPoints; i++) {
-        rawPrices.push(btcPrice);
-        maPrices.push(btcPrice);
+      // Initialize price data - use saved data or current price
+      if (savedPrices.length > 0) {
+        // Use saved prices and fill remaining with current price
+        for (let i = 0; i < dataPoints; i++) {
+          rawPrices.push(savedPrices[i] || btcPrice);
+          maPrices.push(calculateMA(rawPrices, maPeriod));
+        }
+      } else {
+        // No saved data - use current price
+        for (let i = 0; i < dataPoints; i++) {
+          rawPrices.push(btcPrice);
+          maPrices.push(btcPrice);
+        }
       }
       
       prevPrice = btcPrice;
