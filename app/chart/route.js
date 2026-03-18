@@ -88,6 +88,13 @@ export async function GET() {
       if (maPrices.length > dataPoints) maPrices.shift();
       
       window.chart.data.datasets[0].data = maPrices;
+      
+      // Dynamic y-axis
+      const minPrice = Math.min(...rawPrices);
+      const maxPrice = Math.max(...rawPrices);
+      window.chart.options.scales.y.min = minPrice - 50;
+      window.chart.options.scales.y.max = maxPrice + 50;
+      
       window.chart.update('none');
       
       document.getElementById('priceDisplay').textContent = 'BTC $' + Math.round(price);
