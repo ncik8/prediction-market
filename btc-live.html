@@ -168,31 +168,34 @@
       </div>
     </div>
 
-    <script>
-    function toggleRules() {
-      const content = document.getElementById('rulesContent');
-      const arrow = document.getElementById('rulesArrow');
-      if (content.style.display === 'none') {
-        content.style.display = 'block';
-        arrow.textContent = '▲';
-        // Set content if empty
-        if (!content.innerHTML) {
-          content.innerHTML = `
-            <p>• <strong>${t('beatPrice')}</strong> - ${t('roundStart')}</p>
-            <p>• <strong>${t('upWins')}</strong></p>
-            <p>• <strong>${t('downWins')}</strong></p>
-            <p>• <strong>${t('payout')}</strong></p>
-            <p>• <strong>${t('dataSource')}</strong></p>
-            <p>• <strong>${t('settlement')}</strong></p>
-            <p>• <strong>${t('direction')}</strong></p>
-            <p>• <strong>${t('lockout')}</strong></p>
-          `;
-        }
-      } else {
-        content.style.display = 'none';
-        arrow.textContent = '▼';
+<script>
+  function toggleRules() {
+    const content = document.getElementById('rulesContent');
+    const arrow = document.getElementById('rulesArrow');
+
+    if (content.style.display === 'none') {
+      content.style.display = 'block';
+      arrow.textContent = '▲';
+
+      // Set content if empty
+      if (!content.innerHTML) {
+        content.innerHTML = `
+          <p>• <strong>${t('beatPrice')}</strong> - ${t('roundStart')}</p>
+          <p>• <strong>${t('upWins')}</strong></p>
+          <p>• <strong>${t('downWins')}</strong></p>
+          <p>• <strong>${t('payout')}</strong></p>
+          <p>• <strong>${t('dataSource')}</strong></p>
+          <p>• <strong>${t('settlement')}</strong></p>
+          <p>• <strong>${t('direction')}</strong></p>
+          <p>• <strong>${t('lockout')}</strong></p>
+        `;
       }
+    } else {
+      content.style.display = 'none';
+      arrow.textContent = '▼';
     }
+  }
+</script>
     
     // Tab switching
     function switchTab(tabName) {

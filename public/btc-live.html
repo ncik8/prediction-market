@@ -1053,7 +1053,8 @@
       if (!urlCycle) {
         const now = new Date();
         const h = now.getHours().toString().padStart(2,'0');
-        const cycleId = `${h}:${Math.floor(now.getMinutes() / 5) * 5.toString().padStart(2,'0')}`;
+        const cycleMinutes = Math.floor(now.getMinutes() / 5) * 5;
+        const cycleId = `${h}:${cycleMinutes.toString().padStart(2,'0')}`;
         window.history.replaceState({}, '', `?cycle=${cycleId}&beat=${Math.round(manualBeatPrice)}`);
       }
       
