@@ -1085,16 +1085,8 @@
       update();
       setInterval(update, 200);
     }
-              max: manualBeatPrice + 100,
-              grid: { color: 'rgba(255,255,255,0.05)' },
-              ticks: { color: '#64748b', callback: v => '$' + Math.round(v) }
-            }
-          }
-        },
-        plugins: [dotPlugin]
-      });
 
-      let lastCycleNum = getCycleInfo().cycleNum;
+    let lastCycleNum = getCycleInfo().cycleNum;
 
       function updateTime() {
         const { remaining, cycleNum, now } = getCycleInfo();
