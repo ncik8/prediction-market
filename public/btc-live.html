@@ -1025,8 +1025,12 @@
       try {
         const priceData = JSON.parse(localStorage.getItem('btcPriceHistory') || '[]');
         if (priceData.length > 10) {
-          // Get last 150 points
-          savedPrices = priceData.slice(-150).map(p => p.price);
+          const recent = priceData.slice(-150).map(p => p.price);
+          // Only use if average is within 0.5% of current price
+          const avg = recent.reduce((a,b) => a+b, 0) / recent.length;
+          if (Math.abs(avg - btcPrice) / btcPrice < 0.005) {
+            savedPrices = recent;
+          }
         }
       } catch(e) {}
       
