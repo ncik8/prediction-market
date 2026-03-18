@@ -6,7 +6,8 @@
   <title>PredictX - BTC 5MIN</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
     body { 
       background: #0a0a0a; 
       color: white;
@@ -532,6 +533,12 @@
   </div>
 
   <script>
+    // Supabase client
+    const supabase = window.supabase.createClient(
+      'https://oepmupwniliblkuxevyr.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9lcG11cHduaWxpa2JsdXhldnlyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2NzA2NzksImV4cCI6MjA4OTI0NjY3OX0.OWHh1MW8qewCvXF5JW2a5-LVuQP9TWiOFGwnhIiifN0'
+    );
+    
     // State
     let btcPrice = 0;
     let manualBeatPrice = 0;
