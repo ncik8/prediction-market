@@ -913,17 +913,30 @@
       } catch { return 82500; }
     }
     
-    // Fetch historical price data from Binance
+    // Fetch historical price data from Binance (using agg trades for better compatibility)
     async function fetchHistoricalPrices() {
       try {
+        // Try the 1-minute klines endpoint
         const res = await fetch('https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1m&limit=150');
+        if (!res.ok) throw new Error('API error');
         const data = await res.json();
-        // Extract close prices from klines data
-        const prices = data.map(k => parseFloat(k[4])); // Close price is index 4
+        const prices = data.map(k => parseFloat(k[4])); // Close price
         return prices;
       } catch {
-        // Return empty array on error
-        return [];
+        // Try alternative: use recent trades endpoint
+        try {
+          const res = await fetch('https://api.binance.com/api/v3/trades?symbol=BTCUSDT&limit=500');
+          if (!res.ok) throw new Error('API error');
+          const data = await res.json();
+          // Sample prices from trades
+          const prices = [];
+          for (let i = 0; i < data.length; i += Math.floor(data.length / 150)) {
+            prices.push(parseFloat(data[i].price));
+          }
+          return prices.slice(-150);
+        } catch {
+          return []; // Return empty on all failures
+        }
       }
     }
 
