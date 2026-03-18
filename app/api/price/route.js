@@ -6,13 +6,13 @@ const supabase = createClient(
 );
 
 export async function GET() {
-  // Get last 30 seconds of data (about 30 points at 1 per sec)
-  const thirtySecondsAgo = new Date(Date.now() - 30000).toISOString();
+  // Get last 30 minutes of data (cron saves every minute)
+  const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000).toISOString();
   
   const { data } = await supabase
     .from('price_history_global')
     .select('price, timestamp')
-    .gte('timestamp', thirtySecondsAgo)
+    .gte('timestamp', thirtyMinutesAgo)
     .order('timestamp', { ascending: true });
   
   return Response.json(data || [], {
