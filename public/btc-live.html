@@ -920,18 +920,11 @@
     const PRICE_API = 'https://px-fawn.vercel.app/api/price';
     
     async function fetchPrice() {
+      // Always get fresh live price from Binance
       try {
-        // First try to get from our API (which has recent history)
-        const res = await fetch(PRICE_API + '?t=' + Date.now());
+        const res = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT');
         const data = await res.json();
-        if (data && data.length > 0) {
-          // Return the most recent price
-          return data[data.length - 1].price;
-        }
-        // Fallback to Binance
-        const binance = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT');
-        const binData = await binance.json();
-        return parseFloat(binData.price);
+        return parseFloat(data.price);
       } catch { return 82500; }
     }
     
