@@ -6,7 +6,6 @@
   <title>PredictX - BTC Live Chart</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     body { background: #0a0a0a; color: white; }
   </style>
@@ -32,14 +31,8 @@
     const dataPoints = 150;
     const maPeriod = 10;
     
-    // Supabase client
+    // Supabase disabled for now - just use live price
     let supa = null;
-    try {
-      supa = window.supabase.createClient(
-        'https://oepmupwniliblkuxevyr.supabase.co',
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9lcG11cHduaWxpa2JsdXhldnlyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2NzA2NzksImV4cCI6MjA4OTI0NjY3OX0.OWHh1MW8qewCvXF5JW2a5-LVuQP9TWiOFGwnhIiifN0'
-      );
-    } catch(e) { console.log('Supabase not available'); }
     
     // Broadcast channel for sharing data between tabs
     const channel = new BroadcastChannel('btc-price');
@@ -124,14 +117,9 @@
         }
       });
       
-      // Load history from Supabase
-      await loadHistory();
-      
-      // Start fetching
+      // Start fetching (no supabase for now)
       update();
       setInterval(update, 200);
-      // Save to Supabase every 5 seconds
-      setInterval(saveToSupa, 5000);
     }
     
     async function loadHistory() {
