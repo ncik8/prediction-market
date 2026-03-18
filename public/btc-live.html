@@ -1070,7 +1070,15 @@
         }
       }
       
+      // Use historical data for display, but keep beat price based on current
+      // This way chart shows history but trades are based on current
+      
       prevPrice = btcPrice;
+      
+      // Set chart scale to fit the historical data
+      const histMin = Math.min(...rawPrices);
+      const histMax = Math.max(...rawPrices);
+      const histRange = Math.max(histMax - histMin, 100);
       
       const chart = new Chart(document.getElementById('chart'), {
         type: 'line',
@@ -1094,9 +1102,8 @@
             x: { display: false },
             y: { 
               position: 'right',
-              // Calculate range from historical data or use current price
-              min: Math.min(...rawPrices) - 50,
-              max: Math.max(...rawPrices) + 50,
+              min: histMin - histRange * 0.1,
+              max: histMax + histRange * 0.1,
               grid: { color: 'rgba(255,255,255,0.05)' },
               ticks: { color: '#64748b', callback: v => '$' + Math.round(v) }
             }
