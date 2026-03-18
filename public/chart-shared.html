@@ -6,6 +6,7 @@
   <title>PredictX - BTC Live Chart</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     body { background: #0a0a0a; color: white; }
   </style>
@@ -30,6 +31,15 @@
     const maPrices = [];
     const dataPoints = 150;
     const maPeriod = 10;
+    
+    const SUPABASE_URL = 'https://oepmupwniliblkuxevyr.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9lcG11cHduaWxpa2JsdXhldnlyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2NzA2NzksImV4cCI6MjA4OTI0NjY3OX0.OWHh1MW8qewCvXF5JW2a5-LVuQP9TWiOFGwnhIiifN0';
+    
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    
+    // Broadcast channel - subscribe once
+    const channel = supabase.channel('live-price');
+    channel.subscribe();
     
     const API_URL = 'https://px-fawn.vercel.app/api/price';
     
@@ -166,7 +176,14 @@
       const price = rawPrices[rawPrices.length - 1];
       if (!price) return;
       try {
+        // Save to DB
         await supaInsert(price);
+        // Broadcast to all users
+        await channel.send({
+          type: 'broadcast',
+          event: 'price-update',
+          payload: { price: price }
+        });
       } catch(e) { /* ignore */ }
     }
     
