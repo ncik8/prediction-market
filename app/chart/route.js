@@ -1,24 +1,30 @@
 import { createClient } from '@supabase/supabase-js';
 
+const supabase = createClient(
+  'https://oepmupwniliblkuxevyr.supabase.co',
+  process.env.SUPABASE_SERVICE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9lcG11cHduaWxpYmxrdXhldnlyIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MzY3MDY3OSwiZXhwIjoyMDg5MjQ2Njc5fQ.FjlfBgNDUO7Skhgg-hpq3vVYrDaMOn3M4afhvkat9Wg'
+);
+
 export const dynamic = 'force-dynamic';
 
-export default async function ChartPage() {
-  const supabase = createClient(
-    'https://oepmupwniliblkuxevyr.supabase.co',
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9lcG11cHduaWxpYmxrdXhldnlyIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MzY3MDY3OSwiZXhwIjoyMDg5MjQ2Njc5fQ.FjlfBgNDUO7Skhgg-hpq3vVYrDaMOn3M4afhvkat9Wg'
-  );
-  
-  // Fetch historical data on server
-  const { data: initialPrices } = await supabase
-    .from('price_history_global')
-    .select('price')
-    .order('timestamp', { ascending: true })
-    .limit(150);
+async function getPrices() {
+  try {
+    const { data } = await supabase
+      .from('price_history_global')
+      .select('price')
+      .order('timestamp', { ascending: true })
+      .limit(150);
+    return data?.map(p => p.price) || [];
+  } catch(e) {
+    return [];
+  }
+}
 
-  const prices = JSON.stringify(initialPrices?.map(p => p.price) || []);
+export async function GET() {
+  const prices = await getPrices();
+  const pricesJson = JSON.stringify(prices);
 
-  const html = `
-<!DOCTYPE html>
+  const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -26,14 +32,12 @@ export default async function ChartPage() {
   <title>PredictX - BTC Live Chart</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <style>
-    body { background: #0a0a0a; color: white; }
-  </style>
+  <style>body { background: #0a0a0a; color: white; }</style>
 </head>
 <body class="p-4">
   <div class="max-w-3xl mx-auto">
     <h1 class="text-2xl font-bold mb-2">BTC Live Chart</h1>
-    <p class="text-slate-400 text-sm mb-4">Server-rendered with historical data</p>
+    <p class="text-slate-400 text-sm mb-4">Server-rendered with historical data (${prices.length} points)</p>
     
     <div class="bg-slate-900 rounded-xl border border-slate-800 p-3 mb-3">
       <div style="height: 300px;">
@@ -45,11 +49,20 @@ export default async function ChartPage() {
   </div>
 
   <script>
-    const initialPrices = ${prices};
+    const initialPrices = ${pricesJson};
     const rawPrices = [];
     const maPrices = [];
     const dataPoints = 150;
     const maPeriod = 10;
+    
+    function calculateMA(prices, period) {
+      if (prices.length < period) return prices[prices.length - 1] || 74000;
+      let sum = 0;
+      for (let i = prices.length - period; i < prices.length; i++) {
+        sum += prices[i];
+      }
+      return sum / period;
+    }
     
     // Initialize with server data
     if (initialPrices && initialPrices.length > 0) {
@@ -63,15 +76,6 @@ export default async function ChartPage() {
         rawPrices.push(74000);
         maPrices.push(74000);
       }
-    }
-    
-    function calculateMA(prices, period) {
-      if (prices.length < period) return prices[prices.length - 1] || 74000;
-      let sum = 0;
-      for (let i = prices.length - period; i < prices.length; i++) {
-        sum += prices[i];
-      }
-      return sum / period;
     }
     
     function updateChart(price) {
@@ -96,7 +100,6 @@ export default async function ChartPage() {
       } catch { return 74000; }
     }
     
-    // Initialize chart
     const latestPrice = rawPrices[rawPrices.length - 1] || 74000;
     window.chart = new Chart(document.getElementById('chart'), {
       type: 'line',
@@ -129,7 +132,6 @@ export default async function ChartPage() {
       }
     });
     
-    // Start live updates
     async function update() {
       const price = await fetchPrice();
       updateChart(price);
@@ -139,8 +141,7 @@ export default async function ChartPage() {
     setInterval(update, 200);
   </script>
 </body>
-</html>
-`;
+</html>`;
 
   return new Response(html, {
     headers: { 'Content-Type': 'text/html' }
