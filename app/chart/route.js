@@ -14,7 +14,7 @@ async function getPrices() {
       .from('price_history_global')
       .select('price')
       .order('timestamp', { ascending: true })
-      .limit(150);
+      .limit(300);
     return data?.map(p => p.price) || [];
   } catch(e) {
     return [];
