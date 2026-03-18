@@ -254,7 +254,7 @@
     }
     
     async function doSocialLogin(provider) {
-      const { data, error } = await supabase.auth.signInWithOAuth({
+      const { data, error } = await supabaseClient.auth.signInWithOAuth({
         provider: provider,
         options: {
           redirectTo: window.location.href
@@ -274,7 +274,7 @@
       const email = document.getElementById('loginEmail').value;
       const password = document.getElementById('loginPassword').value;
       
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabaseClient.auth.signInWithPassword({
         email: email,
         password: password
       });
@@ -328,7 +328,7 @@
         return;
       }
       
-      const { data, error } = await supabase.auth.signUp({
+      const { data, error } = await supabaseClient.auth.signUp({
         email: email,
         password: password
       });
@@ -340,7 +340,7 @@
       
       // Create profile with $10,000 balance
       if (data.user) {
-        await supabase.from('profiles').insert({
+        await supabaseClient.from('profiles').insert({
           id: data.user.id,
           username: email.split('@')[0],
           balance: 10000
@@ -533,11 +533,11 @@
   </div>
 
   <script>
-    // Initialize Supabase client
-    let supabase = null;
+    // Initialize Supabase client - use different name to avoid conflicts
+    let supabaseClient = null;
     if (window.supabase) {
-      supabase = window.supabase.createClient(
-        'https://oepmupwniliblkuxevyr.supabase.co',
+      supabaseClient = window.supabaseClient.createClient(
+        'https://oepmupwniliblkuxevyr.supabaseClient.co',
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9lcG11cHduaWxpa2JsdXhldnlyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2NzA2NzksImV4cCI6MjA4OTI0NjY3OX0.OWHh1MW8qewCvXF5JW2a5-LVuQP9TWiOFGwnhIiifN0'
       );
     }
