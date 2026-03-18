@@ -6,14 +6,20 @@ const supabase = createClient(
 );
 
 export async function GET() {
-  // Get last 150 points
+  // Get last 300 points
   const { data } = await supabase
     .from('price_history_global')
     .select('price, timestamp')
     .order('timestamp', { ascending: true })
     .limit(300);
   
-  return Response.json(data || []);
+  return Response.json(data || [], {
+    headers: {
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0'
+    }
+  });
 }
 
 export async function POST(request) {

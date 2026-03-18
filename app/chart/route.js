@@ -10,8 +10,8 @@ export const revalidate = 0;
 
 async function getPrices() {
   try {
-    // Fetch from API instead of direct DB (to ensure fresh data)
-    const res = await fetch('https://px-fawn.vercel.app/api/price');
+    // Fetch from API with cache-busting
+    const res = await fetch('https://px-fawn.vercel.app/api/price?t=' + Date.now());
     const data = await res.json();
     return data?.map(p => p.price) || [];
   } catch(e) {
