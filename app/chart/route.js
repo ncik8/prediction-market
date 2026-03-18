@@ -149,12 +149,38 @@ export default async function ChartPage() {
       } catch(e) { console.log('Load error:', e); }
     }
     
-    // Subscribe to realtime broadcasts
+    // Load initial history - subscribe to INSERT events
     const channel = supabase
-      .channel('live-price')
-      .on('broadcast', { event: 'price-update' }, (payload) => {
-        updateChart(payload.payload.price);
-      })
+      .channel('ticks-stream')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'price_history_global'
+        },
+        payload => {
+          const tick = payload.new;
+          rawPrices.push(tick.price);
+          
+          // Keep only last 30 seconds
+          const cutoff = Date.now() - 30000;
+          rawPrices = rawPrices.slice(-150);
+          
+          const ma = calculateMA(rawPrices, maPeriod);
+          maPrices.push(ma);
+          maPrices = maPrices.slice(-150);
+          
+          window.chart.data.datasets[0].data = maPrices;
+          if (rawPrices.length > 1) {
+            window.chart.options.scales.y.min = Math.min(...rawPrices) - 30;
+            window.chart.options.scales.y.max = Math.max(...rawPrices) + 30;
+          }
+          window.chart.update('none');
+          document.getElementById('priceDisplay').textContent = 'BTC $' + Math.round(tick.price);
+          document.getElementById('status').textContent = 'Live!';
+        }
+      )
       .subscribe();
     
     document.getElementById('status').textContent = 'Connected!';
