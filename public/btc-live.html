@@ -913,8 +913,24 @@
       } catch { return 82500; }
     }
     
-    // Generate simulated historical prices based on current price
-    // (Binance API has CORS restrictions, so we simulate historical data)
+    // Fetch real historical prices from our API (which proxies Binance)
+    async function fetchHistoricalPrices() {
+      try {
+        const res = await fetch('/api/history');
+        if (!res.ok) throw new Error('API error');
+        const data = await res.json();
+        if (data.prices && data.prices.length > 0) {
+          return data.prices;
+        }
+        throw new Error('No prices returned');
+      } catch {
+        // Fallback to simulated if API fails
+        console.log('Using simulated historical data');
+        return generateHistoricalPrices(btcPrice);
+      }
+    }
+    
+    // Generate simulated historical prices (fallback)
     function generateHistoricalPrices(currentPrice) {
       const prices = [];
       let price = currentPrice;
@@ -1016,8 +1032,8 @@
       // Fetch current price
       btcPrice = await fetchPrice();
       
-      // Generate historical prices for the chart
-      const historicalPrices = generateHistoricalPrices(btcPrice);
+      // Fetch historical prices for the chart
+      const historicalPrices = await fetchHistoricalPrices();
       
       // Check URL for existing cycle
       const params = new URLSearchParams(window.location.search);
