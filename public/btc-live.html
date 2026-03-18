@@ -1097,7 +1097,7 @@
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          plugins: { legend: { display: false },
+          plugins: { legend: { display: false } },
           scales: {
             x: { display: false },
             y: { 
@@ -1131,81 +1131,6 @@
         .subscribe();
       
       // Start the update loop
-      updateTime();
-      update();
-      setInterval(update, 200);
-    }
-              max: manualBeatPrice + 100,
-              grid: { color: 'rgba(255,255,255,0.05)' },
-              ticks: { color: '#64748b', callback: v => '$' + Math.round(v) }
-            }
-          }
-        },
-        plugins: [dotPlugin]
-      });
-
-      let lastCycleNum = getCycleInfo().cycleNum;
-
-      function updateTime() {
-        const { remaining, cycleNum, now } = getCycleInfo();
-        
-        if (cycleNum !== lastCycleNum) {
-          settleBets();
-          lastCycleNum = cycleNum;
-          manualBeatPrice = btcPrice;
-          document.getElementById('cycleLabel').textContent = '05:00 remaining';
-          strikeEl.textContent = '$' + Math.round(manualBeatPrice);
-          
-          // Update URL with new cycle
-          const h = now.getHours().toString().padStart(2,'0');
-          const cycleId = `${h}:${(Math.floor(now.getMinutes() / 5) * 5).toString().padStart(2,'0')}`;
-          window.history.replaceState({}, '', `?cycle=${cycleId}&beat=${Math.round(manualBeatPrice)}`);
-          
-          for (let i = 0; i < dataPoints; i++) {
-            rawPrices[i] = btcPrice;
-            maPrices[i] = btcPrice;
-          }
-        }
-        
-        const mins = Math.floor(remaining / 60);
-        const secs = remaining % 60;
-        const timeStr = mins.toString().padStart(2,'0') + ':' + secs.toString().padStart(2,'0');
-        document.getElementById('countdown').textContent = timeStr;
-        document.getElementById('cycleLabel').textContent = timeStr + ' remaining';
-        
-        const h = now.getHours().toString().padStart(2,'0');
-        const s = now.getSeconds();
-        const html = [];
-        for (let i = 5; i >= 0; i--) {
-          let sec = s - (i * 5);
-          let min = now.getMinutes();
-          if (sec < 0) { sec += 60; min -= 1; }
-          let label = h + ':' + min.toString().padStart(2,'0') + ':' + sec.toString().padStart(2,'0');
-          html.push(`<span class="${i === 0 ? 'text-green-400 font-bold' : ''}">${label}</span>`);
-        }
-        document.getElementById('timeAxis').innerHTML = html.join('');
-      }
-
-      async function update() {
-        btcPrice = await fetchPrice();
-        prevPrice = btcPrice;
-        
-        // Update price display (chart is now in iframe)
-        titlePriceEl.textContent = 'BTC $' + Math.round(btcPrice);
-        
-        // Update percentage 
-        const priceChange = ((btcPrice - manualBeatPrice) / manualBeatPrice) * 100;
-        const changeEl = document.getElementById('priceChange');
-        changeEl.textContent = (priceChange >= 0 ? '+' : '') + priceChange.toFixed(2) + '%';
-        changeEl.className = 'text-2xl font-bold ' + (priceChange >= 0 ? 'text-green-400' : 'text-red-400');
-        
-        updateTime();
-        updatePayout();
-      }
-
-      document.getElementById('upBtn').onclick = () => placeBet('UP');
-      document.getElementById('downBtn').onclick = () => placeBet('DOWN');
-
       updateTime();
       update();
       setInterval(update, 200);
