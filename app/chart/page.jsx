@@ -8,11 +8,28 @@ export default function ChartPage() {
   const [price, setPrice] = useState('Loading...');
   const pricesRef = useRef([]);
   const maxPoints = 150;
+  const initialized = useRef(false);
 
   useEffect(() => {
-    for (let i = 0; i < maxPoints; i++) {
-      pricesRef.current.push(72000);
-    }
+    // Fetch initial price first
+    fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT')
+      .then(r => r.json())
+      .then(d => {
+        const initialPrice = parseFloat(d.price);
+        // Fill with initial price instead of dummy 72000
+        for (let i = 0; i < maxPoints; i++) {
+          pricesRef.current.push(initialPrice);
+        }
+        if (initialized.current) {
+          chartRef.current.data.datasets[0].data = [...pricesRef.current];
+          chartRef.current.update();
+        }
+      })
+      .catch(() => {
+        for (let i = 0; i < maxPoints; i++) {
+          pricesRef.current.push(70000);
+        }
+      });
   }, []);
 
   useEffect(() => {
@@ -53,7 +70,9 @@ export default function ChartPage() {
         }
       });
 
-      // Fetch price from Binance every second
+      initialized.current = true;
+
+      // Fetch price every second
       async function fetchPrice() {
         try {
           const res = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT');
@@ -65,10 +84,7 @@ export default function ChartPage() {
         }
       }
 
-      // Initial fetch
       fetchPrice();
-      
-      // Update every second
       setInterval(fetchPrice, 1000);
 
       function updateChart(p) {
