@@ -33,10 +33,10 @@
     const maPeriod = 10;
     
     // Supabase client
-    let supabase = null;
+    let supa = null;
     try {
-      supabase = window.supabase.createClient(
-        'https://oepmupwniliblkuxevyr.supabase.co',
+      supa = window.supa.createClient(
+        'https://oepmupwniliblkuxevyr.supa.co',
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9lcG11cHduaWxpa2JsdXhldnlyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2NzA2NzksImV4cCI6MjA4OTI0NjY3OX0.OWHh1MW8qewCvXF5JW2a5-LVuQP9TWiOFGwnhIiifN0'
       );
     } catch(e) { console.log('Supabase not available'); }
@@ -131,7 +131,7 @@
       update();
       setInterval(update, 200);
       // Save to Supabase every 5 seconds
-      setInterval(saveToSupabase, 5000);
+      setInterval(saveTosupa, 5000);
     }
     
     async function loadHistory() {
@@ -163,7 +163,7 @@
       const price = rawPrices[rawPrices.length - 1];
       if (!price) return;
       try {
-        await supabase.from('price_history_global').insert({
+        await supa.from('price_history_global').insert({
           price: price,
           created_at: new Date().toISOString()
         });
