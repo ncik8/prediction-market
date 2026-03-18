@@ -10,7 +10,8 @@ export const revalidate = 0;
 
 async function getPrices() {
   try {
-    // Fetch from API with cache-busting
+    // Fetch last 30 seconds of real data
+    const thirtySecondsAgo = new Date(Date.now() - 30000).toISOString();
     const res = await fetch('https://px-fawn.vercel.app/api/price?t=' + Date.now());
     const data = await res.json();
     return data?.map(p => p.price) || [];
