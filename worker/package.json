@@ -1,0 +1,12 @@
+{
+  "name": "price-worker",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "node price-worker.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0",
+    "ws": "^8.16.0"
+  }
+}
