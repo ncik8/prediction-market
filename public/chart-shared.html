@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PredictX - BTC Live Chart</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { background: #0a0a0a; color: white; }
+  </style>
+</head>
+<body class="p-4">
+  <div class="max-w-3xl mx-auto">
+    <h1 class="text-2xl font-bold mb-2">BTC Live Chart</h1>
+    <p class="text-slate-400 text-sm mb-4">This page broadcasts live price to other tabs</p>
+    
+    <div class="bg-slate-900 rounded-xl border border-slate-800 p-3 mb-3">
+      <div style="height: 300px;">
+        <canvas id="chart"></canvas>
+      </div>
+    </div>
+    
+    <div class="text-center text-xl font-bold" id="priceDisplay">BTC $0</div>
+  </div>
+
+  <script>
+    const btcPrice = 0;
+    const rawPrices = [];
+    const maPrices = [];
+    const dataPoints = 150;
+    const maPeriod = 10;
+    
+    // Broadcast channel for sharing data between tabs
+    const channel = new BroadcastChannel('btc-price');
+    
+    // Receive messages from other tabs
+    channel.onmessage = (event) => {
+      if (event.data.type === 'price') {
+        updateChart(event.data.price);
+      }
+    };
+    
+    async function fetchPrice() {
+      try {
+        const res = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT');
+        const data = await res.json();
+        return parseFloat(data.price);
+      } catch { return 74000; }
+    }
+    
+    function calculateMA(prices, period) {
+      if (prices.length < period) return prices[prices.length - 1];
+      let sum = 0;
+      for (let i = prices.length - period; i < prices.length; i++) {
+        sum += prices[i];
+      }
+      return sum / period;
+    }
+    
+    function updateChart(price) {
+      rawPrices.push(price);
+      if (rawPrices.length > dataPoints) rawPrices.shift();
+      
+      const ma = calculateMA(rawPrices, maPeriod);
+      maPrices.push(ma);
+      if (maPrices.length > dataPoints) maPrices.shift();
+      
+      chart.data.datasets[0].data = maPrices;
+      chart.update('none');
+      
+      document.getElementById('priceDisplay').textContent = 'BTC $' + Math.round(price);
+    }
+    
+    // Initialize
+    async function init() {
+      const price = await fetchPrice();
+      for (let i = 0; i < dataPoints; i++) {
+        rawPrices.push(price);
+        maPrices.push(price);
+      }
+      
+      window.chart = new Chart(document.getElementById('chart'), {
+        type: 'line',
+        data: {
+          labels: Array(dataPoints).fill(''),
+          datasets: [{
+            data: maPrices,
+            borderColor: '#22c55e',
+            backgroundColor: 'rgba(34,197,94,0.1)',
+            fill: true,
+            tension: 0.8,
+            borderWidth: 2,
+            pointRadius: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { display: false },
+            y: { 
+              position: 'right',
+              min: price - 100,
+              max: price + 100,
+              grid: { color: 'rgba(255,255,255,0.05)' },
+              ticks: { color: '#64748b', callback: v => '$' + Math.round(v) }
+            }
+          }
+        }
+      });
+      
+      // Start fetching
+      update();
+      setInterval(update, 200);
+    }
+    
+    async function update() {
+      const price = await fetchPrice();
+      updateChart(price);
+      
+      // Broadcast to other tabs
+      channel.postMessage({ type: 'price', price: price, time: Date.now() });
+    }
+    
+    init();
+  </script>
+</body>
+</html>
