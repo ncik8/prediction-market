@@ -917,18 +917,30 @@
       positionPanel.classList.add('hidden');
     }
 
+    const PRICE_API = 'https://px-fawn.vercel.app/api/price';
+    
     async function fetchPrice() {
       try {
-        const res = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT');
+        // First try to get from our API (which has recent history)
+        const res = await fetch(PRICE_API);
         const data = await res.json();
-        return parseFloat(data.price);
+        if (data && data.length > 0) {
+          // Return the most recent price
+          return data[data.length - 1].price;
+        }
+        // Fallback to Binance
+        const binance = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT');
+        const binData = await binance.json();
+        return parseFloat(binData.price);
       } catch { return 82500; }
     }
     
-    // Historical data - disabled for now
-    // For real data, need to store in Supabase
     async function fetchHistoricalPrices() {
-      return []; // Return empty - will use current price
+      try {
+        const res = await fetch(PRICE_API);
+        const data = await res.json();
+        return data.map(d => d.price);
+      } catch { return []; }
     }
 
     function calculateMA(prices, period) {
@@ -1052,10 +1064,21 @@
         window.history.replaceState({}, '', `?cycle=${cycleId}&beat=${Math.round(manualBeatPrice)}`);
       }
       
-      // Initialize with current price
-      for (let i = 0; i < dataPoints; i++) {
-        rawPrices.push(btcPrice);
-        maPrices.push(btcPrice);
+      // Load historical data from API
+      const historicalPrices = await fetchHistoricalPrices();
+      
+      // Initialize with historical data or current price
+      if (historicalPrices.length > 0) {
+        for (let i = 0; i < dataPoints; i++) {
+          const price = historicalPrices[i] || historicalPrices[historicalPrices.length - 1] || btcPrice;
+          rawPrices.push(price);
+          maPrices.push(calculateMA(rawPrices, maPeriod));
+        }
+      } else {
+        for (let i = 0; i < dataPoints; i++) {
+          rawPrices.push(btcPrice);
+          maPrices.push(btcPrice);
+        }
       }
       
       prevPrice = btcPrice;
