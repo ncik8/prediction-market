@@ -56,7 +56,7 @@ var saved=localStorage.getItem('btcPrices');
 if(saved){prices=JSON.parse(saved);}
 
 // Beat line plugin
-var beatLinePlugin={id:'beatLine',afterDatasetsDraw:function(c){if(!beatPrice)return;var y=c.scales.y.getPixelForValue(beatPrice);var ctx=c.ctx;ctx.save();ctx.beginPath();ctx.setLineDash([5,5]);ctx.moveTo(c.chartArea.left,y);ctx.lineTo(c.chartArea.right,y);ctx.strokeStyle='rgba(255,255,255,0.5)';ctx.lineWidth=2;ctx.stroke();ctx.fillStyle='#fff';ctx.fillRect(c.chartArea.left+5,y-10,70,20);ctx.fillStyle='#000';ctx.font='bold 11px Arial';ctx.textAlign='center';ctx.fillText('BEAT $'+Math.round(beatPrice),c.chartArea.left+40,y+4);ctx.restore();}};
+var beatLinePlugin={id:'beatLine',afterDatasetsDraw:function(c){if(!beatPrice)return;var y=c.scales.y.getPixelForValue(beatPrice);var ctx=c.ctx;ctx.save();ctx.beginPath();ctx.setLineDash([5,5]);ctx.moveTo(c.chartArea.left,y);ctx.lineTo(c.chartArea.right,y);ctx.strokeStyle='rgba(255,255,255,0.5)';ctx.lineWidth=2;ctx.stroke();ctx.fillStyle='#fff';ctx.fillRect(c.chartArea.left+5,y-12,90,24);ctx.strokeStyle='#ccc';ctx.lineWidth=1;ctx.strokeRect(c.chartArea.left+5,y-12,90,24);ctx.fillStyle='#000';ctx.font='bold 12px Arial';ctx.textAlign='center';ctx.fillText('BEAT $'+Math.round(beatPrice),c.chartArea.left+50,y+4);ctx.restore();}};
 
 function init(startPrice){
 beatPrice=startPrice;
