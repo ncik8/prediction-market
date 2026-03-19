@@ -70,8 +70,8 @@ var beatLinePlugin={id:'beatLine',afterDatasetsDraw:function(c){if(!beatPrice)re
 // Orange dot plugin
 var dotPlugin={id:'dot',afterDatasetsDraw:function(c){if(prices.length===0)return;var lastPrice=prices[prices.length-1];var x=c.scales.x.getPixelForValue(prices.length-1);var y=c.scales.y.getPixelForValue(lastPrice);var ctx=c.ctx;ctx.save();ctx.beginPath();ctx.arc(x,y,8,0,Math.PI*2);ctx.fillStyle='rgba(249,115,22,0.3)';ctx.fill();ctx.beginPath();ctx.arc(x,y,5,0,Math.PI*2);ctx.fillStyle='#f97316';ctx.fill();ctx.beginPath();ctx.arc(x,y,2,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();ctx.restore();}};
 
-// X-axis time ticker plugin
-var timeTickerPlugin={id:'timeTicker',afterDraw:function(c){var ctx=c.ctx;var x=c.chartArea.left;var y=c.chartArea.bottom+5;var now=new Date();var sec=now.getHours()*3600+now.getMinutes()*60+now.getSeconds();var rem=300-sec%300;ctx.save();ctx.font='10px Arial';ctx.fillStyle='#94a3b8';ctx.textAlign='center';var tickers=['05:00','04:30','04:00','03:30','03:00','02:30','02:00','01:30','01:00','00:30','00:00'];var width=c.chartArea.right-c.chartArea.left;var pos=width*(rem/300);for(var i=0;i<tickers.length;i++){var tPos=pos-i*(width/10);if(tPos>0&&tPos<width){ctx.fillText(tickers[i],x+tPos,y);}}ctx.restore();}};
+// X-axis time ticker plugin - smooth scrolling from right to left
+var timeTickerPlugin={id:'timeTicker',afterDraw:function(c){var ctx=c.ctx;var x=c.chartArea.left;var y=c.chartArea.bottom+5;var now=new Date();var sec=now.getHours()*3600+now.getMinutes()*60+now.getSeconds();var ms=now.getMilliseconds();var rem=300-sec%300;var totalRem=rem*1000+ms;ctx.save();ctx.font='10px Arial';ctx.fillStyle='#94a3b8';ctx.textAlign='center';var tickers=['00:00','00:30','01:00','01:30','02:00','02:30','03:00','03:30','04:00','04:30','05:00'];var width=c.chartArea.right-c.chartArea.left;var pos=width-(width*(totalRem/300000));for(var i=0;i<tickers.length;i++){var tPos=pos-i*(width/10);if(tPos>0&&tPos<width){ctx.fillText(tickers[i],x+tPos,y);}}ctx.restore();}};
 
 function init(startPrice){
 beatPrice=startPrice;
