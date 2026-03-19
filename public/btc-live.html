@@ -36,9 +36,9 @@
       <span style="font-size: 14px; color: #94a3b8;"> from beat</span>
     </div>
 
-    <!-- Chart (embedded) -->
+    <!-- Chart (embedded, taller with beat line) -->
     <div style="background: #1e293b; border-radius: 12px; padding: 12px; margin-bottom: 16px;">
-      <canvas id="chart" style="height: 300px;"></canvas>
+      <canvas id="chart" style="height: 400px;"></canvas>
       <div id="chartPrice" style="text-align: center; color: #22c55e; font-size: 20px; font-weight: bold; margin-top: 8px;">Loading...</div>
     </div>
 
@@ -74,6 +74,43 @@
     var prices = [];
     var chart;
     var maxPoints = 150;
+    var beatPrice = 0;
+
+    // Chart plugin for beat line
+    var beatLinePlugin = {
+      id: 'beatLine',
+      afterDatasetsDraw: function(chart) {
+        if (!beatPrice || beatPrice === 0) return;
+        
+        var ctx = chart.ctx;
+        var y = chart.scales.y.getPixelForValue(beatPrice);
+        
+        // Draw line
+        ctx.save();
+        ctx.beginPath();
+        ctx.setLineDash([5, 5]);
+        ctx.moveTo(chart.chartArea.left, y);
+        ctx.lineTo(chart.chartArea.right, y);
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        
+        // Draw label box
+        var boxWidth = 70, boxHeight = 20;
+        var boxX = chart.chartArea.left + 5;
+        var boxY = y - boxHeight / 2;
+        
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(boxX, boxY, boxWidth, boxHeight);
+        
+        ctx.font = 'bold 11px Arial';
+        ctx.fillStyle = '#000';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('BEAT $' + Math.round(beatPrice), boxX + 5, boxY + boxHeight / 2);
+        ctx.restore();
+      }
+    };
 
     // Load saved prices
     var saved = localStorage.getItem('btcPrices');
@@ -102,7 +139,10 @@
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
+          plugins: { 
+            legend: { display: false },
+            beatLine: {}
+          },
           scales: {
             x: { display: false },
             y: { 
@@ -111,7 +151,8 @@
               ticks: { color: '#64748b', callback: function(v) { return '$' + Math.round(v); } }
             }
           }
-        }
+        },
+        plugins: [beatLinePlugin]
       });
 
       document.getElementById('chartPrice').textContent = 'BTC $' + Math.round(startPrice);
@@ -123,6 +164,9 @@
         chart.update('none');
         document.getElementById('chartPrice').textContent = 'BTC $' + Math.round(p);
         localStorage.setItem('btcPrices', JSON.stringify(prices));
+        
+        // Update beat line
+        chart.update();
       }
 
       // Update every second
@@ -139,6 +183,7 @@
     var balance = 10000;
     var currentBet = null;
     var currentBetType = null;
+    var currentBeatPrice = 0;
     const cycleDuration = 300;
     const payoutMultiplier = 1.95;
 
@@ -221,7 +266,12 @@
       if (cycleNum !== lastCycleNum && lastCycleNum !== -1) {
         settleBet();
         manualBeatPrice = btcPrice;
+        currentBeatPrice = manualBeatPrice;
+        beatPrice = manualBeatPrice;
         strikeEl.textContent = '$' + Math.round(manualBeatPrice);
+        
+        // Update beat line
+        if (chart) chart.update();
       }
       lastCycleNum = cycleNum;
 
@@ -244,6 +294,8 @@
       .then(function(d) {
         var price = parseFloat(d.price);
         manualBeatPrice = price;
+        currentBeatPrice = price;
+        beatPrice = price;
         strikeEl.textContent = '$' + Math.round(manualBeatPrice);
         initChart(price);
       });
