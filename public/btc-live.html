@@ -83,8 +83,10 @@ var lastLabelUpdate=0;
 function upd(p){prices.push(p);priceTimes.push(new Date());if(prices.length>maxPoints){prices.shift();priceTimes.shift();}chart.data.datasets[0].data=prices;chart.data.datasets[0].borderColor=p>=beatPrice?'#22c55e':'#ef4444';chart.data.datasets[0].backgroundColor=p>=beatPrice?'rgba(34,197,94,0.1)':'rgba(239,68,68,0.1)';chart.update('none');currentPrice=p;updateDisplay(p);localStorage.setItem('btcPrices',JSON.stringify(prices));}
 
 // WebSocket for real-time data
+var latestPrice=null;
 var ws=new WebSocket('wss://stream.binance.com:9443/ws/btcusdt@trade');
-ws.onmessage=function(event){var data=JSON.parse(event.data);upd(parseFloat(data.p));};
+ws.onmessage=function(event){var data=JSON.parse(event.data);latestPrice=parseFloat(data.p);};
+setInterval(function(){if(latestPrice!==null){upd(latestPrice);latestPrice=null;}},200);
 ws.onclose=function(){setTimeout(function(){ws=new WebSocket('wss://stream.binance.com:9443/ws/btcusdt@trade');ws.onmessage=ws.onmessage;},5000);};
 setInterval(function(){var now=new Date();var sec=now.getHours()*3600+now.getMinutes()*60+now.getSeconds();var rem=300-sec%300;document.getElementById('countdown').textContent=Math.floor(rem/60).toString().padStart(2,'0')+':'+(rem%60).toString().padStart(2,'0');},1000);}
 setInterval(updateTicker,10000);updateTicker();
