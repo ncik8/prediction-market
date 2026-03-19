@@ -16,7 +16,13 @@
     .container{max-width:800px;margin:0 auto;padding:70px 20px 20px}
     h1{color:#fff;font-size:24px;margin-bottom:10px}
     .chart-box{height:50vh;background:#1e293b;border-radius:12px;padding:10px}
-    .price{color:#22c55e;font-size:32px;font-weight:bold;text-align:center;margin-top:10px}
+    .price-row{display:flex;justify-content:space-between;margin-top:10px}
+    .price{color:#22c55e;font-size:32px;font-weight:bold}
+    .beat{color:#94a3b8;font-size:14px}
+    .beat span{color:#fff;font-weight:bold}
+    .change{font-size:20px;font-weight:bold}
+    .change.up{color:#22c55e}
+    .change.down{color:#ef4444}
   </style>
 </head>
 <body>
@@ -32,23 +38,36 @@
     <button class="btn" onclick="alert('Login coming soon')">Sign In</button>
   </header>
   <div class="container">
-    <h1>BTC Live Chart</h1>
+    <h1>BTC 5MIN</h1>
     <div class="chart-box"><canvas id="c"></canvas></div>
-    <div class="price" id="p">Loading...</div>
+    <div class="price-row">
+      <div class="price" id="p">$0</div>
+      <div class="beat">Beat: <span id="beat">$0</span></div>
+      <div class="change" id="change">0%</div>
+    </div>
   </div>
   <script>
 var prices=[];
 var chart;
 var maxPoints=150;
+var beatPrice=0;
+var currentPrice=0;
 var saved=localStorage.getItem('btcPrices');
 if(saved){prices=JSON.parse(saved);}
+
+// Beat line plugin
+var beatLinePlugin={id:'beatLine',afterDatasetsDraw:function(c){if(!beatPrice)return;var y=c.scales.y.getPixelForValue(beatPrice);var ctx=c.ctx;ctx.save();ctx.beginPath();ctx.setLineDash([5,5]);ctx.moveTo(c.chartArea.left,y);ctx.lineTo(c.chartArea.right,y);ctx.strokeStyle='rgba(255,255,255,0.5)';ctx.lineWidth=2;ctx.stroke();ctx.fillStyle='#fff';ctx.fillRect(c.chartArea.left+5,y-10,70,20);ctx.fillStyle='#000';ctx.font='bold 11px Arial';ctx.textAlign='center';ctx.fillText('BEAT $'+Math.round(beatPrice),c.chartArea.left+40,y+4);ctx.restore();}};
+
 function init(startPrice){
+beatPrice=startPrice;
+currentPrice=startPrice;
 while(prices.length<maxPoints)prices.push(startPrice);
 while(prices.length>maxPoints)prices.shift();
-chart=new Chart(document.getElementById('c'),{type:'line',data:{labels:Array(maxPoints).fill(''),datasets:[{data:prices,borderColor:'#22c55e',backgroundColor:'rgba(34,197,94,0.1)',fill:true,tension:0.8,borderWidth:2,pointRadius:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{display:false},y:{position:'right',grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#64748b',callback:function(v){return'$'+Math.round(v)}}}}}});
-document.getElementById('p').textContent='BTC $'+Math.round(startPrice);
-function upd(p){prices.push(p);if(prices.length>maxPoints)prices.shift();chart.data.datasets[0].data=prices;chart.update('none');document.getElementById('p').textContent='BTC $'+Math.round(p);localStorage.setItem('btcPrices',JSON.stringify(prices));}
+chart=new Chart(document.getElementById('c'),{type:'line',data:{labels:Array(maxPoints).fill(''),datasets:[{data:prices,borderColor:'#22c55e',backgroundColor:'rgba(34,197,94,0.1)',fill:true,tension:0.8,borderWidth:2,pointRadius:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{display:false},y:{position:'right',grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#64748b',callback:function(v){return'$'+Math.round(v)}}}}},plugins:[beatLinePlugin]});
+updateDisplay(startPrice);
+function upd(p){prices.push(p);if(prices.length>maxPoints)prices.shift();chart.data.datasets[0].data=prices;chart.update('none');currentPrice=p;updateDisplay(p);localStorage.setItem('btcPrices',JSON.stringify(prices));}
 setInterval(function(){fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT').then(function(r){return r.json()}).then(function(d){upd(parseFloat(d.price))})},1000);}
+function updateDisplay(p){document.getElementById('p').textContent='$'+Math.round(p);document.getElementById('beat').textContent='$'+Math.round(beatPrice);var ch=((p-beatPrice)/beatPrice*100).toFixed(2);var el=document.getElementById('change');el.textContent=(ch>=0?'+':'')+ch+'%';el.className='change '+(ch>=0?'up':'down');}
 fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT').then(function(r){return r.json()}).then(function(d){init(parseFloat(d.price))});
   </script>
 </body>
