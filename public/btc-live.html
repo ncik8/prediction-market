@@ -14,7 +14,9 @@
     .nav a.active{color:#3b82f6}
     .btn{background:#3b82f6;border:none;padding:8px 16px;border-radius:6px;color:#fff;cursor:pointer;font-size:14px}
     .container{max-width:800px;margin:0 auto;padding:70px 20px 20px}
-    h1{color:#fff;font-size:24px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+    h1{color:#fff;font-size:24px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;font-weight:normal}
+    .title-row{display:flex;align-items:center;gap:10px}
+    .btc-logo{width:32px;height:32px}
     .chart-box{height:50vh;background:#1e293b;border-radius:12px;padding:10px}
     .price-row{display:flex;justify-content:space-between;margin-top:10px}
     .price{color:#22c55e;font-size:16px;font-weight:normal}
@@ -39,7 +41,7 @@
     <button class="btn" onclick="alert('Login coming soon')">Sign In</button>
   </header>
   <div class="container">
-    <h1 style="display:flex;justify-content:space-between;align-items:center">Bitcoin - 5 Minutes <span class="countdown" id="countdown" style="display:inline-block;vertical-align:middle;margin-top:0"></span></h1>
+    <div class="title-row"><img src="https://cryptologos.cc/logos/bitcoin-btc-logo.svg" class="btc-logo" alt="BTC"><h1 style="display:flex;justify-content:space-between;align-items:center;margin:0;font-weight:normal">Bitcoin - 5 Minutes <span class="countdown" id="countdown" style="display:inline-block;vertical-align:middle;margin-top:0"></span></h1></div>
     <div class="chart-box" style="position:relative"><canvas id="c"></canvas></div>
     <div class="price-row">
       <div><div style="color:#94a3b8;font-size:8px">Current Price</div><div class="price" id="p">$0</div></div>
