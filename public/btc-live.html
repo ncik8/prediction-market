@@ -23,7 +23,7 @@
     .change{font-size:20px;font-weight:bold}
     .change.up{color:#22c55e}
     .change.down{color:#ef4444}
-    .countdown{text-align:center;font-size:28px;font-weight:bold;color:#fbbf24;margin-top:10px}
+    .countdown{font-size:28px;font-weight:bold;color:#fbbf24;margin-top:10px}
   </style>
 </head>
 <body>
@@ -40,13 +40,12 @@
   </header>
   <div class="container">
     <h1>BTC 5MIN</h1>
-    <div class="chart-box"><canvas id="c"></canvas></div>
+    <div class="chart-box" style="position:relative"><canvas id="c"></canvas><div class="countdown" id="countdown" style="position:absolute;top:10px;right:10px;margin:0"></div></div>
     <div class="price-row">
       <div class="price" id="p">$0</div>
       <div class="beat">Beat: <span id="beat">$0</span></div>
       <div class="change" id="change">0%</div>
     </div>
-    <div class="countdown" id="countdown">05:00</div>
   </div>
   <script>
 var prices=[];
