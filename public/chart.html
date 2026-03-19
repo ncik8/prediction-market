@@ -24,14 +24,38 @@ var prices=[];
 var chart;
 var maxPoints=150;
 
-function init(p) {
-  for(var i=0;i<maxPoints;i++)prices.push(p);
+// Load from localStorage or fetch
+var saved=localStorage.getItem('btcPrices');
+if(saved){prices=JSON.parse(saved);console.log('Loaded',prices.length,'prices');}
+
+function init(startPrice) {
+  // Fill remaining points with start price if needed
+  while(prices.length<maxPoints)prices.push(startPrice);
+  while(prices.length>maxPoints)prices.shift();
+  
   chart=new Chart(document.getElementById('c'),{type:'line',data:{labels:Array(maxPoints).fill(''),datasets:[{data:prices,borderColor:'#22c55e',backgroundColor:'rgba(34,197,94,0.1)',fill:true,tension:0.8,borderWidth:2,pointRadius:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{display:false},y:{position:'right',grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#64748b',callback:function(v){return'$'+Math.round(v)}}}}}});
-  function upd(p){prices.push(p);if(prices.length>maxPoints)prices.shift();chart.data.datasets[0].data=prices;chart.update('none');document.getElementById('p').textContent='BTC $'+Math.round(p);}
-  setInterval(function(){fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT').then(function(r){return r.json()}).then(function(d){upd(parseFloat(d.price))})},1000);
+  document.getElementById('p').textContent='BTC $'+Math.round(startPrice);
+  
+  function upd(p){
+    prices.push(p);
+    if(prices.length>maxPoints)prices.shift();
+    chart.data.datasets[0].data=prices;
+    chart.update('none');
+    document.getElementById('p').textContent='BTC $'+Math.round(p);
+    // Save to localStorage
+    localStorage.setItem('btcPrices',JSON.stringify(prices));
+  }
+  
+  setInterval(function(){
+    fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT')
+    .then(function(r){return r.json()})
+    .then(function(d){upd(parseFloat(d.price))})
+  },1000);
 }
 
-fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT').then(function(r){return r.json()}).then(function(d){init(parseFloat(d.price))});
+fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT')
+.then(function(r){return r.json()})
+.then(function(d){init(parseFloat(d.price))});
   </script>
 </body>
 </html>
