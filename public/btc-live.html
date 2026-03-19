@@ -6,305 +6,358 @@
   <title>PredictX - BTC 5MIN</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    body { background: #0a0a0a; color: white; font-family: system-ui, sans-serif; margin: 0; padding: 0; }
+    body { background: #0a0a0a; color: white; position: relative; }
+    body::before { content: ''; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-image: url('/public.png'); background-size: cover; background-position: center; opacity: 0.15; z-index: -1; }
+    body::after { content: ''; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(10, 10, 10, 0.85); z-index: -1; }
     .btn-up { background: #22c55e; }
     .btn-up:hover { background: #16a34a; }
     .btn-down { background: #ef4444; }
     .btn-down:hover { background: #dc2626; }
+    .btn-cashout { background: #f59e0b; }
+    .btn-cashout:hover { background: #d97706; }
   </style>
 </head>
 <body>
-  <div style="max-width: 600px; margin: 0 auto; padding: 16px;">
-    
-    <!-- Header -->
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+  <!-- Header -->
+  <header class="flex items-center justify-between" style="position: fixed; top: 0; left: 0; right: 0; background: rgba(10,10,10,0.98); backdrop-filter: blur(10px); z-index: 100; padding: 10px 12px; border-bottom: 1px solid #1e293b;">
+    <div class="flex items-center gap-3">
+      <a href="/" class="text-lg font-bold text-white" style="text-decoration: none;">PREDICTX</a>
+      <nav class="hidden md:flex items-center gap-3">
+        <a href="#" class="text-sm text-slate-400 hover:text-white" style="text-decoration: none;">Markets</a>
+        <a href="btc-live.html" class="text-sm text-blue-400" style="text-decoration: none;">5m</a>
+        <a href="btc-15min.html" class="text-sm text-slate-400 hover:text-white" style="text-decoration: none;">15m</a>
+        <a href="btc-30min.html" class="text-sm text-slate-400 hover:text-white" style="text-decoration: none;">30m</a>
+        <a href="btc-1hour.html" class="text-sm text-slate-400 hover:text-white" style="text-decoration: none;">1h</a>
+      </nav>
+    </div>
+    <div class="flex items-center gap-1">
+      <button onclick="toggleLang()" class="text-xs bg-slate-700 px-2 py-1 rounded" style="border: none; color: #94a3b8; cursor: pointer;">中文</button>
+      <button onclick="showLogin()" class="text-xs bg-transparent border border-slate-600 px-2 py-1 rounded" style="color: #94a3b8; cursor: pointer;">Sign In</button>
+      <button onclick="showLogin()" class="text-xs bg-blue-600 px-2 py-1 rounded" style="border: none; color: white; cursor: pointer;">Get Started</button>
+    </div>
+  </header>
+
+  <div class="max-w-3xl mx-auto p-4" style="padding-top: 80px;">
+    <!-- Trading Header -->
+    <div class="flex items-center justify-between mb-3">
       <div>
-        <div style="font-size: 14px; color: #94a3b8;">Crypto • 5MIN</div>
-        <div style="font-size: 24px; font-weight: bold;" id="titlePrice">BTC $0</div>
-        <div style="font-size: 12px; color: #fbbf24;" id="cycleLabel">05:00 remaining</div>
+        <div class="text-sm text-slate-400">Crypto • 5MIN</div>
+        <h1 class="text-xl font-bold" id="titlePrice">BTC $0</h1>
+        <div class="text-xs text-yellow-400" id="cycleLabel">05:00 remaining</div>
       </div>
-      <div style="text-align: right;">
-        <div style="font-size: 28px; font-weight: bold; color: #22c55e;" id="countdown">00:00</div>
-        <div style="font-size: 12px; color: #94a3b8;">Balance: <span id="balance" style="color: white;">$10,000</span></div>
+      <div class="text-right">
+        <div id="loginArea">
+          <button onclick="showLogin()" class="text-xs bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded mb-1">Login to Trade</button>
+        </div>
+        <div id="userArea" style="display: none;">
+          <div class="flex items-center gap-2 justify-end mb-1">
+            <span class="text-xs text-slate-400">👤 <span id="username">User</span></span>
+            <button onclick="topUp()" class="text-xs bg-yellow-600 hover:bg-yellow-700 px-2 py-0.5 rounded">Top up $10K</button>
+            <button onclick="logout()" class="text-xs bg-slate-600 hover:bg-slate-500 px-2 py-0.5 rounded">Logout</button>
+          </div>
+        </div>
+        <div id="balanceArea" style="display: none;">
+          <div class="text-3xl font-bold text-green-400" id="countdown">00:00</div>
+          <div class="text-xs text-slate-400"><span id="balanceLabel">Balance</span>: <span class="text-white font-bold" id="balance">$10,000</span></div>
+          <div class="text-xs text-yellow-400"><span id="revenueLabel">Revenue</span>: <span id="platformRevenue">$0</span></div>
+        </div>
+        <div id="loginPrompt" class="text-xs text-slate-500">Login to start trading</div>
       </div>
     </div>
 
     <!-- Price Change -->
-    <div style="text-align: center; margin-bottom: 16px;">
-      <span id="priceChange" style="font-size: 24px; font-weight: bold;">0.00%</span>
-      <span style="font-size: 14px; color: #94a3b8;"> from beat</span>
+    <div class="text-center mb-2">
+      <span id="priceChange" class="text-2xl font-bold">0.00%</span>
+      <span class="text-sm text-slate-400" id="fromBeatLabel"> from beat</span>
     </div>
 
-    <!-- Chart (embedded, taller with beat line) -->
-    <div style="background: #1e293b; border-radius: 12px; padding: 12px; margin-bottom: 16px; height: 450px;">
-      <canvas id="chart" style="height: 400px !important;"></canvas>
+    <!-- Chart -->
+    <div class="bg-slate-900 rounded-xl border border-slate-800 p-3 mb-3">
+      <canvas id="chart" style="height: 400px;"></canvas>
+      <div class="flex justify-between text-xs text-slate-500 mt-1" id="timeAxis"></div>
     </div>
 
-    <!-- Beat Price -->
-    <div style="text-align: center; margin-bottom: 16px;">
-      <span style="color: #94a3b8;">Beat: </span>
-      <span id="strike" style="font-weight: bold;">$0</span>
-    </div>
-
-    <!-- Bet Amount -->
-    <div style="margin-bottom: 16px;">
-      <div style="display: flex; gap: 8px; margin-bottom: 8px;">
-        <input type="number" id="betAmount" value="100" style="flex: 1; background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 12px; color: white; font-size: 18px; text-align: center;">
-        <button onclick="addBet(10)" style="background: #334155; border: none; border-radius: 8px; padding: 12px 16px; color: white; cursor: pointer;">+10</button>
-        <button onclick="addBet(50)" style="background: #334155; border: none; border-radius: 8px; padding: 12px 16px; color: white; cursor: pointer;">+50</button>
-        <button onclick="addBet(100)" style="background: #334155; border: none; border-radius: 8px; padding: 12px 16px; color: white; cursor: pointer;">+100</button>
+    <!-- Market Rules -->
+    <div class="mt-4 bg-slate-900/80 rounded-lg border border-slate-800">
+      <div class="p-3 flex items-center justify-between cursor-pointer" onclick="toggleRules()">
+        <h3 class="text-sm font-bold text-slate-400" id="rulesTitle">📋 Market Rules</h3>
+        <span id="rulesArrow" class="text-slate-400">▼</span>
+      </div>
+      <div id="rulesContent" class="text-xs text-slate-500 space-y-1 px-3 pb-3" style="display: none;">
+        <p>• <strong>Beat Price</strong> = BTC price when 5-min round starts</p>
+        <p>• <strong>UP wins</strong> if final price is above beat</p>
+        <p>• <strong>DOWN wins</strong> if final price is below beat</p>
+        <p>• <strong>Payout</strong> decreases as round progresses (early = more)</p>
+        <p>• <strong>Data Source:</strong> Real-time BTC/USDT price from Binance</p>
+        <p>• <strong>Lockout:</strong> 5 seconds between bets</p>
       </div>
     </div>
 
-    <!-- Trading Buttons -->
-    <div style="display: flex; gap: 12px;">
-      <button onclick="placeBet('UP')" class="btn-up" style="flex: 1; padding: 16px; border: none; border-radius: 12px; font-size: 18px; font-weight: bold; color: white; cursor: pointer;">UP</button>
-      <button onclick="placeBet('DOWN')" class="btn-down" style="flex: 1; padding: 16px; border: none; border-radius: 12px; font-size: 18px; font-weight: bold; color: white; cursor: pointer;">DOWN</button>
+    <!-- Position Panel -->
+    <div id="positionPanel" class="bg-slate-800 rounded-lg p-3 mb-3" style="display: none;">
+      <div class="flex items-center justify-between mb-2">
+        <div>
+          <div class="text-sm text-slate-400" id="yourBetsLabel">Your Bets</div>
+          <div class="font-bold text-green-400" id="positionSummary">$0</div>
+        </div>
+        <div class="text-right">
+          <div class="text-sm text-slate-400">Total Potential</div>
+          <div class="text-green-400 font-bold text-lg" id="totalPayout">$0</div>
+        </div>
+      </div>
+      <div class="text-center text-xs text-slate-500 mb-2" id="holdTimer"></div>
+      <div class="flex gap-2">
+        <button onclick="cashOutPercent(25)" id="sell25Btn" class="flex-1 py-2 rounded-lg font-bold text-sm btn-cashout">Sell 25%</button>
+        <button onclick="cashOutPercent(50)" id="sell50Btn" class="flex-1 py-2 rounded-lg font-bold text-sm btn-cashout">Sell 50%</button>
+        <button onclick="cashOutPercent(100)" id="sellAllBtn" class="flex-1 py-2 rounded-lg font-bold text-sm bg-red-500 hover:bg-red-600">Sell All</button>
+      </div>
     </div>
 
-    <!-- Message -->
-    <div id="message" style="text-align: center; margin-top: 16px; color: #94a3b8; font-size: 14px;"></div>
+    <!-- Betting Panel -->
+    <div id="bettingPanel" class="bg-slate-900 rounded-xl border border-slate-800 p-3">
+      <div id="bettingLoginPrompt" class="text-center py-8" style="display: none;">
+        <p class="text-slate-400 mb-4">🔒 Login required to trade</p>
+        <button onclick="showLogin()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg">Login to Start Trading</button>
+      </div>
+      <div id="bettingForm">
+        <div class="mb-3">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-sm text-slate-400">Bet Amount</span>
+            <span class="text-sm text-slate-400">Beat: <span class="text-white font-bold" id="strike">$0</span></span>
+          </div>
+          <div class="flex gap-1">
+            <button class="px-2 py-1 bg-slate-600 rounded-lg text-xs" onclick="document.getElementById('betAmount').value='0'">Clear</button>
+            <input type="number" id="betAmount" value="100" class="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-2 py-1 text-white font-mono text-center">
+            <button class="px-2 py-1 bg-slate-700 rounded-lg text-xs" onclick="addBet(10)">+10</button>
+            <button class="px-2 py-1 bg-slate-700 rounded-lg text-xs" onclick="addBet(50)">+50</button>
+            <button class="px-2 py-1 bg-slate-700 rounded-lg text-xs" onclick="addBet(100)">+100</button>
+          </div>
+        </div>
+        <div class="flex gap-2">
+          <button id="upBtn" class="flex-1 py-4 rounded-xl font-bold text-lg btn-up">UP</button>
+          <button id="downBtn" class="flex-1 py-4 rounded-xl font-bold text-lg btn-down">DOWN</button>
+        </div>
+      </div>
+    </div>
 
+    <!-- Tabs -->
+    <div class="mt-4 bg-slate-900 rounded-xl border border-slate-800 p-3">
+      <div class="flex border-b border-slate-700 mb-3">
+        <button onclick="switchTab('positions')" id="tab-positions" class="tab-btn flex-1 pb-2 text-sm font-bold text-green-400 border-b-2 border-green-400">Positions</button>
+        <button onclick="switchTab('openOrders')" id="tab-openOrders" class="tab-btn flex-1 pb-2 text-sm font-bold text-slate-400">Open Orders</button>
+        <button onclick="switchTab('history')" id="tab-history" class="tab-btn flex-1 pb-2 text-sm font-bold text-slate-400">History</button>
+      </div>
+      <div id="content-positions" class="tab-content">
+        <div class="text-center text-slate-500 text-sm py-4">No open positions</div>
+      </div>
+      <div id="content-openOrders" class="tab-content" style="display:none;">
+        <div class="text-center text-slate-500 text-sm py-4">No open orders</div>
+      </div>
+      <div id="content-history" class="tab-content" style="display:none;">
+        <div class="text-center text-slate-500 text-sm py-4">No trade history</div>
+      </div>
+    </div>
+
+    <div id="message" class="mt-3 text-center text-sm text-slate-400"></div>
   </div>
 
   <script>
-    // Chart setup
-    var prices = [];
-    var chart;
-    var maxPoints = 150;
-    var beatPrice = 0;
-
-    // Chart plugin for beat line
-    var beatLinePlugin = {
-      id: 'beatLine',
-      afterDatasetsDraw: function(chart) {
-        if (!beatPrice || beatPrice === 0) return;
-        
-        var ctx = chart.ctx;
-        var y = chart.scales.y.getPixelForValue(beatPrice);
-        
-        // Draw line
-        ctx.save();
-        ctx.beginPath();
-        ctx.setLineDash([5, 5]);
-        ctx.moveTo(chart.chartArea.left, y);
-        ctx.lineTo(chart.chartArea.right, y);
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
-        ctx.lineWidth = 2;
-        ctx.stroke();
-        
-        // Draw label box
-        var boxWidth = 90, boxHeight = 20;
-        var boxX = chart.chartArea.left + 5;
-        var boxY = y - boxHeight / 2;
-        
-        ctx.fillStyle = '#fff';
-        ctx.fillRect(boxX, boxY, boxWidth, boxHeight);
-        
-        // Add bevel effect
-        ctx.strokeStyle = '#ccc';
-        ctx.lineWidth = 1;
-        ctx.strokeRect(boxX, boxY, boxWidth, boxHeight);
-        
-        ctx.font = 'bold 11px Arial';
-        ctx.fillStyle = '#000';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText('BEAT $' + Math.round(beatPrice), boxX + boxWidth / 2, boxY + boxHeight / 2);
-        ctx.restore();
-      }
-    };
-
-    // Load saved prices
-    var saved = localStorage.getItem('btcPrices');
-    if (saved) {
-      prices = JSON.parse(saved);
+    // ===== LOGIN / UI =====
+    function toggleRules() {
+      var c = document.getElementById('rulesContent');
+      var a = document.getElementById('rulesArrow');
+      c.style.display = c.style.display === 'none' ? 'block' : 'none';
+      a.textContent = c.style.display === 'none' ? '▼' : '▲';
     }
-
-    function initChart(startPrice) {
-      while (prices.length < maxPoints) prices.push(startPrice);
-      while (prices.length > maxPoints) prices.shift();
-
-      chart = new Chart(document.getElementById('chart'), {
-        type: 'line',
-        data: {
-          labels: Array(maxPoints).fill(''),
-          datasets: [{
-            data: prices,
-            borderColor: '#22c55e',
-            backgroundColor: 'rgba(34,197,94,0.1)',
-            fill: true,
-            tension: 0.8,
-            borderWidth: 2,
-            pointRadius: 0
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { 
-            legend: { display: false },
-            beatLine: {}
-          },
-          scales: {
-            x: { display: false },
-            y: { 
-              position: 'right',
-              grid: { color: 'rgba(255,255,255,0.05)' },
-              ticks: { color: '#64748b', callback: function(v) { return '$' + Math.round(v); } }
-            }
-          }
-        },
-        plugins: [beatLinePlugin]
+    function switchTab(t) {
+      document.querySelectorAll('.tab-content').forEach(function(el){el.style.display='none'});
+      document.getElementById('content-'+t).style.display='block';
+      document.querySelectorAll('.tab-btn').forEach(function(btn){
+        btn.classList.remove('text-green-400','border-b-2','border-green-400');
+        btn.classList.add('text-slate-400');
       });
-
-      document.getElementById('chartPrice').textContent = 'BTC $' + Math.round(startPrice);
-
-      function updatePrice(p) {
-        prices.push(p);
-        if (prices.length > maxPoints) prices.shift();
-        chart.data.datasets[0].data = prices;
-        chart.update('none');
-        document.getElementById('chartPrice').textContent = 'BTC $' + Math.round(p);
-        localStorage.setItem('btcPrices', JSON.stringify(prices));
-        
-        // Update beat line
-        chart.update();
-      }
-
-      // Update every second
-      setInterval(function() {
-        fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT')
-          .then(function(r) { return r.json(); })
-          .then(function(d) { updatePrice(parseFloat(d.price)); });
-      }, 1000);
+      document.getElementById('tab-'+t).classList.remove('text-slate-400');
+      document.getElementById('tab-'+t).classList.add('text-green-400','border-b-2','border-green-400');
     }
-
-    // Trading logic
-    var btcPrice = 0;
-    var manualBeatPrice = 0;
-    var balance = 10000;
-    var currentBet = null;
-    var currentBetType = null;
-    var currentBeatPrice = 0;
-    const cycleDuration = 300;
-    const payoutMultiplier = 1.95;
-
-    var strikeEl = document.getElementById('strike');
-    var titlePriceEl = document.getElementById('titlePrice');
-    var balanceEl = document.getElementById('balance');
-    var countdownEl = document.getElementById('countdown');
-    var cycleLabelEl = document.getElementById('cycleLabel');
-    var priceChangeEl = document.getElementById('priceChange');
-    var messageEl = document.getElementById('message');
-    var betAmountInput = document.getElementById('betAmount');
-
-    function getCycleInfo() {
-      var now = new Date();
-      var totalSeconds = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
-      var cyclePosition = totalSeconds % cycleDuration;
-      var remaining = cycleDuration - cyclePosition;
-      return { remaining: remaining };
+    function showLogin() {
+      var m = document.createElement('div');
+      m.className = 'fixed inset-0 bg-black/80 flex items-center justify-center z-50';
+      m.innerHTML = '<div class="bg-slate-900 border border-slate-700 rounded-xl p-4 w-72"><h2 class="text-lg font-bold mb-2">Welcome Back</h2><input id="lemail" type="email" placeholder="Email" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 mb-2 text-white"><input id="lpwd" type="password" placeholder="Password" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 mb-3 text-white"><button onclick="doLogin()" class="w-full bg-blue-600 text-white py-2 rounded-lg mb-3">Login</button><p class="text-xs text-slate-400">No account? <button onclick="closemodal();showSignup()" class="text-blue-400">Sign Up</button></p><button onclick="closemodal()" class="w-full bg-slate-700 text-white py-2 rounded-lg mt-3">Cancel</button></div>';
+      document.body.appendChild(m);
     }
-
-    function addBet(amount) {
-      var current = parseInt(betAmountInput.value) || 0;
-      betAmountInput.value = current + amount;
+    function showSignup() {
+      var m = document.createElement('div');
+      m.className = 'fixed inset-0 bg-black/80 flex items-center justify-center z-50';
+      m.innerHTML = '<div class="bg-slate-900 border border-slate-700 rounded-xl p-4 w-72"><h2 class="text-lg font-bold mb-2">Create Account</h2><input id="semail" type="email" placeholder="Email" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 mb-2 text-white"><input id="spwd" type="password" placeholder="Password" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 mb-3 text-white"><button onclick="doSignup()" class="w-full bg-green-600 text-white py-2 rounded-lg mb-3">Sign Up</button><p class="text-xs text-slate-400">Have account? <button onclick="closemodal();showLogin()" class="text-blue-400">Login</button></p><button onclick="closemodal()" class="w-full bg-slate-700 text-white py-2 rounded-lg mt-3">Cancel</button></div>';
+      document.body.appendChild(m);
     }
-
-    function placeBet(type) {
-      var amount = parseInt(betAmountInput.value);
-
-      if (amount > balance) {
-        messageEl.textContent = 'Insufficient balance!';
-        return;
-      }
-
-      if (currentBetType && currentBetType !== type) {
-        messageEl.textContent = 'You have a ' + currentBetType + ' bet! Wait for round to end.';
-        return;
-      }
-
-      balance -= amount;
-      if (currentBet) {
-        currentBet += amount;
-      } else {
-        currentBet = amount;
-        currentBetType = type;
-      }
-
-      balanceEl.textContent = '$' + balance.toLocaleString();
-      messageEl.textContent = 'Bet placed: $' + amount + ' ' + type + '!';
+    function closemodal() { document.querySelector('.fixed.inset-0').remove(); }
+    function doLogin() {
+      var e = document.getElementById('lemail').value;
+      localStorage.setItem('user',JSON.stringify({email:e,balance:10000,username:e.split('@')[0]}));
+      updateUserUI();
+      closemodal();
     }
-
-    function settleBet() {
-      if (!currentBet || !currentBetType) return;
-
-      var beatDiff = btcPrice - manualBeatPrice;
-      var won = (currentBetType === 'UP' && beatDiff > 0) || (currentBetType === 'DOWN' && beatDiff < 0);
-
-      if (won) {
-        var winnings = currentBet * payoutMultiplier;
-        balance += Math.round(winnings);
-        messageEl.textContent = 'You WON $' + Math.round(winnings) + '! 🎉';
-      } else {
-        messageEl.textContent = 'You lost. Better luck next time!';
-      }
-
-      currentBet = null;
-      currentBetType = null;
-      balanceEl.textContent = '$' + balance.toLocaleString();
+    function doSignup() {
+      var e = document.getElementById('semail').value;
+      localStorage.setItem('user',JSON.stringify({email:e,balance:10000,username:e.split('@')[0]}));
+      alert('Account created! $10,000 demo balance.');
+      updateUserUI();
+      closemodal();
     }
-
-    var lastCycleNum = -1;
-
-    function update() {
-      btcPrice = parseFloat(document.getElementById('chartPrice').textContent.replace('BTC $', '')) || btcPrice;
-
-      var remaining = getCycleInfo().remaining;
-      var now = new Date();
-      var cycleNum = Math.floor((now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds()) / cycleDuration);
-
-      // New cycle
-      if (cycleNum !== lastCycleNum && lastCycleNum !== -1) {
-        settleBet();
-        manualBeatPrice = btcPrice;
-        currentBeatPrice = manualBeatPrice;
-        beatPrice = manualBeatPrice;
-        strikeEl.textContent = '$' + Math.round(manualBeatPrice);
-        
-        // Update beat line
-        if (chart) chart.update();
+    function updateUserUI() {
+      var u = JSON.parse(localStorage.getItem('user')||'{}');
+      if(u.email){
+        document.getElementById('loginArea').style.display='none';
+        document.getElementById('userArea').style.display='block';
+        document.getElementById('balanceArea').style.display='block';
+        document.getElementById('loginPrompt').style.display='none';
+        document.getElementById('username').textContent=u.username||'User';
+        document.getElementById('balance').textContent='$'+ (u.balance||10000).toLocaleString();
       }
-      lastCycleNum = cycleNum;
-
-      // Update display
-      titlePriceEl.textContent = 'BTC $' + Math.round(btcPrice);
-
-      var mins = Math.floor(remaining / 60);
-      var secs = remaining % 60;
-      countdownEl.textContent = mins.toString().padStart(2, '0') + ':' + secs.toString().padStart(2, '0');
-      cycleLabelEl.textContent = countdownEl.textContent + ' remaining';
-
-      var priceChange = ((btcPrice - manualBeatPrice) / manualBeatPrice) * 100;
-      priceChangeEl.textContent = (priceChange >= 0 ? '+' : '') + priceChange.toFixed(2) + '%';
-      priceChangeEl.style.color = priceChange >= 0 ? '#22c55e' : '#ef4444';
     }
+    function topUp() { document.getElementById('balance').textContent='$10,000'; alert('Added $10,000!'); }
+    function logout() { localStorage.removeItem('user'); location.reload(); }
+    updateUserUI();
 
-    // Initialize
-    fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT')
-      .then(function(r) { return r.json(); })
-      .then(function(d) {
-        var price = parseFloat(d.price);
-        manualBeatPrice = price;
-        currentBeatPrice = price;
-        beatPrice = price;
-        strikeEl.textContent = '$' + Math.round(manualBeatPrice);
-        initChart(price);
+    // ===== CHART =====
+    var prices=[], chart, maxPoints=150, beatPrice=0, btcPrice=0;
+    var saved=localStorage.getItem('btcPrices');
+    if(saved) prices=JSON.parse(saved);
+
+    var beatLinePlugin={id:'beatLine',afterDatasetsDraw:function(c){
+      if(!beatPrice)return;
+      var y=c.scales.y.getPixelForValue(beatPrice),ctx=c.ctx;
+      ctx.save();
+      ctx.beginPath();ctx.setLineDash([5,5]);ctx.moveTo(c.chartArea.left,y);ctx.lineTo(c.chartArea.right,y);ctx.strokeStyle='rgba(255,255,255,0.5)';ctx.lineWidth=2;ctx.stroke();
+      var bw=90,bh=20,bx=c.chartArea.left+5,by=y-bh/2;
+      ctx.fillStyle='#fff';ctx.fillRect(bx,by,bw,bh);ctx.strokeStyle='#ccc';ctx.strokeRect(bx,by,bw,bh);
+      ctx.font='bold 11px Arial';ctx.fillStyle='#000';ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillText('BEAT $'+Math.round(beatPrice),bx+bw/2,by+bh/2);
+      ctx.restore();
+    }};
+
+    function initChart(startPrice){
+      while(prices.length<maxPoints)prices.push(startPrice);
+      while(prices.length>maxPoints)prices.shift();
+      chart=new Chart(document.getElementById('chart'),{
+        type:'line',
+        data:{labels:Array(maxPoints).fill(''),datasets:[{data:prices,borderColor:'#22c55e',backgroundColor:'rgba(34,197,94,0.1)',fill:true,tension:0.8,borderWidth:2,pointRadius:0}]},
+        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{display:false},y:{position:'right',grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#64748b',callback:function(v){return'$'+Math.round(v)}}}}}},
+        plugins:[beatLinePlugin]
       });
+      function up(p){
+        prices.push(p);if(prices.length>maxPoints)prices.shift();
+        chart.data.datasets[0].data=prices;chart.update('none');
+        document.getElementById('titlePrice').textContent='BTC $'+Math.round(p);
+        localStorage.setItem('btcPrices',JSON.stringify(prices));
+        window.btcPrice=p;updateTrading();chart.update();
+      }
+      setInterval(function(){fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT').then(function(r){return r.json()}).then(function(d){up(parseFloat(d.price))})},1000);
+    }
 
-    setInterval(update, 1000);
+    // ===== TRADING =====
+    var balance=10000,currentBets=[],lastBetTime=0,lastCycleNum=-1,manualBeatPrice=0;
+    var cycleDuration=300,payoutMultiplier=1.95,maxFeeTime=30;
+
+    function getCycleInfo(){
+      var n=new Date(),t=n.getHours()*3600+n.getMinutes()*60+n.getSeconds();
+      return{remaining:cycleDuration-t%cycleDuration,cycleNum:Math.floor(t/cycleDuration),now:n};
+    }
+    function addBet(a){var c=parseInt(document.getElementById('betAmount').value)||0;document.getElementById('betAmount').value=c+a;}
+    function getPlatformFee(){if(!manualBeatPrice)return 0.01;var d=Math.abs(btcPrice-manualBeatPrice);return 0.005+Math.min(d/(manualBeatPrice*0.01),1)*0.015;}
+    function calcPayout(bet){
+      var r=getCycleInfo().remaining/cycleDuration;
+      var p=1.02+(1.95-1.02)*r;
+      var diff=btcPrice-manualBeatPrice;
+      var thresh=manualBeatPrice*0.01;
+      var val=bet.amount;
+      if(bet.type==='UP'){if(diff>0)val=bet.amount+(bet.amount*(p-1)*Math.min(Math.abs(diff)/thresh,1)*r);else val=bet.amount-bet.amount*0.5*Math.min(Math.abs(diff)/thresh,1)*(1-r);}
+      else{if(diff<0)val=bet.amount+(bet.amount*(p-1)*Math.min(Math.abs(diff)/thresh,1)*r);else val=bet.amount-bet.amount*0.5*Math.min(Math.abs(diff)/thresh,1)*(1-r);}
+      return Math.max(0,val);
+    }
+    function placeBet(type){
+      var u=JSON.parse(localStorage.getItem('user')||'{}');
+      if(!u.email){showLogin();return;}
+      var amt=parseInt(document.getElementById('betAmount').value);
+      if(amt>balance){document.getElementById('message').textContent='Insufficient balance!';return;}
+      if(currentBets.length>0&&currentBets[0].type!==type){document.getElementById('message').textContent='Sell first!';return;}
+      balance-=amt;currentBets.push({type:type,amount:amt,betTime:Date.now()});
+      document.getElementById('balance').textContent='$'+balance.toLocaleString();
+      document.getElementById('message').textContent='Bet: $'+amt+' '+type+'!';
+      updatePayout();
+    }
+    function updatePayout(){
+      if(currentBets.length===0){document.getElementById('positionPanel').style.display='none';return;}
+      document.getElementById('positionPanel').style.display='block';
+      var s=(Date.now()-currentBets[0].betTime)/1000;
+      var ef=Math.max(0,1-s/maxFeeTime)*0.10*100;
+      var pf=getPlatformFee()*100;
+      var te=document.getElementById('holdTimer');
+      te.textContent=(ef>0.1?'⚡ Early: '+ef.toFixed(2)+'% + ':'✅ ')+'Fee: '+pf.toFixed(2)+'%';
+      te.className='text-center text-xs '+(ef>0.1?'text-yellow-500':'text-green-500')+' mb-2';
+      var ta=currentBets.reduce(function(s,b){return s+b.amount},0);
+      var tp=currentBets.reduce(function(s,b){return s+calcPayout(b)},0);
+      var dir=currentBets[0].type;
+      document.getElementById('positionSummary').innerHTML=currentBets.length+' bet'+(currentBets.length>1?'s':'')+' • $'+ta+' <span class="text-'+(dir==='UP'?'green':'red')+'-400">'+(dir==='UP'?'▲':'▼')+' '+dir+'</span>';
+      document.getElementById('totalPayout').textContent='$'+Math.round(tp).toLocaleString();
+    }
+    function cashOutPercent(pct){
+      if(currentBets.length===0)return;
+      var tv=currentBets.reduce(function(s,b){return s+calcPayout(b)},0);
+      var s=(Date.now()-currentBets[0].betTime)/1000;
+      var fee=tv*Math.max(0,1-s/maxFeeTime)*0.10+tv*getPlatformFee();
+      var cash=tv*(pct/100)-fee*(pct/100);
+      currentBets.forEach(function(b){b.amount*=1-pct/100});
+      currentBets=currentBets.filter(function(b){return b.amount>1});
+      balance+=Math.round(cash);
+      document.getElementById('balance').textContent='$'+balance.toLocaleString();
+      document.getElementById('message').textContent='Sold '+pct+'% = $'+Math.round(cash)+'!';
+      updatePayout();
+    }
+    function settleBets(){
+      if(currentBets.length===0)return;
+      var w=0,ba=0;
+      for(var i=0;i<currentBets.length;i++){
+        var bet=currentBets[i];
+        var diff=btcPrice-manualBeatPrice;
+        var won=(bet.type==='UP'&&diff>0)||(bet.type==='DOWN'&&diff<0);
+        ba+=bet.amount;
+        if(won)w+=bet.amount*payoutMultiplier;
+      }
+      var pf=w*getPlatformFee();
+      balance+=Math.round(w-pf);
+      var profit=Math.round(w-pf)-ba;
+      document.getElementById('message').textContent=profit>0?'You WON $'+profit+'! 🎉':profit<0?'You lost $'+Math.abs(profit)+'.':'Break even!';
+      currentBets=[];
+      document.getElementById('balance').textContent='$'+balance.toLocaleString();
+      updatePayout();
+    }
+    function updateTrading(){
+      var info=getCycleInfo();
+      document.getElementById('countdown').textContent=Math.floor(info.remaining/60).toString().padStart(2,'0')+':'+(info.remaining%60).toString().padStart(2,'0');
+      document.getElementById('cycleLabel').textContent=document.getElementById('countdown').textContent+' remaining';
+      if(manualBeatPrice){
+        var pc=((btcPrice-manualBeatPrice)/manualBeatPrice)*100;
+        var ce=document.getElementById('priceChange');
+        ce.textContent=(pc>=0?'+':'')+pc.toFixed(2)+'%';
+        ce.className='text-2xl font-bold '+(pc>=0?'text-green-400':'text-red-400');
+      }
+      if(info.cycleNum!==lastCycleNum&&lastCycleNum!==-1){settleBets();manualBeatPrice=btcPrice;beatPrice=btcPrice;document.getElementById('strike').textContent='$'+Math.round(btcPrice);}
+      lastCycleNum=info.cycleNum;
+    }
+
+    // Init
+    fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT').then(function(r){return r.json()}).then(function(d){
+      var p=parseFloat(d.price);
+      manualBeatPrice=p;beatPrice=p;
+      document.getElementById('strike').textContent='$'+Math.round(p);
+      initChart(p);
+    });
+    document.getElementById('upBtn').onclick=function(){placeBet('UP')};
+    document.getElementById('downBtn').onclick=function(){placeBet('DOWN')};
   </script>
 </body>
 </html>
