@@ -18,7 +18,7 @@
     .chart-box{height:50vh;background:#1e293b;border-radius:12px;padding:10px}
     .price-row{display:flex;justify-content:space-between;margin-top:10px}
     .price{color:#22c55e;font-size:16px;font-weight:normal}
-    .beat{color:#94a3b8;font-size:14px}
+    .beat{color:#94a3b8;font-size:16px;font-weight:normal}
     .beat span{color:#fff;font-weight:bold}
     .change{font-size:20px;font-weight:bold}
     .change.up{color:#22c55e}
@@ -43,7 +43,7 @@
     <div class="chart-box" style="position:relative"><canvas id="c"></canvas></div>
     <div class="price-row">
       <div><div style="color:#94a3b8;font-size:8px">Current Price</div><div class="price" id="p">$0</div></div>
-      <div class="beat">Beat: <span id="beat">$0</span></div>
+      <div class="beat"><div style="color:#94a3b8;font-size:8px">Price to Beat</div><span id="beat">$0</span></div>
       <div class="change" id="change">0%</div>
     </div>
   </div>
