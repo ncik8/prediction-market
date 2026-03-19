@@ -77,10 +77,10 @@ beatPrice=startPrice;
 currentPrice=startPrice;
 while(prices.length<maxPoints){prices.push(startPrice);priceTimes.push(new Date());}
 while(prices.length>maxPoints){prices.shift();priceTimes.shift();}
-chart=new Chart(document.getElementById('c'),{type:'line',data:{labels:Array(maxPoints).fill(''),datasets:[{data:prices,borderColor:'#22c55e',backgroundColor:'rgba(34,197,94,0.1)',fill:true,tension:0.2,borderWidth:2,pointRadius:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{display:false},y:{position:'right',grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#64748b',callback:function(v){return'$'+Math.round(v)}}}}},plugins:[beatLinePlugin,dotPlugin,timeTickerPlugin]});
+chart=new Chart(document.getElementById('c'),{type:'line',data:{labels:Array(maxPoints).fill(''),datasets:[{data:prices,borderColor:'#22c55e',backgroundColor:'rgba(34,197,94,0.1)',fill:true,tension:0.2,borderWidth:2,pointRadius:0}]},options:{responsive:true,maintainAspectRatio:false,animation:{duration:200},plugins:{legend:{display:false}},scales:{x:{display:false},y:{position:'right',grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#64748b',callback:function(v){return'$'+Math.round(v)}}}}},plugins:[beatLinePlugin,dotPlugin,timeTickerPlugin]});
 updateDisplay(startPrice);
 var lastLabelUpdate=0;
-function upd(p){prices.push(p);priceTimes.push(new Date());if(prices.length>maxPoints){prices.shift();priceTimes.shift();}chart.data.datasets[0].data=prices;chart.data.datasets[0].borderColor=p>=beatPrice?'#22c55e':'#ef4444';chart.data.datasets[0].backgroundColor=p>=beatPrice?'rgba(34,197,94,0.1)':'rgba(239,68,68,0.1)';chart.update('none');currentPrice=p;updateDisplay(p);localStorage.setItem('btcPrices',JSON.stringify(prices));}
+function upd(p){prices.push(p);priceTimes.push(new Date());if(prices.length>maxPoints){prices.shift();priceTimes.shift();}chart.data.datasets[0].data=prices;chart.data.datasets[0].borderColor=p>=beatPrice?'#22c55e':'#ef4444';chart.data.datasets[0].backgroundColor=p>=beatPrice?'rgba(34,197,94,0.1)':'rgba(239,68,68,0.1)';chart.update();currentPrice=p;updateDisplay(p);localStorage.setItem('btcPrices',JSON.stringify(prices));}
 
 // WebSocket for real-time data - miniTicker stream (cleaner, 1 update/sec)
 var latestPrice=null;
