@@ -58,12 +58,15 @@ if(saved){prices=JSON.parse(saved);}
 // Beat line plugin
 var beatLinePlugin={id:'beatLine',afterDatasetsDraw:function(c){if(!beatPrice)return;var y=c.scales.y.getPixelForValue(beatPrice);var ctx=c.ctx;ctx.save();ctx.beginPath();ctx.setLineDash([5,5]);ctx.moveTo(c.chartArea.left,y);ctx.lineTo(c.chartArea.right,y);ctx.strokeStyle='rgba(255,255,255,0.5)';ctx.lineWidth=2;ctx.stroke();ctx.beginPath();ctx.roundRect(c.chartArea.left+5,y-12,100,24,4);ctx.fillStyle='#fff';ctx.fill();ctx.strokeStyle='#ccc';ctx.stroke();ctx.fillStyle='#000';ctx.font='bold 10px Arial';ctx.textAlign='center';ctx.fillText('BEAT $'+Math.round(beatPrice),c.chartArea.left+55,y+4);ctx.restore();}};
 
+// Orange dot plugin
+var dotPlugin={id:'dot',afterDatasetsDraw:function(c){if(prices.length===0)return;var lastPrice=prices[prices.length-1];var x=c.scales.x.getPixelForValue(prices.length-1);var y=c.scales.y.getPixelForValue(lastPrice);var ctx=c.ctx;ctx.save();ctx.beginPath();ctx.arc(x,y,8,0,Math.PI*2);ctx.fillStyle='rgba(249,115,22,0.3)';ctx.fill();ctx.beginPath();ctx.arc(x,y,5,0,Math.PI*2);ctx.fillStyle='#f97316';ctx.fill();ctx.beginPath();ctx.arc(x,y,2,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();ctx.restore();}};
+
 function init(startPrice){
 beatPrice=startPrice;
 currentPrice=startPrice;
 while(prices.length<maxPoints)prices.push(startPrice);
 while(prices.length>maxPoints)prices.shift();
-chart=new Chart(document.getElementById('c'),{type:'line',data:{labels:Array(maxPoints).fill(''),datasets:[{data:prices,borderColor:'#22c55e',backgroundColor:'rgba(34,197,94,0.1)',fill:true,tension:0.8,borderWidth:2,pointRadius:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{display:false},y:{position:'right',grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#64748b',callback:function(v){return'$'+Math.round(v)}}}}},plugins:[beatLinePlugin]});
+chart=new Chart(document.getElementById('c'),{type:'line',data:{labels:Array(maxPoints).fill(''),datasets:[{data:prices,borderColor:'#22c55e',backgroundColor:'rgba(34,197,94,0.1)',fill:true,tension:0.8,borderWidth:2,pointRadius:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{display:false},y:{position:'right',grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#64748b',callback:function(v){return'$'+Math.round(v)}}}}},plugins:[beatLinePlugin,dotPlugin]});
 updateDisplay(startPrice);
 function upd(p){prices.push(p);if(prices.length>maxPoints)prices.shift();chart.data.datasets[0].data=prices;chart.data.datasets[0].borderColor=p>=beatPrice?'#22c55e':'#ef4444';chart.data.datasets[0].backgroundColor=p>=beatPrice?'rgba(34,197,94,0.1)':'rgba(239,68,68,0.1)';chart.update('none');currentPrice=p;updateDisplay(p);localStorage.setItem('btcPrices',JSON.stringify(prices));}
 setInterval(function(){fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT').then(function(r){return r.json()}).then(function(d){upd(parseFloat(d.price))})},1000);}
