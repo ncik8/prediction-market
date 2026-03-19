@@ -3,59 +3,346 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BTC Chart</title>
+  <title>PredictX - BTC 5MIN</title>
+  <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    body{background:#0a0a0a;margin:0;padding:20px;font-family:system-ui,sans-serif}
-    .container{max-width:800px;margin:0 auto}
-    h1{color:#fff;font-size:24px;margin-bottom:10px}
-    .chart-box{height:60vh;background:#1e293b;border-radius:12px;padding:10px}
-    .price{color:#22c55e;font-size:32px;font-weight:bold;text-align:center;margin-top:10px}
+    body{background:#0a0a0a;color:white;margin:0;font-family:system-ui,sans-serif}
+    .btn-up{background:#22c55e}
+    .btn-up:hover{background:#16a34a}
+    .btn-down{background:#ef4444}
+    .btn-down:hover{background:#dc2626}
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>BTC Live Chart</h1>
-    <div class="chart-box"><canvas id="c"></canvas></div>
-    <div class="price" id="p">Loading...</div>
+  <!-- Header -->
+  <header style="position:fixed;top:0;left:0;right:0;background:rgba(10,10,10,0.98);padding:12px;border-bottom:1px solid #1e293b;display:flex;justify-content:space-between;align-items:center;z-index:100;">
+    <div style="display:flex;align-items:center;gap:20px;">
+      <a href="/" style="font-size:20px;font-weight:bold;color:white;text-decoration:none;">PREDICTX</a>
+      <nav style="display:flex;gap:15px;">
+        <a href="#" style="color:#94a3b8;font-size:14px;">Markets</a>
+        <a href="btc-live.html" style="color:#60a5fa;font-size:14px;">5m</a>
+      </nav>
+    </div>
+    <button onclick="showLogin()" style="background:#3b82f6;border:none;padding:8px 16px;border-radius:6px;color:white;cursor:pointer;">Get Started</button>
+  </header>
+
+  <div style="max-width:600px;margin:0 auto;padding:80px 16px 20px;">
+    <!-- Trading Header -->
+    <div style="display:flex;justify-content:space-between;margin-bottom:16px;">
+      <div>
+        <div style="color:#94a3b8;font-size:14px;">Crypto - 5MIN</div>
+        <div style="font-size:24px;font-weight:bold;" id="titlePrice">BTC $0</div>
+        <div style="color:#fbbf24;font-size:12px;" id="cycleLabel">05:00 remaining</div>
+      </div>
+      <div style="text-align:right;">
+        <div id="loginArea"><button onclick="showLogin()" style="background:#3b82f6;border:none;padding:8px 16px;border-radius:6px;color:white;cursor:pointer;">Login</button></div>
+        <div id="userArea" style="display:none;">
+          <span style="color:#94a3b8;font-size:12px;">User: <span id="username">-</span></span>
+        </div>
+        <div id="balanceArea" style="display:none;">
+          <div style="font-size:32px;font-weight:bold;color:#22c55e;" id="countdown">00:00</div>
+          <div style="color:#94a3b8;font-size:12px;">Balance: <span id="balance" style="color:white;font-weight:bold;">$10,000</span></div>
+        </div>
+        <div id="loginPrompt" style="color:#64748b;font-size:12px;">Login to start</div>
+      </div>
+    </div>
+
+    <!-- Price Change -->
+    <div style="text-align:center;margin-bottom:16px;">
+      <span id="priceChange" style="font-size:24px;font-weight:bold;">0.00%</span>
+      <span style="color:#94a3b8;font-size:14px;"> from beat</span>
+    </div>
+
+    <!-- Chart -->
+    <div style="background:#1e293b;border-radius:12px;padding:12px;margin-bottom:16px;">
+      <canvas id="chart" style="height:400px;"></canvas>
+    </div>
+
+    <!-- Beat -->
+    <div style="text-align:center;margin-bottom:16px;">
+      <span style="color:#94a3b8;">Beat: </span>
+      <span id="strike" style="font-weight:bold;">$0</span>
+    </div>
+
+    <!-- Position Panel -->
+    <div id="positionPanel" style="background:#334155;border-radius:12px;padding:12px;margin-bottom:16px;display:none;">
+      <div style="display:flex;justify-content:space-between;margin-bottom:12px;">
+        <div><span style="color:#94a3b8;font-size:14px;">Your Bets</span><div id="positionSummary" style="font-weight:bold;color:#22c55e;">$0</div></div>
+        <div style="text-align:right;"><span style="color:#94a3b8;font-size:14px;">Potential</span><div id="totalPayout" style="color:#22c55e;font-size:20px;font-weight:bold;">$0</div></div>
+      </div>
+      <div style="text-align:center;font-size:12px;margin-bottom:12px;color:#64748b;" id="holdTimer"></div>
+      <div style="display:flex;gap:8px;">
+        <button onclick="cashOutPercent(25)" style="flex:1;padding:12px;background:#f59e0b;border:none;border-radius:8px;color:white;font-weight:bold;">Sell 25%</button>
+        <button onclick="cashOutPercent(50)" style="flex:1;padding:12px;background:#f59e0b;border:none;border-radius:8px;color:white;font-weight:bold;">Sell 50%</button>
+        <button onclick="cashOutPercent(100)" style="flex:1;padding:12px;background:#ef4444;border:none;border-radius:8px;color:white;font-weight:bold;">Sell All</button>
+      </div>
+    </div>
+
+    <!-- Betting Panel -->
+    <div style="background:#1e293b;border-radius:12px;padding:16px;margin-bottom:16px;">
+      <div style="margin-bottom:12px;">
+        <div style="display:flex;gap:8px;margin-bottom:8px;">
+          <button onclick="document.getElementById('betAmount').value='0'" style="padding:8px 12px;background:#475569;border:none;border-radius:6px;color:#94a3b8;cursor:pointer;">Clear</button>
+          <input type="number" id="betAmount" value="100" style="flex:1;background:#0f172a;border:1px solid #334155;border-radius:6px;padding:8px;color:white;text-align:center;">
+          <button onclick="addBet(10)" style="padding:8px 12px;background:#334155;border:none;border-radius:6px;color:white;cursor:pointer;">+10</button>
+          <button onclick="addBet(50)" style="padding:8px 12px;background:#334155;border:none;border-radius:6px;color:white;cursor:pointer;">+50</button>
+          <button onclick="addBet(100)" style="padding:8px 12px;background:#334155;border:none;border-radius:6px;color:white;cursor:pointer;">+100</button>
+        </div>
+      </div>
+      <div style="display:flex;gap:12px;">
+        <button id="upBtn" class="btn-up" style="flex:1;padding:16px;border:none;border-radius:12px;color:white;font-size:18px;font-weight:bold;cursor:pointer;">UP</button>
+        <button id="downBtn" class="btn-down" style="flex:1;padding:16px;border:none;border-radius:12px;color:white;font-size:18px;font-weight:bold;cursor:pointer;">DOWN</button>
+      </div>
+    </div>
+
+    <div id="message" style="text-align:center;color:#94a3b8;font-size:14px;margin-top:12px;"></div>
   </div>
+
   <script>
-var prices=[];
-var chart;
-var maxPoints=150;
+    // ===== CHART =====
+    var prices = [];
+    var chart;
+    var maxPoints = 150;
+    var beatPrice = 0;
+    var btcPrice = 0;
 
-// Load from localStorage or fetch
-var saved=localStorage.getItem('btcPrices');
-if(saved){prices=JSON.parse(saved);console.log('Loaded',prices.length,'prices');}
+    // Load saved prices
+    var saved = localStorage.getItem('btcPrices');
+    if (saved) { prices = JSON.parse(saved); }
 
-function init(startPrice) {
-  // Fill remaining points with start price if needed
-  while(prices.length<maxPoints)prices.push(startPrice);
-  while(prices.length>maxPoints)prices.shift();
-  
-  chart=new Chart(document.getElementById('c'),{type:'line',data:{labels:Array(maxPoints).fill(''),datasets:[{data:prices,borderColor:'#22c55e',backgroundColor:'rgba(34,197,94,0.1)',fill:true,tension:0.8,borderWidth:2,pointRadius:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{display:false},y:{position:'right',grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#64748b',callback:function(v){return'$'+Math.round(v)}}}}}});
-  document.getElementById('p').textContent='BTC $'+Math.round(startPrice);
-  
-  function upd(p){
-    prices.push(p);
-    if(prices.length>maxPoints)prices.shift();
-    chart.data.datasets[0].data=prices;
-    chart.update('none');
-    document.getElementById('p').textContent='BTC $'+Math.round(p);
-    // Save to localStorage
-    localStorage.setItem('btcPrices',JSON.stringify(prices));
-  }
-  
-  setInterval(function(){
+    // Beat line plugin
+    var beatLinePlugin = {
+      id: 'beatLine',
+      afterDatasetsDraw: function(c) {
+        if (!beatPrice) return;
+        var y = c.scales.y.getPixelForValue(beatPrice);
+        var ctx = c.ctx;
+        ctx.save();
+        ctx.beginPath();
+        ctx.setLineDash([5, 5]);
+        ctx.moveTo(c.chartArea.left, y);
+        ctx.lineTo(c.chartArea.right, y);
+        ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        
+        var bw = 90, bh = 20, bx = c.chartArea.left + 5, by = y - bh/2;
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(bx, by, bw, bh);
+        ctx.strokeStyle = '#ccc';
+        ctx.strokeRect(bx, by, bw, bh);
+        ctx.font = 'bold 11px Arial';
+        ctx.fillStyle = '#000';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('BEAT $' + Math.round(beatPrice), bx + bw/2, by + bh/2);
+        ctx.restore();
+      }
+    };
+
+    function initChart(startPrice) {
+      while (prices.length < maxPoints) prices.push(startPrice);
+      while (prices.length > maxPoints) prices.shift();
+
+      chart = new Chart(document.getElementById('chart'), {
+        type: 'line',
+        data: {
+          labels: Array(maxPoints).fill(''),
+          datasets: [{ data: prices, borderColor: '#22c55e', backgroundColor: 'rgba(34,197,94,0.1)', fill: true, tension: 0.8, borderWidth: 2, pointRadius: 0 }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: { x: { display: false }, y: { position: 'right', grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#64748b', callback: function(v) { return '$' + Math.round(v); } } }
+        },
+        plugins: [beatLinePlugin]
+      });
+
+      function updatePrice(p) {
+        prices.push(p);
+        if (prices.length > maxPoints) prices.shift();
+        chart.data.datasets[0].data = prices;
+        chart.update('none');
+        document.getElementById('titlePrice').textContent = 'BTC $' + Math.round(p);
+        localStorage.setItem('btcPrices', JSON.stringify(prices));
+        window.btcPrice = p;
+        updateTrading();
+        chart.update();
+      }
+
+      setInterval(function() {
+        fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT')
+          .then(function(r) { return r.json(); })
+          .then(function(d) { updatePrice(parseFloat(d.price)); });
+      }, 1000);
+    }
+
+    // ===== TRADING =====
+    var balance = 10000;
+    var currentBets = [];
+    var manualBeatPrice = 0;
+    var lastCycleNum = -1;
+    var cycleDuration = 300;
+    var payoutMultiplier = 1.95;
+    var maxFeeTime = 30;
+
+    function getCycleInfo() {
+      var n = new Date();
+      var t = n.getHours() * 3600 + n.getMinutes() * 60 + n.getSeconds();
+      return { remaining: cycleDuration - t % cycleDuration, cycleNum: Math.floor(t / cycleDuration) };
+    }
+
+    function addBet(amount) {
+      var current = parseInt(document.getElementById('betAmount').value) || 0;
+      document.getElementById('betAmount').value = current + amount;
+    }
+
+    function placeBet(type) {
+      var user = JSON.parse(localStorage.getItem('user') || '{}');
+      if (!user.email) { showLogin(); return; }
+      
+      var amount = parseInt(document.getElementById('betAmount').value);
+      if (amount > balance) { document.getElementById('message').textContent = 'Insufficient balance!'; return; }
+      if (currentBets.length > 0 && currentBets[0].type !== type) { document.getElementById('message').textContent = 'Sell first!'; return; }
+
+      balance -= amount;
+      currentBets.push({ type: type, amount: amount, betTime: Date.now() });
+      document.getElementById('balance').textContent = '$' + balance.toLocaleString();
+      document.getElementById('message').textContent = 'Bet: $' + amount + ' ' + type + '!';
+      updatePayout();
+    }
+
+    function getPlatformFee() {
+      if (!manualBeatPrice) return 0.01;
+      var diff = Math.abs(btcPrice - manualBeatPrice);
+      return 0.005 + Math.min(diff / (manualBeatPrice * 0.01), 1) * 0.015;
+    }
+
+    function calculatePayout(bet) {
+      var r = getCycleInfo().remaining / cycleDuration;
+      var p = 1.02 + (1.95 - 1.02) * r;
+      var diff = btcPrice - manualBeatPrice;
+      var thresh = manualBeatPrice * 0.01;
+      var val = bet.amount;
+      if (bet.type === 'UP') {
+        if (diff > 0) val = bet.amount + bet.amount * (p - 1) * Math.min(Math.abs(diff) / thresh, 1) * r;
+        else val = bet.amount - bet.amount * 0.5 * Math.min(Math.abs(diff) / thresh, 1) * (1 - r);
+      } else {
+        if (diff < 0) val = bet.amount + bet.amount * (p - 1) * Math.min(Math.abs(diff) / thresh, 1) * r;
+        else val = bet.amount - bet.amount * 0.5 * Math.min(Math.abs(diff) / thresh, 1) * (1 - r);
+      }
+      return Math.max(0, val);
+    }
+
+    function updatePayout() {
+      if (currentBets.length === 0) { document.getElementById('positionPanel').style.display = 'none'; return; }
+      document.getElementById('positionPanel').style.display = 'block';
+      
+      var seconds = (Date.now() - currentBets[0].betTime) / 1000;
+      var earlyFee = Math.max(0, 1 - seconds / maxFeeTime) * 0.10 * 100;
+      var platFee = getPlatformFee() * 100;
+      
+      var timerEl = document.getElementById('holdTimer');
+      if (earlyFee > 0.1) { timerEl.textContent = 'Early: ' + earlyFee.toFixed(2) + '% + Fee: ' + platFee.toFixed(2) + '%'; timerEl.style.color = '#f59e0b'; }
+      else { timerEl.textContent = 'Fee: ' + platFee.toFixed(2) + '%'; timerEl.style.color = '#22c55e'; }
+      
+      var totalAmount = currentBets.reduce(function(s, b) { return s + b.amount; }, 0);
+      var totalPotential = currentBets.reduce(function(s, b) { return s + calculatePayout(b); }, 0);
+      var dir = currentBets[0].type;
+      document.getElementById('positionSummary').innerHTML = currentBets.length + ' bet - $' + totalAmount + ' <span style="color:' + (dir === 'UP' ? '#22c55e' : '#ef4444') + ';">' + (dir === 'UP' ? 'UP' : 'DOWN') + '</span>';
+      document.getElementById('totalPayout').textContent = '$' + Math.round(totalPotential).toLocaleString();
+    }
+
+    function cashOutPercent(pct) {
+      if (currentBets.length === 0) return;
+      var totalValue = currentBets.reduce(function(s, b) { return s + calculatePayout(b); }, 0);
+      var seconds = (Date.now() - currentBets[0].betTime) / 1000;
+      var fee = totalValue * Math.max(0, 1 - seconds / maxFeeTime) * 0.10 + totalValue * getPlatformFee();
+      var cash = totalValue * (pct / 100) - fee * (pct / 100);
+      currentBets.forEach(function(b) { b.amount = b.amount * (1 - pct / 100); });
+      currentBets = currentBets.filter(function(b) { return b.amount > 1; });
+      balance += Math.round(cash);
+      document.getElementById('balance').textContent = '$' + balance.toLocaleString();
+      document.getElementById('message').textContent = 'Sold ' + pct + '% = $' + Math.round(cash) + '!';
+      updatePayout();
+    }
+
+    function settleBets() {
+      if (currentBets.length === 0) return;
+      var winnings = 0, betAmount = 0;
+      for (var i = 0; i < currentBets.length; i++) {
+        var bet = currentBets[i];
+        var diff = btcPrice - manualBeatPrice;
+        var won = (bet.type === 'UP' && diff > 0) || (bet.type === 'DOWN' && diff < 0);
+        betAmount += bet.amount;
+        if (won) winnings += bet.amount * payoutMultiplier;
+      }
+      var pf = winnings * getPlatformFee();
+      balance += Math.round(winnings - pf);
+      var profit = Math.round(winnings - pf) - betAmount;
+      document.getElementById('message').textContent = profit > 0 ? 'You WON $' + profit + '!' : profit < 0 ? 'You lost $' + Math.abs(profit) + '.' : 'Break even!';
+      currentBets = [];
+      document.getElementById('balance').textContent = '$' + balance.toLocaleString();
+      updatePayout();
+    }
+
+    function updateTrading() {
+      var info = getCycleInfo();
+      document.getElementById('countdown').textContent = Math.floor(info.remaining / 60).toString().padStart(2, '0') + ':' + (info.remaining % 60).toString().padStart(2, '0');
+      document.getElementById('cycleLabel').textContent = document.getElementById('countdown').textContent + ' remaining';
+      
+      if (manualBeatPrice) {
+        var pc = ((btcPrice - manualBeatPrice) / manualBeatPrice) * 100;
+        var ce = document.getElementById('priceChange');
+        ce.textContent = (pc >= 0 ? '+' : '') + pc.toFixed(2) + '%';
+        ce.style.color = pc >= 0 ? '#22c55e' : '#ef4444';
+      }
+      
+      if (info.cycleNum !== lastCycleNum && lastCycleNum !== -1) {
+        settleBets();
+        manualBeatPrice = btcPrice;
+        beatPrice = btcPrice;
+        document.getElementById('strike').textContent = '$' + Math.round(btcPrice);
+      }
+      lastCycleNum = info.cycleNum;
+    }
+
+    // ===== LOGIN =====
+    function showLogin() {
+      var email = prompt('Enter email:');
+      if (email) {
+        localStorage.setItem('user', JSON.stringify({ email: email, balance: 10000, username: email.split('@')[0] }));
+        updateUserUI();
+      }
+    }
+    function updateUserUI() {
+      var u = JSON.parse(localStorage.getItem('user') || '{}');
+      if (u.email) {
+        document.getElementById('loginArea').style.display = 'none';
+        document.getElementById('userArea').style.display = 'block';
+        document.getElementById('balanceArea').style.display = 'block';
+        document.getElementById('loginPrompt').style.display = 'none';
+        document.getElementById('username').textContent = u.username || 'User';
+        document.getElementById('balance').textContent = '$' + (u.balance || 10000).toLocaleString();
+      }
+    }
+    updateUserUI();
+
+    // ===== INIT =====
     fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT')
-    .then(function(r){return r.json()})
-    .then(function(d){upd(parseFloat(d.price))})
-  },1000);
-}
+      .then(function(r) { return r.json(); })
+      .then(function(d) {
+        var price = parseFloat(d.price);
+        manualBeatPrice = price;
+        beatPrice = price;
+        document.getElementById('strike').textContent = '$' + Math.round(price);
+        initChart(price);
+      });
 
-fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT')
-.then(function(r){return r.json()})
-.then(function(d){init(parseFloat(d.price))});
+    document.getElementById('upBtn').onclick = function() { placeBet('UP'); };
+    document.getElementById('downBtn').onclick = function() { placeBet('DOWN'); };
   </script>
 </body>
 </html>
