@@ -39,7 +39,6 @@
     <!-- Chart (embedded, taller with beat line) -->
     <div style="background: #1e293b; border-radius: 12px; padding: 12px; margin-bottom: 16px; height: 450px;">
       <canvas id="chart" style="height: 400px !important;"></canvas>
-      <div id="chartPrice" style="text-align: center; color: #22c55e; font-size: 20px; font-weight: bold; margin-top: 8px;">Loading...</div>
     </div>
 
     <!-- Beat Price -->
@@ -96,7 +95,7 @@
         ctx.stroke();
         
         // Draw label box
-        var boxWidth = 70, boxHeight = 20;
+        var boxWidth = 90, boxHeight = 20;
         var boxX = chart.chartArea.left + 5;
         var boxY = y - boxHeight / 2;
         
