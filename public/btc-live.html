@@ -69,17 +69,18 @@ var beatLinePlugin={id:'beatLine',afterDatasetsDraw:function(c){if(!beatPrice)re
 // Orange dot plugin
 var dotPlugin={id:'dot',afterDatasetsDraw:function(c){if(prices.length===0)return;var lastPrice=prices[prices.length-1];var x=c.scales.x.getPixelForValue(prices.length-1);var y=c.scales.y.getPixelForValue(lastPrice);var ctx=c.ctx;ctx.save();ctx.beginPath();ctx.arc(x,y,8,0,Math.PI*2);ctx.fillStyle='rgba(249,115,22,0.3)';ctx.fill();ctx.beginPath();ctx.arc(x,y,5,0,Math.PI*2);ctx.fillStyle='#f97316';ctx.fill();ctx.beginPath();ctx.arc(x,y,2,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();ctx.restore();}};
 
+// X-axis time ticker plugin
+var timeTickerPlugin={id:'timeTicker',afterDraw:function(c){var ctx=c.ctx;var x=c.chartArea.left;var y=c.chartArea.bottom+20;var now=new Date();var sec=now.getHours()*3600+now.getMinutes()*60+now.getSeconds();var rem=300-sec%300;ctx.save();ctx.font='8px Arial';ctx.fillStyle='#64748b';ctx.textAlign='center';var tickers=['05:00','04:30','04:00','03:30','03:00','02:30','02:00','01:30','01:00','00:30','00:00'];var width=c.chartArea.right-c.chartArea.left;var pos=width*(rem/300);for(var i=0;i<tickers.length;i++){var tPos=pos-i*(width/10);if(tPos>0&&tPos<width){ctx.fillText(tickers[i],x+tPos,y);}}ctx.restore();}};
+
 function init(startPrice){
 beatPrice=startPrice;
 currentPrice=startPrice;
 while(prices.length<maxPoints){prices.push(startPrice);priceTimes.push(new Date());}
 while(prices.length>maxPoints){prices.shift();priceTimes.shift();}
-var labels=priceTimes.map(function(t){return t.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'});});
-chart=new Chart(document.getElementById('c'),{type:'line',data:{labels:labels,datasets:[{data:prices,borderColor:'#22c55e',backgroundColor:'rgba(34,197,94,0.1)',fill:true,tension:0.8,borderWidth:2,pointRadius:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{display:true,ticks:{color:'#64748b',font:{size:8},maxTicksLimit:10},grid:{display:false}},y:{position:'right',grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#64748b',callback:function(v){return'$'+Math.round(v)}}}}},plugins:[beatLinePlugin,dotPlugin]});
+chart=new Chart(document.getElementById('c'),{type:'line',data:{labels:Array(maxPoints).fill(''),datasets:[{data:prices,borderColor:'#22c55e',backgroundColor:'rgba(34,197,94,0.1)',fill:true,tension:0.8,borderWidth:2,pointRadius:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{display:false},y:{position:'right',grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#64748b',callback:function(v){return'$'+Math.round(v)}}}}},plugins:[beatLinePlugin,dotPlugin,timeTickerPlugin]});
 updateDisplay(startPrice);
 var lastLabelUpdate=0;
-function upd(p){prices.push(p);priceTimes.push(new Date());if(prices.length>maxPoints){prices.shift();priceTimes.shift();}var now=Date.now();if(now-lastLabelUpdate>30000){lastLabelUpdate=now;var labels=priceTimes.map(function(t){return t.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'});});chart.data.labels=labels;}
-chart.data.datasets[0].data=prices;chart.data.datasets[0].borderColor=p>=beatPrice?'#22c55e':'#ef4444';chart.data.datasets[0].backgroundColor=p>=beatPrice?'rgba(34,197,94,0.1)':'rgba(239,68,68,0.1)';chart.update('none');currentPrice=p;updateDisplay(p);localStorage.setItem('btcPrices',JSON.stringify(prices));}
+function upd(p){prices.push(p);priceTimes.push(new Date());if(prices.length>maxPoints){prices.shift();priceTimes.shift();}chart.data.datasets[0].data=prices;chart.data.datasets[0].borderColor=p>=beatPrice?'#22c55e':'#ef4444';chart.data.datasets[0].backgroundColor=p>=beatPrice?'rgba(34,197,94,0.1)':'rgba(239,68,68,0.1)';chart.update('none');currentPrice=p;updateDisplay(p);localStorage.setItem('btcPrices',JSON.stringify(prices));}
 setInterval(function(){fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT').then(function(r){return r.json()}).then(function(d){upd(parseFloat(d.price))})},1000);
 setInterval(function(){var now=new Date();var sec=now.getHours()*3600+now.getMinutes()*60+now.getSeconds();var rem=300-sec%300;document.getElementById('countdown').textContent=Math.floor(rem/60).toString().padStart(2,'0')+':'+(rem%60).toString().padStart(2,'0');},1000);}
 setInterval(updateTicker,10000);updateTicker();
