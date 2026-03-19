@@ -16,6 +16,9 @@
     .container{max-width:800px;margin:0 auto;padding:70px 20px 20px}
     .title-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
     .btc-logo{width:28px;height:28px;border-radius:50%}
+    .ticker{background:#1e293b;padding:8px 0;overflow:hidden;white-space:nowrap;margin-bottom:10px}
+    .ticker-content{display:inline-block;animation:scroll 30s linear infinite}
+    @keyframes scroll{from{transform:translateX(100%)}to{transform:translateX(-100%)}}
     .chart-box{height:50vh;background:#1e293b;border-radius:12px;padding:10px}
     .chart-box{height:50vh;background:#1e293b;border-radius:12px;padding:10px}
     .price-row{display:flex;justify-content:space-between;margin-top:10px}
@@ -42,6 +45,7 @@
   </header>
   <div class="container">
     <div class="title-row"><img src="https://assets.coingecko.com/coins/images/1/small/bitcoin.png" class="btc-logo" alt="BTC"><span style="font-size:24px;color:#fff;font-weight:normal">Bitcoin - 5 Minutes</span><span class="countdown" id="countdown" style="margin-left:auto"></span></div>
+    <div class="ticker"><div class="ticker-content" id="ticker"></div></div>
     <div class="chart-box" style="position:relative"><canvas id="c"></canvas></div>
     <div class="price-row">
       <div><div style="color:#94a3b8;font-size:8px">Current Price</div><div class="price" id="p">$0</div></div>
@@ -74,6 +78,8 @@ updateDisplay(startPrice);
 function upd(p){prices.push(p);if(prices.length>maxPoints)prices.shift();chart.data.datasets[0].data=prices;chart.data.datasets[0].borderColor=p>=beatPrice?'#22c55e':'#ef4444';chart.data.datasets[0].backgroundColor=p>=beatPrice?'rgba(34,197,94,0.1)':'rgba(239,68,68,0.1)';chart.update('none');currentPrice=p;updateDisplay(p);localStorage.setItem('btcPrices',JSON.stringify(prices));}
 setInterval(function(){fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT').then(function(r){return r.json()}).then(function(d){upd(parseFloat(d.price))})},1000);
 setInterval(function(){var now=new Date();var sec=now.getHours()*3600+now.getMinutes()*60+now.getSeconds();var rem=300-sec%300;document.getElementById('countdown').textContent=Math.floor(rem/60).toString().padStart(2,'0')+':'+(rem%60).toString().padStart(2,'0');},1000);}
+setInterval(updateTicker,10000);updateTicker();
+function updateTicker(){var zones=['UTC','New York','London','Tokyo','Sydney','Dubai','Singapore','Hong Kong','Los Angeles','Paris','Berlin','Mumbai'];var times=zones.map(function(z){var d=new Date();var opts={timeZone:'UTC',hour:'2-digit',minute:'2-digit',second:'2-digit'};if(z!=='UTC')opts.timeZone='America/New_York';if(z==='London')opts.timeZone='Europe/London';if(z==='Tokyo')opts.timeZone='Asia/Tokyo';if(z==='Sydney')opts.timeZone='Australia/Sydney';if(z==='Dubai')opts.timeZone='Asia/Dubai';if(z==='Singapore')opts.timeZone='Asia/Singapore';if(z==='Hong Kong')opts.timeZone='Asia/Hong_Kong';if(z==='Los Angeles')opts.timeZone='America/Los_Angeles';if(z==='Paris')opts.timeZone='Europe/Paris';if(z==='Berlin')opts.timeZone='Europe/Berlin';if(z==='Mumbai')opts.timeZone='Asia/Kolkata';return z+': '+d.toLocaleTimeString('en-US',opts);});document.getElementById('ticker').textContent=times.join('  |  ');}
 function updateDisplay(p){document.getElementById('p').textContent='$'+p.toFixed(2);document.getElementById('beat').textContent='$'+beatPrice.toFixed(2);var ch=((p-beatPrice)/beatPrice*100).toFixed(2);var el=document.getElementById('change');el.textContent=(ch>=0?'+':'')+ch+'%';el.className='change '+(ch>=0?'up':'down');var now=new Date();var sec=now.getHours()*3600+now.getMinutes()*60+now.getSeconds();var rem=300-sec%300;document.getElementById('countdown').textContent=Math.floor(rem/60).toString().padStart(2,'0')+':'+(rem%60).toString().padStart(2,'0');}
 fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT').then(function(r){return r.json()}).then(function(d){init(parseFloat(d.price))});
   </script>
