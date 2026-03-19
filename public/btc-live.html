@@ -51,6 +51,13 @@
       <div class="beat"><div style="color:#94a3b8;font-size:8px">Price to Beat</div><span id="beat">$0</span></div>
       <div class="change" id="change">0%</div>
     </div>
+    <div style="margin-top:15px">
+      <div style="display:flex;gap:10px">
+        <button onclick="placeBet('UP')" style="flex:1;padding:20px;background:#22c55e;border:none;border-radius:8px;color:#fff;font-size:18px;font-weight:bold;cursor:pointer">UP</button>
+        <button onclick="placeBet('DOWN')" style="flex:1;padding:20px;background:#ef4444;border:none;border-radius:8px;color:#fff;font-size:18px;font-weight:bold;cursor:pointer">DOWN</button>
+      </div>
+      <div id="betMessage" style="text-align:center;margin-top:10px;color:#94a3b8"></div>
+    </div>
   </div>
   <script>
 var prices=[];
@@ -95,5 +102,15 @@ function updateTicker(){var zones=['UTC','New York','London','Tokyo','Sydney','D
 function updateDisplay(p){document.getElementById('p').textContent='$'+p.toFixed(2);document.getElementById('beat').textContent='$'+beatPrice.toFixed(2);var ch=((p-beatPrice)/beatPrice*100).toFixed(2);var el=document.getElementById('change');el.textContent=(ch>=0?'+':'')+ch+'%';el.className='change '+(ch>=0?'up':'down');var now=new Date();var sec=now.getHours()*3600+now.getMinutes()*60+now.getSeconds();var rem=300-sec%300;document.getElementById('countdown').textContent=Math.floor(rem/60).toString().padStart(2,'0')+':'+(rem%60).toString().padStart(2,'0');}
 fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT').then(function(r){return r.json()}).then(function(d){init(parseFloat(d.price))});
   </script>
+<script>
+// Trading
+var balance=10000;
+var userBets=[];
+function placeBet(type){
+  if(type==='UP'){balance-=100;userBets.push({type:'UP',amount:100,time:Date.now()});}
+  else{balance-=100;userBets.push({type:'DOWN',amount:100,time:Date.now()});}
+  document.getElementById('betMessage').textContent='Bet placed: '+type+' $100 | Balance: $'+balance;
+}
+</script>
 </body>
 </html>
