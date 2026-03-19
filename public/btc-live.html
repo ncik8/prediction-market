@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PredictX - BTC 5MIN</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body { background: #0a0a0a; color: white; font-family: system-ui, sans-serif; margin: 0; padding: 0; }
     .btn-up { background: #22c55e; }
@@ -35,9 +36,10 @@
       <span style="font-size: 14px; color: #94a3b8;"> from beat</span>
     </div>
 
-    <!-- Chart -->
+    <!-- Chart (embedded) -->
     <div style="background: #1e293b; border-radius: 12px; padding: 12px; margin-bottom: 16px;">
-      <iframe src="/chart.html" style="width: 100%; height: 300px; border: none; background: #0f172a; border-radius: 8px;"></iframe>
+      <canvas id="chart" style="height: 300px;"></canvas>
+      <div id="chartPrice" style="text-align: center; color: #22c55e; font-size: 20px; font-weight: bold; margin-top: 8px;">Loading...</div>
     </div>
 
     <!-- Beat Price -->
@@ -68,93 +70,153 @@
   </div>
 
   <script>
-    let btcPrice = 0;
-    let manualBeatPrice = 0;
-    let balance = 10000;
-    let currentBet = null;
+    // Chart setup
+    var prices = [];
+    var chart;
+    var maxPoints = 150;
+
+    // Load saved prices
+    var saved = localStorage.getItem('btcPrices');
+    if (saved) {
+      prices = JSON.parse(saved);
+    }
+
+    function initChart(startPrice) {
+      while (prices.length < maxPoints) prices.push(startPrice);
+      while (prices.length > maxPoints) prices.shift();
+
+      chart = new Chart(document.getElementById('chart'), {
+        type: 'line',
+        data: {
+          labels: Array(maxPoints).fill(''),
+          datasets: [{
+            data: prices,
+            borderColor: '#22c55e',
+            backgroundColor: 'rgba(34,197,94,0.1)',
+            fill: true,
+            tension: 0.8,
+            borderWidth: 2,
+            pointRadius: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { display: false },
+            y: { 
+              position: 'right',
+              grid: { color: 'rgba(255,255,255,0.05)' },
+              ticks: { color: '#64748b', callback: function(v) { return '$' + Math.round(v); } }
+            }
+          }
+        }
+      });
+
+      document.getElementById('chartPrice').textContent = 'BTC $' + Math.round(startPrice);
+
+      function updatePrice(p) {
+        prices.push(p);
+        if (prices.length > maxPoints) prices.shift();
+        chart.data.datasets[0].data = prices;
+        chart.update('none');
+        document.getElementById('chartPrice').textContent = 'BTC $' + Math.round(p);
+        localStorage.setItem('btcPrices', JSON.stringify(prices));
+      }
+
+      // Update every second
+      setInterval(function() {
+        fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT')
+          .then(function(r) { return r.json(); })
+          .then(function(d) { updatePrice(parseFloat(d.price)); });
+      }, 1000);
+    }
+
+    // Trading logic
+    var btcPrice = 0;
+    var manualBeatPrice = 0;
+    var balance = 10000;
+    var currentBet = null;
+    var currentBetType = null;
     const cycleDuration = 300;
     const payoutMultiplier = 1.95;
 
-    const strikeEl = document.getElementById('strike');
-    const titlePriceEl = document.getElementById('titlePrice');
-    const balanceEl = document.getElementById('balance');
-    const countdownEl = document.getElementById('countdown');
-    const cycleLabelEl = document.getElementById('cycleLabel');
-    const priceChangeEl = document.getElementById('priceChange');
-    const messageEl = document.getElementById('message');
-    const betAmountInput = document.getElementById('betAmount');
+    var strikeEl = document.getElementById('strike');
+    var titlePriceEl = document.getElementById('titlePrice');
+    var balanceEl = document.getElementById('balance');
+    var countdownEl = document.getElementById('countdown');
+    var cycleLabelEl = document.getElementById('cycleLabel');
+    var priceChangeEl = document.getElementById('priceChange');
+    var messageEl = document.getElementById('message');
+    var betAmountInput = document.getElementById('betAmount');
 
     function getCycleInfo() {
-      const now = new Date();
-      const totalSeconds = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
-      const cyclePosition = totalSeconds % cycleDuration;
-      const remaining = cycleDuration - cyclePosition;
-      return { remaining };
-    }
-
-    async function fetchPrice() {
-      try {
-        const res = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT');
-        const data = await res.json();
-        return parseFloat(data.price);
-      } catch { return 70000; }
+      var now = new Date();
+      var totalSeconds = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+      var cyclePosition = totalSeconds % cycleDuration;
+      var remaining = cycleDuration - cyclePosition;
+      return { remaining: remaining };
     }
 
     function addBet(amount) {
-      const current = parseInt(betAmountInput.value) || 0;
+      var current = parseInt(betAmountInput.value) || 0;
       betAmountInput.value = current + amount;
     }
 
     function placeBet(type) {
-      const amount = parseInt(betAmountInput.value);
-      
+      var amount = parseInt(betAmountInput.value);
+
       if (amount > balance) {
         messageEl.textContent = 'Insufficient balance!';
         return;
       }
-      
-      if (currentBet && currentBet.type !== type) {
-        messageEl.textContent = 'You have a bet! Wait for round to end.';
+
+      if (currentBetType && currentBetType !== type) {
+        messageEl.textContent = 'You have a ' + currentBetType + ' bet! Wait for round to end.';
         return;
       }
 
       balance -= amount;
       if (currentBet) {
-        currentBet.amount += amount;
+        currentBet += amount;
       } else {
-        currentBet = { type, amount, startPrice: manualBeatPrice };
+        currentBet = amount;
+        currentBetType = type;
       }
-      
+
       balanceEl.textContent = '$' + balance.toLocaleString();
-      messageEl.textContent = `Bet placed: $${amount} ${type}!`;
+      messageEl.textContent = 'Bet placed: $' + amount + ' ' + type + '!';
     }
 
     function settleBet() {
-      if (!currentBet) return;
-      
-      const beatDiff = btcPrice - currentBet.startPrice;
-      const won = (currentBet.type === 'UP' && beatDiff > 0) || (currentBet.type === 'DOWN' && beatDiff < 0);
-      
+      if (!currentBet || !currentBetType) return;
+
+      var beatDiff = btcPrice - manualBeatPrice;
+      var won = (currentBetType === 'UP' && beatDiff > 0) || (currentBetType === 'DOWN' && beatDiff < 0);
+
       if (won) {
-        const winnings = currentBet.amount * payoutMultiplier;
+        var winnings = currentBet * payoutMultiplier;
         balance += Math.round(winnings);
-        messageEl.textContent = `You WON $${Math.round(winnings)}! 🎉`;
+        messageEl.textContent = 'You WON $' + Math.round(winnings) + '! 🎉';
       } else {
         messageEl.textContent = 'You lost. Better luck next time!';
       }
-      
+
       currentBet = null;
+      currentBetType = null;
       balanceEl.textContent = '$' + balance.toLocaleString();
     }
 
-    let lastCycleNum = -1;
+    var lastCycleNum = -1;
 
-    async function update() {
-      btcPrice = await fetchPrice();
-      
-      const { remaining } = getCycleInfo();
-      const cycleNum = Math.floor((new Date().getHours() * 3600 + new Date().getMinutes() * 60 + new Date().getSeconds()) / cycleDuration);
-      
+    function update() {
+      btcPrice = parseFloat(document.getElementById('chartPrice').textContent.replace('BTC $', '')) || btcPrice;
+
+      var remaining = getCycleInfo().remaining;
+      var now = new Date();
+      var cycleNum = Math.floor((now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds()) / cycleDuration);
+
       // New cycle
       if (cycleNum !== lastCycleNum && lastCycleNum !== -1) {
         settleBet();
@@ -162,27 +224,30 @@
         strikeEl.textContent = '$' + Math.round(manualBeatPrice);
       }
       lastCycleNum = cycleNum;
-      
+
       // Update display
       titlePriceEl.textContent = 'BTC $' + Math.round(btcPrice);
-      
-      const mins = Math.floor(remaining / 60);
-      const secs = remaining % 60;
-      countdownEl.textContent = mins.toString().padStart(2,'0') + ':' + secs.toString().padStart(2,'0');
+
+      var mins = Math.floor(remaining / 60);
+      var secs = remaining % 60;
+      countdownEl.textContent = mins.toString().padStart(2, '0') + ':' + secs.toString().padStart(2, '0');
       cycleLabelEl.textContent = countdownEl.textContent + ' remaining';
-      
-      const priceChange = ((btcPrice - manualBeatPrice) / manualBeatPrice) * 100;
+
+      var priceChange = ((btcPrice - manualBeatPrice) / manualBeatPrice) * 100;
       priceChangeEl.textContent = (priceChange >= 0 ? '+' : '') + priceChange.toFixed(2) + '%';
       priceChangeEl.style.color = priceChange >= 0 ? '#22c55e' : '#ef4444';
     }
 
     // Initialize
-    fetchPrice().then(p => {
-      manualBeatPrice = p;
-      strikeEl.textContent = '$' + Math.round(manualBeatPrice);
-    });
+    fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT')
+      .then(function(r) { return r.json(); })
+      .then(function(d) {
+        var price = parseFloat(d.price);
+        manualBeatPrice = price;
+        strikeEl.textContent = '$' + Math.round(manualBeatPrice);
+        initChart(price);
+      });
 
-    update();
     setInterval(update, 1000);
   </script>
 </body>
