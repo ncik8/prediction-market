@@ -102,11 +102,16 @@
         ctx.fillStyle = '#fff';
         ctx.fillRect(boxX, boxY, boxWidth, boxHeight);
         
+        // Add bevel effect
+        ctx.strokeStyle = '#ccc';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(boxX, boxY, boxWidth, boxHeight);
+        
         ctx.font = 'bold 11px Arial';
         ctx.fillStyle = '#000';
-        ctx.textAlign = 'left';
+        ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText('BEAT $' + Math.round(beatPrice), boxX + 5, boxY + boxHeight / 2);
+        ctx.fillText('BEAT $' + Math.round(beatPrice), boxX + boxWidth / 2, boxY + boxHeight / 2);
         ctx.restore();
       }
     };
