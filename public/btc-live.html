@@ -55,12 +55,13 @@
   </div>
   <script>
 var prices=[];
+var priceTimes=[];
 var chart;
 var maxPoints=150;
 var beatPrice=0;
 var currentPrice=0;
 var saved=localStorage.getItem('btcPrices');
-if(saved){prices=JSON.parse(saved);}
+if(saved){prices=JSON.parse(saved);for(var i=0;i<prices.length;i++)priceTimes.push(new Date());}
 
 // Beat line plugin
 var beatLinePlugin={id:'beatLine',afterDatasetsDraw:function(c){if(!beatPrice)return;var y=c.scales.y.getPixelForValue(beatPrice);var ctx=c.ctx;ctx.save();ctx.beginPath();ctx.setLineDash([5,5]);ctx.moveTo(c.chartArea.left,y);ctx.lineTo(c.chartArea.right,y);ctx.strokeStyle='rgba(255,255,255,0.5)';ctx.lineWidth=2;ctx.stroke();ctx.beginPath();ctx.roundRect(c.chartArea.left+5,y-12,100,24,4);ctx.fillStyle='#fff';ctx.fill();ctx.strokeStyle='#ccc';ctx.stroke();ctx.fillStyle='#000';ctx.font='bold 10px Arial';ctx.textAlign='center';ctx.fillText('BEAT $'+beatPrice.toFixed(2),c.chartArea.left+55,y+4);ctx.restore();}};
@@ -71,11 +72,12 @@ var dotPlugin={id:'dot',afterDatasetsDraw:function(c){if(prices.length===0)retur
 function init(startPrice){
 beatPrice=startPrice;
 currentPrice=startPrice;
-while(prices.length<maxPoints)prices.push(startPrice);
-while(prices.length>maxPoints)prices.shift();
-chart=new Chart(document.getElementById('c'),{type:'line',data:{labels:Array(maxPoints).fill(''),datasets:[{data:prices,borderColor:'#22c55e',backgroundColor:'rgba(34,197,94,0.1)',fill:true,tension:0.8,borderWidth:2,pointRadius:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{display:true,ticks:{color:'#64748b',font:{size:8},maxTicksLimit:10},grid:{display:false}},y:{position:'right',grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#64748b',callback:function(v){return'$'+Math.round(v)}}}}},plugins:[beatLinePlugin,dotPlugin]});
+while(prices.length<maxPoints){prices.push(startPrice);priceTimes.push(new Date());}
+while(prices.length>maxPoints){prices.shift();priceTimes.shift();}
+var labels=priceTimes.map(function(t){return t.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'});});
+chart=new Chart(document.getElementById('c'),{type:'line',data:{labels:labels,datasets:[{data:prices,borderColor:'#22c55e',backgroundColor:'rgba(34,197,94,0.1)',fill:true,tension:0.8,borderWidth:2,pointRadius:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{display:true,ticks:{color:'#64748b',font:{size:8},maxTicksLimit:10},grid:{display:false}},y:{position:'right',grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#64748b',callback:function(v){return'$'+Math.round(v)}}}}},plugins:[beatLinePlugin,dotPlugin]});
 updateDisplay(startPrice);
-function upd(p){prices.push(p);if(prices.length>maxPoints)prices.shift();chart.data.datasets[0].data=prices;chart.data.datasets[0].borderColor=p>=beatPrice?'#22c55e':'#ef4444';chart.data.datasets[0].backgroundColor=p>=beatPrice?'rgba(34,197,94,0.1)':'rgba(239,68,68,0.1)';chart.update('none');currentPrice=p;updateDisplay(p);localStorage.setItem('btcPrices',JSON.stringify(prices));}
+function upd(p){prices.push(p);priceTimes.push(new Date());if(prices.length>maxPoints){prices.shift();priceTimes.shift();}var labels=priceTimes.map(function(t){return t.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'});});chart.data.labels=labels;chart.data.datasets[0].data=prices;chart.data.datasets[0].borderColor=p>=beatPrice?'#22c55e':'#ef4444';chart.data.datasets[0].backgroundColor=p>=beatPrice?'rgba(34,197,94,0.1)':'rgba(239,68,68,0.1)';chart.update('none');currentPrice=p;updateDisplay(p);localStorage.setItem('btcPrices',JSON.stringify(prices));}
 setInterval(function(){fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT').then(function(r){return r.json()}).then(function(d){upd(parseFloat(d.price))})},1000);
 setInterval(function(){var now=new Date();var sec=now.getHours()*3600+now.getMinutes()*60+now.getSeconds();var rem=300-sec%300;document.getElementById('countdown').textContent=Math.floor(rem/60).toString().padStart(2,'0')+':'+(rem%60).toString().padStart(2,'0');},1000);}
 setInterval(updateTicker,10000);updateTicker();
