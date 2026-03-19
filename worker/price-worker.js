@@ -18,7 +18,7 @@ console.log('Starting BTC price worker...');
 console.log('Supabase:', SUPABASE_URL);
 
 // Connect to Binance WebSocket
-const ws = new WebSocket('wss://stream.binance.com:9443/ws/btcusdt@trade');
+let ws = new WebSocket('wss://stream.binance.com:9443/ws/btcusdt@trade');
 
 let priceCount = 0;
 let lastSave = Date.now();
