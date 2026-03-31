@@ -50,6 +50,7 @@
       <div><div style="color:#94a3b8;font-size:8px">Current Price</div><div class="price" id="p">$0</div></div>
       <div class="beat"><div style="color:#94a3b8;font-size:8px">Price to Beat</div><span id="beat">$0</span></div>
       <div class="change" id="change">0%</div>
+      <div style="text-align:right"><div style="color:#94a3b8;font-size:8px">Market Odds</div><div id="polyOdds" style="color:#f59e0b;font-size:16px">Loading...</div></div>
     </div>
     <div style="margin-top:15px">
       <div style="display:flex;gap:5px;margin-bottom:10px">
@@ -135,6 +136,26 @@ setInterval(function(){var now=new Date();var sec=now.getHours()*3600+now.getMin
 setInterval(updateTicker,10000);updateTicker();
 function updateTicker(){var zones=['UTC','New York','London','Tokyo','Sydney','Dubai','Singapore','Hong Kong','Los Angeles','Paris','Berlin','Mumbai'];var times=zones.map(function(z){var d=new Date();var opts={timeZone:'UTC',hour:'2-digit',minute:'2-digit',second:'2-digit'};if(z!=='UTC')opts.timeZone='America/New_York';if(z==='London')opts.timeZone='Europe/London';if(z==='Tokyo')opts.timeZone='Asia/Tokyo';if(z==='Sydney')opts.timeZone='Australia/Sydney';if(z==='Dubai')opts.timeZone='Asia/Dubai';if(z==='Singapore')opts.timeZone='Asia/Singapore';if(z==='Hong Kong')opts.timeZone='Asia/Hong_Kong';if(z==='Los Angeles')opts.timeZone='America/Los_Angeles';if(z==='Paris')opts.timeZone='Europe/Paris';if(z==='Berlin')opts.timeZone='Europe/Berlin';if(z==='Mumbai')opts.timeZone='Asia/Kolkata';return z+': '+d.toLocaleTimeString('en-US',opts);});document.getElementById('ticker').textContent=times.join('  |  ');}
 function updateDisplay(p){document.getElementById('p').textContent='$'+p.toFixed(2);document.getElementById('beat').textContent='$'+beatPrice.toFixed(2);var ch=((p-beatPrice)/beatPrice*100).toFixed(2);var el=document.getElementById('change');el.textContent=(ch>=0?'+':'')+ch+'%';el.className='change '+(ch>=0?'up':'down');var now=new Date();var sec=now.getHours()*3600+now.getMinutes()*60+now.getSeconds();var rem=300-sec%300;document.getElementById('countdown').textContent=Math.floor(rem/60).toString().padStart(2,'0')+':'+(rem%60).toString().padStart(2,'0');}
+
+// Polymarket odds fetcher
+function fetchPolyOdds(){
+  fetch('https://clob.polymarket.com/markets?closed=false&limit=10')
+    .then(function(r){return r.json();})
+    .then(function(data){
+      var btcMarkets=data.markets.filter(function(m){return m.question && m.question.toLowerCase().includes('bitcoin');});
+      if(btcMarkets.length>0){
+        var m=btcMarkets[0];
+        var yesPrice=m.outcomes_yes[0]?m.outcomes_yes[0].price:null;
+        if(yesPrice){
+          var yesPct=(yesPrice*100).toFixed(1);
+          document.getElementById('polyOdds').innerHTML='Yes: '+yesPct+'% <span style="color:#94a3b8;font-size:10px">(Polymarket)</span>';
+        }
+      }
+    })
+    .catch(function(){document.getElementById('polyOdds').textContent='-';});
+}
+fetchPolyOdds();
+setInterval(fetchPolyOdds,30000);
 fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT').then(function(r){return r.json()}).then(function(d){init(parseFloat(d.price))});
   </script>
 <script>
