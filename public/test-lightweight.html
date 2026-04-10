@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>BTC Chart - Lightweight</title>
+  <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+  <style>
+    body{background:#0a0a0a;margin:0;padding:20px;font-family:system-ui,sans-serif}
+    .container{max-width:800px;margin:0 auto}
+    #chart{height:400px}
+    .price{color:#22c55e;font-size:24px;font-weight:bold}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2 style="color:#fff">BTC - 5 Minutes (Lightweight Charts)</h2>
+    <div id="chart"></div>
+    <div class="price" id="p">Loading...</div>
+  </div>
+  <script>
+var chart=LightweightCharts.createChart(document.getElementById('chart'),{layout:{background:{type:'solid',color:'#1e293b'},textColor:'#94a3b8'},grid:{vertLines:{color:'rgba(255,255,255,0.05)'},horzLines:{color:'rgba(255,255,255,0.05)'}},rightPriceScale:{borderVisible:false},timeScale:{borderVisible:false},width:800,height:400});
+var area=chart.addAreaSeries({lineColor:'#22c55e',topColor:'rgba(34,197,94,0.1)',bottomColor:'rgba(34,197,94,0)',lineWidth:2});
+var data=[];
+function updatePrice(p){data.push({time:Math.floor(Date.now()/1000),value:p});if(data.length>150)data.shift();area.setData(data);document.getElementById('p').textContent='$'+p.toFixed(2);}
+setInterval(function(){fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT').then(function(r){return r.json()}).then(function(d){updatePrice(parseFloat(d.price))})},1000);
+fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT').then(function(r){return r.json()}).then(function(d){updatePrice(parseFloat(d.price))});
+  </script>
+</body>
+</html>
