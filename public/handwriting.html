@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Handwriting to PDF</title>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    body{background:#1e293b;margin:0;padding:20px;font-family:system-ui,sans-serif}
+    h2{color:#fff;margin-bottom:10px}
+    canvas{border:2px solid #475569;border-radius:8px;background:#fff;cursor:crosshair;touch-action:none}
+    .btn{padding:12px 24px;border:none;border-radius:6px;font-size:16px;margin:5px;cursor:pointer}
+    .btn-clear{background:#ef4444;color:#fff}
+    .btn-save{background:#22c55e;color:#fff}
+    .btn-pdf{background:#3b82f6;color:#fff}
+    #status{color:#fbbf24;margin-top:10px}
+    .controls{display:flex;gap:10px;margin-top:10px}
+    input[type="color"]{width:40px;height:40px;border:none;cursor:pointer}
+  </style>
+</head>
+<body>
+  <h2>✍️ Handwriting to PDF</h2>
+  <canvas id="canvas" width="800" height="600"></canvas>
+  <div class="controls">
+    <input type="color" id="colorPicker" value="#000000">
+    <button class="btn btn-clear" onclick="clearCanvas()">Clear</button>
+    <button class="btn btn-save" onclick="recognizeText()">Convert to Text</button>
+    <button class="btn btn-pdf" onclick="savePDF()">Save PDF</button>
+  </div>
+  <div id="status"></div>
+  <div id="result" style="color:#fff;margin-top:15px;font-size:18px;white-space:pre-wrap"></div>
+
+  <script>
+    const canvas=document.getElementById('canvas');
+    const ctx=canvas.getContext('2d');
+    let isDrawing=false;
+    let lastX=0;
+    let lastY=0;
+    
+    // Drawing settings
+    let brushColor='#000000';
+    let brushSize=3;
+    
+    document.getElementById('colorPicker').addEventListener('change',e=>brushColor=e.target.value);
+    
+    // Mouse events
+    canvas.addEventListener('mousedown',startDrawing);
+    canvas.addEventListener('mousemove',draw);
+    canvas.addEventListener('mouseup',stopDrawing);
+    canvas.addEventListener('mouseout',stopDrawing);
+    
+    // Touch events for iPad
+    canvas.addEventListener('touchstart',e=>{e.preventDefault();const touch=e.touches[0];startDrawing({offsetX:touch.clientX-canvas.offsetLeft,offsetY:touch.clientY-canvas.offsetTop})});
+    canvas.addEventListener('touchmove',e=>{e.preventDefault();const touch=e.touches[0];draw({offsetX:touch.clientX-canvas.offsetLeft,offsetY:touch.clientY-canvas.offsetTop})});
+    canvas.addEventListener('touchend',stopDrawing);
+    
+    function startDrawing(e){
+      isDrawing=true;
+      lastX=e.offsetX;
+      lastY=e.offsetY;
+    }
+    
+    function draw(e){
+      if(!isDrawing)return;
+      ctx.beginPath();
+      ctx.moveTo(lastX,lastY);
+      ctx.lineTo(e.offsetX,e.offsetY);
+      ctx.strokeStyle=brushColor;
+      ctx.lineWidth=brushSize;
+      ctx.lineCap='round';
+      ctx.stroke();
+      lastX=e.offsetX;
+      lastY=e.offsetY;
+    }
+    
+    function stopDrawing(){
+      isDrawing=false;
+    }
+    
+    function clearCanvas(){
+      ctx.fillStyle='#fff';
+      ctx.fillRect(0,0,canvas.width,canvas.height);
+      document.getElementById('result').textContent='';
+      document.getElementById('status').textContent='';
+    }
+    
+    // Initialize white background
+    clearCanvas();
+    
+    async function recognizeText(){
+      document.getElementById('status').textContent='Recognizing... (may take a moment)';
+      const worker=await Tesseract.createWorker('eng');
+      const result=await worker.recognize(canvas);
+      document.getElementById('result').textContent=result.data.text;
+      document.getElementById('status').textContent='Done!';
+      await worker.terminate();
+    }
+    
+    function savePDF(){
+      const{jsPDF}=window.jspdf;
+      const pdf=new jsPDF();
+      const imgData=canvas.toDataURL('image/png');
+      pdf.addImage(imgData,'PNG',10,10,190,0);
+      pdf.save('handwriting.pdf');
+      document.getElementById('status').textContent='PDF saved!';
+    }
+  </script>
+</body>
+</html>
