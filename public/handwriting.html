@@ -30,7 +30,7 @@
     <button class="btn btn-eraser" onclick="eraserMode()" id="eraserBtn">Eraser</button>
     <button class="btn btn-clear" onclick="clearCanvas()">Clear</button>
     <button class="btn btn-save" onclick="recognizeText()">Convert to Text</button>
-    <button class="btn btn-ai" onclick="improveWithAI()">✨ Improve with AI</button>
+    <button class="btn btn-ai" onclick="aiReadCanvas()">🤖 AI Read</button>
     <button class="btn btn-pdf" onclick="savePDF()">Save PDF</button>
   </div>
   <div id="status"></div>
@@ -130,6 +130,28 @@
           document.getElementById('status').textContent='Error: unknown';
         }
       }catch(e){document.getElementById('status').textContent='Error: '+e.message;}
+    }
+    
+    async function aiReadCanvas(){
+      document.getElementById('status').textContent='🤖 AI reading...';
+      try{
+        const dataURL=canvas.toDataURL('image/png');
+        // Use vision model via session
+        const response=await fetch('/api/ai-read',{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({image:dataURL})
+        });
+        const data=await response.json();
+        if(data.text){
+          document.getElementById('result').textContent=data.text;
+          document.getElementById('status').textContent='🤖 Read complete!';
+        }else{
+          document.getElementById('status').textContent='Error: '+data.error;
+        }
+      }catch(e){
+        document.getElementById('status').textContent='Error: '+e.message;
+      }
     }
     
     function savePDF(){
