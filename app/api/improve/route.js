@@ -1,16 +1,12 @@
-// Simple API route to improve text - avoids CORS
-export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-
-  const { text } = req.body;
-
-  if (!text) {
-    return res.status(400).json({ error: 'Text is required' });
-  }
-
+// API route to improve text - avoids CORS
+export async function POST(req) {
   try {
+    const { text } = await req.json();
+
+    if (!text) {
+      return Response.json({ error: 'Text is required' }, { status: 400 });
+    }
+
     const response = await fetch('https://api.minimax.chat/v1/text/chatcompletion_pro', {
       method: 'POST',
       headers: {
@@ -28,14 +24,15 @@ export default async function handler(req, res) {
 
     const data = await response.json();
     
+    // Handle different response formats
     if (data.choices && data.choices[0] && data.choices[0].message) {
-      res.status(200).json({ result: data.choices[0].message.content });
+      return Response.json({ result: data.choices[0].message.content });
     } else if (data.message && data.message.content) {
-      res.status(200).json({ result: data.message.content });
+      return Response.json({ result: data.message.content });
     } else {
-      res.status(500).json({ error: 'API returned no result', data });
+      return Response.json({ error: 'API returned no result', details: data });
     }
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    return Response.json({ error: error.message }, { status: 500 });
   }
 }
